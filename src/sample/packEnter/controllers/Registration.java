@@ -2,6 +2,8 @@ package sample.packEnter.controllers;
 
 import java.net.URL;
 import java.util.ResourceBundle;
+
+import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
@@ -57,18 +59,28 @@ public class Registration {
         {
             DataClient.login = loginText.getText();
             DataClient.password = passwordText.getText();
-            try {
-                if (GetData.getDataMessage("REGISTRATION / ://100") == 100)
-                {
-                    NavigatorEnter.loadVista(NavigatorEnter.ENTER);
+
+
+            Platform.runLater(new Runnable() {
+                @Override
+                public void run() {
+                    try {
+                        if (GetData.getDataMessage("REGISTRATION / ://100") == 100)
+                        {
+                            loadBack();
+                        }
+                        else
+                        {
+                            label.setText("Такой пользователь уже существует");
+                        }
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
                 }
-                else
-                {
-                    label.setText("Такой пользователь уже существует");
-                }
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
+            });
+
+
+
         }
 
     }
@@ -78,6 +90,10 @@ public class Registration {
         NavigatorEnter.loadVista(NavigatorEnter.ENTER);
     }
 
+    void loadBack()
+    {
+        NavigatorEnter.loadVista(NavigatorEnter.ENTER);
+    }
 
 
 

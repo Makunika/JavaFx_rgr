@@ -3,6 +3,8 @@ package sample.packEnter.controllers;
 import java.io.IOException;
 import java.net.URL;
 import java.util.ResourceBundle;
+
+import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -62,29 +64,36 @@ public class Controller {
         {
             DataClient.login = loginText.getText();
             DataClient.password = passwordText.getText();
-            try {
-                if (GetData.getDataMessage("AUTHORIZATION / ://101") == 100)
-                {
-                    Parent root;
-                    try {
-                        root = FXMLLoader.load(getClass().getClassLoader().getResource("sample/packFileManager/scenepack/FileManager.fxml"), resources);
-                        Stage stage = new Stage();
-                        stage.setTitle("File Manager");
-                        stage.setScene(new Scene(root, 1280, 720));
-                        ((Node) (event.getSource())).getScene().getWindow().hide();
-                        stage.show();
 
-                    } catch (IOException e) {
+            Platform.runLater(new Runnable() {
+                @Override
+                public void run() {
+                    try {
+                        if (GetData.getDataMessage("AUTHORIZATION / ://101") == 100)
+                        {
+                            Parent root;
+                            try {
+                                root = FXMLLoader.load(getClass().getClassLoader().getResource("sample/packFileManager/scenepack/FileManager.fxml"), resources);
+                                Stage stage = new Stage();
+                                stage.setTitle("File Manager");
+                                stage.setScene(new Scene(root, 1280, 720));
+                                ((Node) (event.getSource())).getScene().getWindow().hide();
+                                stage.show();
+
+                            } catch (IOException e) {
+                                e.printStackTrace();
+                            }
+                        } else
+                        {
+                            label.setText("Неправильный логин или пароль");
+                        }
+                    } catch (InterruptedException e) {
                         e.printStackTrace();
                     }
                 }
-                else
-                {
-                    label.setText("Неправильный логин или пароль");
-                }
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
+            });
+
+
         }
 
 
