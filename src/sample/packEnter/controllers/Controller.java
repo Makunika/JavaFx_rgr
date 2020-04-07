@@ -1,9 +1,6 @@
 package sample.packEnter.controllers;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileReader;
-import java.io.IOException;
+import java.io.*;
 import java.net.URL;
 import java.util.ResourceBundle;
 
@@ -76,8 +73,11 @@ public class Controller {
                 @Override
                 public void run() {
                     try {
-                        if (GetData.getDataMessage("AUTHORIZATION / ://101") == 100)
+                        if (GetData.getDataMessage("AUTHORIZATION / ://101").getCode() == 100)
                         {
+                            //загрузка в тектовик разные данные
+                            DataClient.SavedPreferences();
+                            //Запуск новой сцены
                             Parent root;
                             try {
                                 root = FXMLLoader.load(getClass().getClassLoader().getResource("sample/packFileManager/scenepack/FileManager.fxml"), resources);
@@ -108,8 +108,11 @@ public class Controller {
 
     }
 
+
+
     @FXML
     void signUpClicked(ActionEvent event) {
+        DataClient.SavedPreferences();
         NavigatorEnter.loadVista(NavigatorEnter.SIGN_UP);
     }
 
@@ -117,7 +120,6 @@ public class Controller {
     void initialize() {
         DataClient.isAutoEnter = false;
         DataClient.isSavedPassword = false;
-
 
         try {
             File filePreferences = new File(new File(new File(".").getCanonicalPath()),"Preferences.txt");
@@ -127,48 +129,54 @@ public class Controller {
                 {
                     try(BufferedReader br = new BufferedReader(new FileReader(filePreferences))) {
                         String line = br.readLine();
-                        if (line != null && line.equalsIgnoreCase("true")) DataClient.isSavedPassword = true;
-                        else DataClient.isSavedPassword = false;
+                        checkPassword.setSelected(DataClient.isSavedPassword = line != null && line.equalsIgnoreCase("true"));
+
                         line = br.readLine();
-                        if (line != null && line.equalsIgnoreCase("true")) DataClient.isAutoEnter = true;
-                        else DataClient.                        if (line != null && line.equalsIgnoreCase("true")) DataClient.isAutoEnter = true;
- = false;
+                        checkAuto.setSelected(DataClient.isAutoEnter = line != null && line.equalsIgnoreCase("true"));
+
                         line = br.readLine();
-                        if (line != null) loginText.setText(line);
+                        if (line != null) {
+                            DataClient.login = line;
+                            loginText.setText(line);
+                        }
                         line = br.readLine();
-                        if (line != null) passwordText.setText(line);
+                        if (line != null) {
+                            DataClient.password = line;
+                            passwordText.setText(line);
+                        }
 
-
-
-
-
-                        String everything = sb.toString();
                     }
                 }
             }
             else
             {
-                filePreferences.createNewFile()
+                filePreferences.createNewFile();
             }
         } catch (IOException e) {
             e.printStackTrace();
         }
 
-
+        if (DataClient.isAutoEnter)
+        {
+            signIn.fire();
+        }
         checkAuto.setOnAction(event -> {
             if(checkAuto.isSelected())
             {
                 DataClient.isAutoEnter = true;
+                checkPassword.setSelected(true);
+                DataClient.isSavedPassword = true;
             }
             else DataClient.isAutoEnter = false;
         });
 
         checkPassword.setOnAction(event -> {
-            if(checkPassword.isSelected())
+            DataClient.isSavedPassword = checkPassword.isSelected();
+            if (!DataClient.isSavedPassword)
             {
-                DataClient.isSavedPassword = true;
+                checkAuto.setSelected(false);
+                DataClient.isAutoEnter = false;
             }
-            else DataClient.isSavedPassword = false;
         });
 
     }

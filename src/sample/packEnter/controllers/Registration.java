@@ -65,7 +65,7 @@ public class Registration {
                 @Override
                 public void run() {
                     try {
-                        if (GetData.getDataMessage("REGISTRATION / ://100") == 100)
+                        if (GetData.getDataMessage("REGISTRATION / ://100").getCode() == 100)
                         {
                             loadBack();
                         }

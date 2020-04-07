@@ -40,7 +40,7 @@
          </children>
       </AnchorPane>
       <AnchorPane layoutX="-7.0" layoutY="-9.0" prefHeight="510.0" prefWidth="145.0" style="-fx-background-color: #79a6f2;" AnchorPane.leftAnchor="0.0" AnchorPane.topAnchor="0.0" />
-      <Label fx:id="label" layoutX="340.0" layoutY="438.0" textFill="RED">
+      <Label fx:id="label" layoutX="340.0" layoutY="472.0" textFill="RED" AnchorPane.leftAnchor="340.0" AnchorPane.topAnchor="472.0">
          <font>
             <Font size="17.0" />
          </font>

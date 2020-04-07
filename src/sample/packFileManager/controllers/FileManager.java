@@ -4,7 +4,9 @@ package sample.packFileManager.controllers;
 import java.io.IOException;
 import java.net.URL;
 import java.util.ResourceBundle;
+import java.util.regex.Pattern;
 
+import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
@@ -15,6 +17,8 @@ import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
 import javafx.geometry.Rectangle2D;
 import javafx.scene.Node;
+import javafx.scene.Parent;
+import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.control.Button;
 import javafx.scene.control.cell.PropertyValueFactory;
@@ -24,20 +28,46 @@ import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.StackPane;
+import javafx.scene.paint.Color;
+import javafx.scene.paint.Paint;
 import javafx.scene.text.Font;
+import javafx.stage.Modality;
+import javafx.stage.Stage;
+import sample.DataClient;
+import sample.connection.GetData;
+import sample.connection.NetworkData;
 import sample.packFileManager.DataFile;
 
 public class FileManager implements Initializable {
 
     private ObservableList<DataFile> files;
 
+    @FXML
     private ImageView imageView;
+
+    @FXML
+    private ResourceBundle resources;
 
     @FXML
     private Button b;
 
     @FXML
     private AnchorPane pane;
+
+    @FXML
+    private Button buttonExit;
+
+    @FXML
+    private Button buttonExitAccount;
+
+    @FXML
+    private ProgressBar storageProgressBar;
+
+    @FXML
+    private Label storageLabel;
+
+    @FXML
+    private Label loginLabel;
 
     @FXML
     private StackPane Holder;
@@ -58,20 +88,46 @@ public class FileManager implements Initializable {
     private TableView<DataFile> tableView;
 
     @FXML
-    private ResourceBundle resources;
-
-    @FXML
     private URL location;
 
     @FXML
     private TreeView<DataFile> treeView;
 
+    @FXML
+    void exitAccountClicked(ActionEvent event) {
+        //Close current\
+
+        DataClient.isAutoEnter = false;
+        DataClient.SavedPreferences();
+        Parent root;
+        try {
+            root = FXMLLoader.load(getClass().getClassLoader().getResource("sample/packEnter/scenepack/sample.fxml"), resources);
+            Stage stage = new Stage();
+            stage.setTitle("Авторизация");
+            stage.setScene(new Scene(root));
+            ((Node) (event.getSource())).getScene().getWindow().hide();
+            stage.show();
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    @FXML
+    void exitClicked(ActionEvent event) {
+        Platform.exit();
+    }
+
+
+
+
+
 
     @FXML
     void click(MouseEvent event) {
-        loadImg("sample/packFileManager/14124.png");
-        imageView.toFront();
-        changeViewImage();
+        //loadImg("sample/packFileManager/14124.png");
+        //imageView.toFront();
+        //changeViewImage();
 
     }
 
@@ -108,6 +164,31 @@ public class FileManager implements Initializable {
 
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
+
+
+        long storageAll = 0;
+        long storageFill = 0;
+        try {
+            NetworkData networkData = GetData.getDataMessage("STORAGE / ://200");
+            if (networkData.getCode() == 200)
+            {
+                Pattern pattern = Pattern.compile("/");
+                String[] strings = pattern.split(networkData.getText());
+                storageAll = Long.parseLong(strings[0]);
+                storageFill = Long.parseLong(strings[1]);
+            }
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+
+
+        double ratio = (double)storageFill / (double)storageAll;
+        storageProgressBar.setProgress(ratio);
+
+        storageLabel.setText(getStorage(storageFill) + " / " + getStorage(storageAll));
+
+
+
         try {
             //загрузка в tree view
             files = FXCollections.observableArrayList();
@@ -145,6 +226,22 @@ public class FileManager implements Initializable {
         } catch (IOException e) {
             e.printStackTrace();
         }
+
+        buttonExitAccount.setOnMouseEntered(event -> {
+            buttonExitAccount.setTextFill(Color.AQUA);
+        });
+        buttonExit.setOnMouseEntered(event -> {
+            buttonExit.setTextFill(Color.AQUA);
+        });
+        buttonExitAccount.setOnMouseExited(event -> {
+            buttonExitAccount.setTextFill(Color.WHITE);
+        });
+        buttonExit.setOnMouseExited(event -> {
+            buttonExit.setTextFill(Color.WHITE);
+        });
+        loginLabel.setText(DataClient.login);
+
+
     }
 
     private void changeViewImage()
@@ -244,6 +341,42 @@ public class FileManager implements Initializable {
         }
     }
 
+    private String getStorage(long storage)
+    {
+        int i = 0;
+        while (storage > 1023)
+        {
+            i++;
+            if (i == 4) break;
+            storage /= 1024;
+        }
+        String str = Long.toString(storage);
+        switch (i)
+        {
+            case 0:
+            {
+                str += " Байт";
+                break;
+            }
+            case 1:
+            {
+                str += " Кб";
+                break;
+            }
+            case 2:
+            {
+                str += " Мб";
+                break;
+            }
+            case 3:
+            {
+                str += " Гб";
+                break;
+            }
+            default: break;
+        }
+        return str;
+    }
 
 }
 

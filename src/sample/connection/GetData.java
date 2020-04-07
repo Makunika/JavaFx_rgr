@@ -8,9 +8,9 @@ import java.net.UnknownHostException;
 import java.util.regex.Pattern;
 
 public class GetData {
-    public static int getDataMessage(String request) throws InterruptedException {
+    public static NetworkData getDataMessage(String request) throws InterruptedException {
         String result = "";
-        int code = 198;
+        NetworkData networkData = new NetworkData();
         String loginpassword = DataClient.login + "/" + DataClient.password + "://";
             try (Socket socket = new Socket(DataClient.SERVER, DataClient.PORT_MESSAGE);
                  DataOutputStream oos = new DataOutputStream(socket.getOutputStream());
@@ -22,9 +22,14 @@ public class GetData {
                     result = ois.readUTF();
                     Pattern pattern = Pattern.compile("://");
 
+                    System.out.println(result);
                     String[] strings = pattern.split(result);
-
-                    code = Integer.parseInt(strings[3]);
+                    for (String str:
+                         strings) {
+                        System.out.println(str);
+                    }
+                    networkData.setCode(Integer.parseInt(strings[3]));
+                    networkData.setText(strings[2]);
                 }
             } catch (UnknownHostException e) {
                 e.printStackTrace();
@@ -32,7 +37,7 @@ public class GetData {
 
                 e.printStackTrace();
             }
-            return code;
+            return networkData;
     }
 
     public static File getDataFile(String request) throws InterruptedException {
