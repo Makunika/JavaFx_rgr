@@ -1,20 +1,21 @@
 package sample.packEnter.controllers;
 
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileReader;
 import java.io.IOException;
 import java.net.URL;
 import java.util.ResourceBundle;
 
 import javafx.application.Platform;
 import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
-import javafx.scene.control.Button;
-import javafx.scene.control.Label;
-import javafx.scene.control.PasswordField;
-import javafx.scene.control.TextField;
+import javafx.scene.control.*;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.Pane;
 import javafx.stage.Stage;
@@ -48,6 +49,12 @@ public class Controller {
 
     @FXML
     private Label label;
+
+    @FXML
+    private CheckBox checkPassword;
+
+    @FXML
+    private CheckBox checkAuto;
 
     @FXML
     void signInClicked(ActionEvent event) throws InterruptedException, IOException {
@@ -108,7 +115,61 @@ public class Controller {
 
     @FXML
     void initialize() {
+        DataClient.isAutoEnter = false;
+        DataClient.isSavedPassword = false;
 
+
+        try {
+            File filePreferences = new File(new File(new File(".").getCanonicalPath()),"Preferences.txt");
+            if (filePreferences.exists())
+            {
+                if (filePreferences.canRead())
+                {
+                    try(BufferedReader br = new BufferedReader(new FileReader(filePreferences))) {
+                        String line = br.readLine();
+                        if (line != null && line.equalsIgnoreCase("true")) DataClient.isSavedPassword = true;
+                        else DataClient.isSavedPassword = false;
+                        line = br.readLine();
+                        if (line != null && line.equalsIgnoreCase("true")) DataClient.isAutoEnter = true;
+                        else DataClient.                        if (line != null && line.equalsIgnoreCase("true")) DataClient.isAutoEnter = true;
+ = false;
+                        line = br.readLine();
+                        if (line != null) loginText.setText(line);
+                        line = br.readLine();
+                        if (line != null) passwordText.setText(line);
+
+
+
+
+
+                        String everything = sb.toString();
+                    }
+                }
+            }
+            else
+            {
+                filePreferences.createNewFile()
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+
+        checkAuto.setOnAction(event -> {
+            if(checkAuto.isSelected())
+            {
+                DataClient.isAutoEnter = true;
+            }
+            else DataClient.isAutoEnter = false;
+        });
+
+        checkPassword.setOnAction(event -> {
+            if(checkPassword.isSelected())
+            {
+                DataClient.isSavedPassword = true;
+            }
+            else DataClient.isSavedPassword = false;
+        });
 
     }
 
