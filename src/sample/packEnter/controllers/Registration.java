@@ -2,6 +2,7 @@ package sample.packEnter.controllers;
 
 import java.net.URL;
 import java.util.ResourceBundle;
+import java.util.regex.Pattern;
 
 import javafx.application.Platform;
 import javafx.event.ActionEvent;
@@ -47,27 +48,20 @@ public class Registration {
     @FXML
     void signUpClicked(ActionEvent event) {
 
-        if (loginText.getText().equals(""))
-        {
-            loginText.setPromptText("Заполните поле");
-        }
-        else if (passwordText.getText().equals(""))
-        {
-            passwordText.setPromptText("Заполните поле");
-        }
-        else
+        if (checkFields())
         {
             DataClient.login = loginText.getText();
             DataClient.password = passwordText.getText();
-
+            DataClient.email = emailText.getText();
 
             Platform.runLater(new Runnable() {
                 @Override
                 public void run() {
                     try {
-                        if (GetData.getDataMessage("REGISTRATION / ://100").getCode() == 100)
+                        if (GetData.getDataMessage("REGISTRATION /" + DataClient.email + "://100").getCode() == 100)
                         {
-                            loadBack();
+                            DataClient.SavedPreferences();
+                            NavigatorEnter.loadVista(NavigatorEnter.ENTER);
                         }
                         else
                         {
@@ -90,10 +84,6 @@ public class Registration {
         NavigatorEnter.loadVista(NavigatorEnter.ENTER);
     }
 
-    void loadBack()
-    {
-        NavigatorEnter.loadVista(NavigatorEnter.ENTER);
-    }
 
 
 
@@ -101,6 +91,61 @@ public class Registration {
     void initialize() {
 
 
+    }
+
+
+
+    private boolean checkFields()
+    {
+        String regex = "(?:[a-z0-9!#$%&'*+/=?^_`{|}~-]+" +
+                "(?:\\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*|\"" +
+                "(?:[\\x01-\\x08\\x0b\\x0c\\x0e-\\x1f\\x21\\x23-\\x5b\\x5d-\\x7f]|" +
+                "\\\\[\\x01-\\x09\\x0b\\x0c\\x0e-\\x7f])*\")@" +
+                "(?:(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\\.)+" +
+                "[a-z0-9](?:[a-z0-9-]*[a-z0-9])?|\\" +
+                "[(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.)" +
+                "{3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?|" +
+                "[a-z0-9-]*[a-z0-9]:(?:" +
+                "[\\x01-\\x08\\x0b\\x0c\\x0e-\\x1f\\x21-\\x5a\\x53-\\x7f]|\\\\[\\x01-\\x09\\x0b\\x0c\\x0e-\\x7f])+)\\])";
+        Pattern pattern = Pattern.compile(regex);
+        boolean bool = true;
+        if (loginText.getText().equals(""))
+        {
+            loginText.setPromptText("Заполните поле");
+            loginText.clear();
+            bool = false;
+        }
+        else if (loginText.getText().length() < 3)
+        {
+            loginText.setPromptText("Больше трех символов");
+            loginText.clear();
+            bool = false;
+        }
+        else if (passwordText.getText().equals(""))
+        {
+            passwordText.setPromptText("Заполните поле");
+            passwordText.clear();
+            bool = false;
+        }
+        else if (passwordText.getText().length() < 3)
+        {
+            passwordText.setPromptText("Больше трех символов");
+            passwordText.clear();
+            bool = false;
+        }
+        else if (emailText.getText().equals(""))
+        {
+            emailText.setPromptText("Заполните поле");
+            emailText.clear();
+            bool = false;
+        }
+        else if (!pattern.matcher(emailText.getText()).matches())
+        {
+            emailText.setPromptText("Неправильные данные");
+            emailText.clear();
+            bool = false;
+        }
+        return bool;
     }
 }
 
