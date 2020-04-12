@@ -16,6 +16,14 @@ public class DataClient {
     public static final int PORT_MESSAGE = 24571;
     public static final int PORT_FILE = 24570;
 
+
+    public static void loadPreferences()
+    {
+
+    }
+
+
+
     public static void SavedPreferences()
     {
         try {

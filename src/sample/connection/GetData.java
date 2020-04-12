@@ -22,12 +22,11 @@ public class GetData {
                     result = ois.readUTF();
                     Pattern pattern = Pattern.compile("://");
 
-                    System.out.println(result);
+                    System.out.println("in: " + result);
                     String[] strings = pattern.split(result);
-                    for (String str:
-                         strings) {
-                        System.out.println(str);
-                    }
+                    //Если то, что пришло, неверно, то ставим код 599
+                    if (strings.length != 4) networkData.setCode(599);
+                    //Если все верно, то код и текст записываем в нетворкдату
                     networkData.setCode(Integer.parseInt(strings[3]));
                     networkData.setText(strings[2]);
                 }

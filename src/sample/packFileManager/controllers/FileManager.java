@@ -15,6 +15,7 @@ import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
+import javafx.geometry.Pos;
 import javafx.geometry.Rectangle2D;
 import javafx.scene.Node;
 import javafx.scene.Parent;
@@ -26,6 +27,7 @@ import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.AnchorPane;
+import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.StackPane;
 import javafx.scene.paint.Color;
@@ -44,6 +46,12 @@ public class FileManager implements Initializable {
 
     @FXML
     private ImageView imageView;
+
+    @FXML
+    private Label pathName;
+
+    @FXML
+    private Button backPath;
 
     @FXML
     private ResourceBundle resources;
@@ -73,7 +81,7 @@ public class FileManager implements Initializable {
     private StackPane Holder;
 
     @FXML
-    private TableColumn<DataFile, String> iconColumn;
+    private TableColumn<DataFile, ImageView> iconColumn;
 
     @FXML
     private TableColumn<DataFile, String> nameColumn;
@@ -115,7 +123,9 @@ public class FileManager implements Initializable {
 
     @FXML
     void exitClicked(ActionEvent event) {
-        Platform.exit();
+        loadImg("sample/packFileManager/123.jpg");
+        changeViewImage();
+        //Platform.exit();
     }
 
 
@@ -151,21 +161,15 @@ public class FileManager implements Initializable {
 
     @FXML
     void SelectedNode(MouseEvent event) {
-            TreeItem<DataFile> item = treeView.getSelectionModel().getSelectedItem();
-        files.clear();
-        files.add(item.getValue());
-        for (TreeItem<DataFile> it: item.getChildren()) {
-            files.add(it.getValue());
-        }
-        System.out.println(item.toString());
+        treeChildToTable();
     }
+
 
 
 
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
-
-
+        pathName.setText("");
         long storageAll = 0;
         long storageFill = 0;
         try {
@@ -194,23 +198,29 @@ public class FileManager implements Initializable {
             files = FXCollections.observableArrayList();
             tableView.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
 
-            TreeItem<DataFile> root = new TreeItem<>(new DataFile("123d:data1:23.01:245 kb"));
+            TreeItem<DataFile> root = new TreeItem<>(new DataFile("file:data1:23.01:245 kb"));
             ObservableList<TreeItem<DataFile>> rootlist = FXCollections.observableArrayList(
                     new TreeItem<>(new DataFile("d123d:data2:23.01:245 kb")),
-                    new TreeItem<>(new DataFile("d123d:data3:23.01:245 kb")),
+                    new TreeItem<>(new DataFile("file:data3:23.01:245 kb")),
                     new TreeItem<>(new DataFile("d123d:data4:23.01:245 kb"))
             );
             root.getChildren().addAll(rootlist);
-            TreeItem<DataFile> data31 = new TreeItem<>(new DataFile("d123d:data41:23.01:245 kb"));
+            TreeItem<DataFile> data31 = new TreeItem<>(new DataFile("file:data41:23.01:245 kb"));
             rootlist.get(2).getChildren().add(data31);
             treeView.setRoot(root);
 
 
             //настройка таблицы
-            iconColumn.setCellValueFactory(new PropertyValueFactory<DataFile, String>("icon1"));
-            nameColumn.setCellValueFactory(new PropertyValueFactory<DataFile, String>("name"));
-            sizeColumn.setCellValueFactory(new PropertyValueFactory<DataFile, String>("size"));
-            dateColumn.setCellValueFactory(new PropertyValueFactory<DataFile, String>("date"));
+            iconColumn.setCellValueFactory(cellData -> cellData.getValue().iconProperty());
+            nameColumn.setCellValueFactory(cellData -> cellData.getValue().nameProperty());
+            sizeColumn.setCellValueFactory(cellData -> cellData.getValue().sizeProperty());
+            dateColumn.setCellValueFactory(cellData -> cellData.getValue().dateProperty());
+
+            iconColumn.setPrefWidth(50);
+            iconColumn.setMaxWidth(50);
+            iconColumn.setMinWidth(50);
+            iconColumn.setSortable(false);
+
 
             files.add(root.getValue());
             for (TreeItem<DataFile> it : root.getChildren()) {
@@ -241,7 +251,31 @@ public class FileManager implements Initializable {
         });
         loginLabel.setText(DataClient.login);
 
+        backPath.setOnAction(event -> {
+            //treeView.getSelectionModel().selectPrevious();
+            treeView.getSelectionModel().select(treeView.getSelectionModel().getSelectedItem().getParent());
+            treeChildToTable();
+        });
+    }
 
+    private void treeChildToTable() {
+        TreeItem<DataFile> item = treeView.getSelectionModel().getSelectedItem();
+        backPath.setVisible(item.getParent() != null);
+
+        files.clear();
+
+        for (TreeItem<DataFile> it: item.getChildren()) {
+            files.add(it.getValue());
+        }
+        System.out.println(item.toString());
+
+        StringBuffer sb = new StringBuffer("");
+        while (item != null)
+        {
+            sb.insert(0,item.getValue().getName() + "\\");
+            item = item.getParent();
+        }
+        pathName.setText(sb.toString());
     }
 
     private void changeViewImage()
@@ -276,19 +310,23 @@ public class FileManager implements Initializable {
         button.setOnMouseClicked(event -> clickedBackImage(event));
         anchorPane.getChildren().add(button);
 
+
         imageView = new ImageView();
         imageView.setStyle("-fx-background-color: #ff0900");
         imageView.setFitWidth(760);
         imageView.setFitHeight(540);
+        imageView.setPreserveRatio(true);
         imageView.setLayoutX(260);
         imageView.setLayoutY(45);
 
+        StackPane stackPane = new StackPane();
+        stackPane.setPrefSize(760,540);
 
-        imageView.setPreserveRatio(true);
+        stackPane.getChildren().add(imageView);
+        stackPane.setAlignment(imageView, Pos.CENTER);
 
+        anchorPane.getChildren().add(stackPane);
 
-
-        anchorPane.getChildren().add(imageView);
         AnchorPane.setTopAnchor(button, (double) 630);
         AnchorPane.setRightAnchor(button, (double) 557);
         AnchorPane.setBottomAnchor(button, (double) 45);
@@ -298,9 +336,13 @@ public class FileManager implements Initializable {
         AnchorPane.setRightAnchor(pane, (double) 0);
         AnchorPane.setLeftAnchor(pane, (double) 0);
 
-        AnchorPane.setRightAnchor(imageView, (double) 260);
-        AnchorPane.setBottomAnchor(imageView,(double) 135);
-        AnchorPane.setTopAnchor(imageView,(double) 45);
+        AnchorPane.setBottomAnchor(stackPane, (double) 135);
+        AnchorPane.setTopAnchor(stackPane, (double) 45);
+        AnchorPane.setRightAnchor(stackPane, (double) 260);
+
+        //AnchorPane.setRightAnchor(imageView, (double) 260);
+        //AnchorPane.setBottomAnchor(imageView,(double) 135);
+        //AnchorPane.setTopAnchor(imageView,(double) 45);
 
 
         Holder.getChildren().add(anchorPane);
@@ -313,33 +355,9 @@ public class FileManager implements Initializable {
     private void loadImg(String url)
     {
         imageView.setImage(new Image(url));
-        centerImage();
     }
 
-    private void centerImage() {
-        Image img = imageView.getImage();
-        if (img != null) {
-            double w = 0;
-            double h = 0;
 
-            double ratioX = imageView.getFitWidth() / img.getWidth();
-            double ratioY = imageView.getFitHeight() / img.getHeight();
-
-            double reducCoeff = 0;
-            if(ratioX >= ratioY) {
-                reducCoeff = ratioY;
-            } else {
-                reducCoeff = ratioX;
-            }
-
-            w = img.getWidth() * reducCoeff;
-            h = img.getHeight() * reducCoeff;
-
-            imageView.setX((imageView.getFitWidth() - w) / 2);
-            imageView.setY((imageView.getFitHeight() - h) / 2);
-
-        }
-    }
 
     private String getStorage(long storage)
     {

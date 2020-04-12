@@ -5,12 +5,10 @@ import java.util.ResourceBundle;
 import java.util.regex.Pattern;
 
 import javafx.application.Platform;
+import javafx.concurrent.Task;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
-import javafx.scene.control.Button;
-import javafx.scene.control.Label;
-import javafx.scene.control.PasswordField;
-import javafx.scene.control.TextField;
+import javafx.scene.control.*;
 import javafx.scene.layout.AnchorPane;
 import sample.DataClient;
 import sample.connection.GetData;
@@ -20,6 +18,9 @@ public class Registration {
 
     @FXML
     private ResourceBundle resources;
+
+    @FXML
+    private ProgressIndicator progressDownload;
 
     @FXML
     private AnchorPane paneReg;
@@ -54,25 +55,35 @@ public class Registration {
             DataClient.password = passwordText.getText();
             DataClient.email = emailText.getText();
 
-            Platform.runLater(new Runnable() {
+            Task<Void> task = new Task<Void>() {
                 @Override
-                public void run() {
+                protected Void call() throws Exception {
                     try {
                         if (GetData.getDataMessage("REGISTRATION /" + DataClient.email + "://100").getCode() == 100)
                         {
-                            DataClient.SavedPreferences();
-                            NavigatorEnter.loadVista(NavigatorEnter.ENTER);
+                            Platform.runLater(() -> {
+                                DataClient.SavedPreferences();
+                                NavigatorEnter.loadVista(NavigatorEnter.ENTER);
+                            });
+
                         }
                         else
                         {
-                            label.setText("Такой пользователь уже существует");
+                            Platform.runLater(() -> {
+                                label.setText("Такой пользователь уже существует");
+                                progressDownload.setVisible(false);
+                            });
                         }
                     } catch (InterruptedException e) {
                         e.printStackTrace();
                     }
+                    return null;
                 }
-            });
+            };
 
+            progressDownload.setVisible(true);
+
+            new Thread(task).start();
 
 
         }

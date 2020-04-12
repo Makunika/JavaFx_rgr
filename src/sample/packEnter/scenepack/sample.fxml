@@ -4,6 +4,7 @@
 <?import javafx.scene.control.CheckBox?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.PasswordField?>
+<?import javafx.scene.control.ProgressIndicator?>
 <?import javafx.scene.control.TextField?>
 <?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.text.Font?>
@@ -55,5 +56,6 @@
             <Font size="17.0" />
          </font>
       </CheckBox>
+      <ProgressIndicator fx:id="progressDownload" focusTraversable="false" layoutX="270.0" layoutY="425.0" visible="false" AnchorPane.leftAnchor="270.0" AnchorPane.topAnchor="425.0" />
    </children>
 </AnchorPane>

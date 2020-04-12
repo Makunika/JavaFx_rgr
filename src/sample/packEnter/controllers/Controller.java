@@ -5,6 +5,7 @@ import java.net.URL;
 import java.util.ResourceBundle;
 
 import javafx.application.Platform;
+import javafx.concurrent.Task;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
@@ -39,6 +40,9 @@ public class Controller {
     private Button signIn;
 
     @FXML
+    private ProgressIndicator progressDownload;
+
+    @FXML
     private Button signUp;
 
     @FXML
@@ -69,36 +73,47 @@ public class Controller {
             DataClient.login = loginText.getText();
             DataClient.password = passwordText.getText();
 
-            Platform.runLater(new Runnable() {
+            Task<Void> task = new Task<Void>() {
                 @Override
-                public void run() {
+                protected Void call() throws Exception {
                     try {
                         if (GetData.getDataMessage("AUTHORIZATION / ://101").getCode() == 100)
                         {
-                            //загрузка в тектовик разные данные
-                            DataClient.SavedPreferences();
-                            //Запуск новой сцены
-                            Parent root;
-                            try {
-                                root = FXMLLoader.load(getClass().getClassLoader().getResource("sample/packFileManager/scenepack/FileManager.fxml"), resources);
-                                Stage stage = new Stage();
-                                stage.setTitle("File Manager");
-                                stage.setScene(new Scene(root, 1280, 720));
-                                ((Node) (event.getSource())).getScene().getWindow().hide();
-                                stage.show();
+                            Platform.runLater(() -> {
+                                //загрузка в тектовик разные данные
+                                DataClient.SavedPreferences();
+                                //Запуск новой сцены
+                                Parent root;
+                                try {
+                                    root = FXMLLoader.load(getClass().getClassLoader().getResource("sample/packFileManager/scenepack/FileManager.fxml"), resources);
+                                    Stage stage = new Stage();
+                                    stage.setTitle("File Manager");
+                                    stage.setScene(new Scene(root, 1280, 720));
+                                    ((Node) (event.getSource())).getScene().getWindow().hide();
+                                    stage.show();
 
-                            } catch (IOException e) {
-                                e.printStackTrace();
-                            }
+                                } catch (IOException e) {
+                                    e.printStackTrace();
+                                }
+                            });
                         } else
                         {
-                            label.setText("Неправильный логин или пароль");
+                            Platform.runLater(() -> {
+                                label.setText("Неправильный логин или пароль");
+                                progressDownload.setVisible(false);
+                            });
                         }
                     } catch (InterruptedException e) {
                         e.printStackTrace();
                     }
+                    return null;
                 }
-            });
+            };
+
+            new Thread(task).start();
+            progressDownload.setVisible(true);
+
+
 
 
         }

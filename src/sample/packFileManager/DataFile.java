@@ -1,18 +1,23 @@
 package sample.packFileManager;
 
+import javafx.beans.property.ObjectProperty;
+import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
+import javafx.beans.property.StringProperty;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 
 import java.io.IOException;
 import java.util.regex.Pattern;
 
 public class DataFile {
-    private SimpleStringProperty icon1;
-    private SimpleStringProperty name;
-    private SimpleStringProperty date;
-    private SimpleStringProperty size;
+    private ObjectProperty<ImageView> icon;
+    private StringProperty name;
+    private StringProperty date;
+    private StringProperty size;
 
     public DataFile(String data) throws IOException {
-        icon1 = new SimpleStringProperty();
+        icon = new SimpleObjectProperty<>();
         name = new SimpleStringProperty();
         date = new SimpleStringProperty();
         size = new SimpleStringProperty();
@@ -21,6 +26,26 @@ public class DataFile {
 
     public void setData(String data) throws IOException {
         parseString(data);
+    }
+
+    public StringProperty dateProperty() {
+        return date;
+    }
+
+    public ObjectProperty<ImageView> iconProperty() {
+        return icon;
+    }
+
+    public StringProperty nameProperty() {
+        return name;
+    }
+
+    public StringProperty sizeProperty() {
+        return size;
+    }
+
+    public ImageView getIcon() {
+        return icon.get();
     }
 
     public String getName() {
@@ -47,16 +72,21 @@ public class DataFile {
         this.size.set(size);
     }
 
+    public void setIcon(ImageView icon) {
+        this.icon.set(icon);
+    }
 
     private void parseString(String data) throws IOException {
         Pattern pattern = Pattern.compile(":");
         String[] strings = pattern.split(data);
         if (strings.length == 4)
         {
-            icon1.set(strings[0]);
+            setIcon(new ImageView(new Image(strings[0].equals("file") ? "sample/packFileManager/123.jpg" : "sample/packFileManager/14124.png")));
             setName(strings[1]);
             setDate(strings[2]);
             setSize(strings[3]);
+            getIcon().setFitWidth(25);
+            getIcon().setFitHeight(25);
         }
         else
         {
