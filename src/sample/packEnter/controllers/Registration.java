@@ -1,5 +1,6 @@
 package sample.packEnter.controllers;
 
+import java.net.ConnectException;
 import java.net.URL;
 import java.util.ResourceBundle;
 import java.util.regex.Pattern;
@@ -54,7 +55,7 @@ public class Registration {
             DataClient.login = loginText.getText();
             DataClient.password = passwordText.getText();
             DataClient.email = emailText.getText();
-
+            label.setText("");
             Task<Void> task = new Task<Void>() {
                 @Override
                 protected Void call() throws Exception {
@@ -74,8 +75,12 @@ public class Registration {
                                 progressDownload.setVisible(false);
                             });
                         }
-                    } catch (InterruptedException e) {
+                    } catch (ConnectException e) {
                         e.printStackTrace();
+                        Platform.runLater(() -> {
+                            label.setText("lost connection");
+                            progressDownload.setVisible(false);
+                        });
                     }
                     return null;
                 }

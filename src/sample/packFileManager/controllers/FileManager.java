@@ -2,6 +2,7 @@ package sample.packFileManager.controllers;
 
 
 import java.io.IOException;
+import java.net.ConnectException;
 import java.net.URL;
 import java.util.ResourceBundle;
 import java.util.regex.Pattern;
@@ -174,14 +175,14 @@ public class FileManager implements Initializable {
         long storageFill = 0;
         try {
             NetworkData networkData = GetData.getDataMessage("STORAGE / ://200");
-            if (networkData.getCode() == 200)
-            {
+            if (networkData.getCode() == 200) {
                 Pattern pattern = Pattern.compile("/");
                 String[] strings = pattern.split(networkData.getText());
                 storageAll = Long.parseLong(strings[0]);
                 storageFill = Long.parseLong(strings[1]);
             }
-        } catch (InterruptedException e) {
+        } catch (ConnectException e)
+        {
             e.printStackTrace();
         }
 

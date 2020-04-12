@@ -3,12 +3,13 @@ package sample.connection;
 import sample.DataClient;
 
 import java.io.*;
+import java.net.ConnectException;
 import java.net.Socket;
 import java.net.UnknownHostException;
 import java.util.regex.Pattern;
 
 public class GetData {
-    public static NetworkData getDataMessage(String request) throws InterruptedException {
+    public static NetworkData getDataMessage(String request) throws ConnectException {
         String result = "";
         NetworkData networkData = new NetworkData();
         String loginpassword = DataClient.login + "/" + DataClient.password + "://";
@@ -35,6 +36,7 @@ public class GetData {
             } catch (IOException e) {
 
                 e.printStackTrace();
+                throw new ConnectException("Lost connection");
             }
             return networkData;
     }

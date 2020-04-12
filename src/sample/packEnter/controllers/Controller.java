@@ -1,6 +1,7 @@
 package sample.packEnter.controllers;
 
 import java.io.*;
+import java.net.ConnectException;
 import java.net.URL;
 import java.util.ResourceBundle;
 
@@ -72,13 +73,12 @@ public class Controller {
         {
             DataClient.login = loginText.getText();
             DataClient.password = passwordText.getText();
-
+            label.setText("");
             Task<Void> task = new Task<Void>() {
                 @Override
                 protected Void call() throws Exception {
                     try {
-                        if (GetData.getDataMessage("AUTHORIZATION / ://101").getCode() == 100)
-                        {
+                        if (GetData.getDataMessage("AUTHORIZATION / ://101").getCode() == 100) {
                             Platform.runLater(() -> {
                                 //загрузка в тектовик разные данные
                                 DataClient.SavedPreferences();
@@ -96,16 +96,21 @@ public class Controller {
                                     e.printStackTrace();
                                 }
                             });
-                        } else
-                        {
+                        } else {
                             Platform.runLater(() -> {
                                 label.setText("Неправильный логин или пароль");
                                 progressDownload.setVisible(false);
                             });
                         }
-                    } catch (InterruptedException e) {
+                    } catch (ConnectException e)
+                    {
                         e.printStackTrace();
+                        Platform.runLater(() -> {
+                            label.setText("lost connection");
+                            progressDownload.setVisible(false);
+                        });
                     }
+
                     return null;
                 }
             };
