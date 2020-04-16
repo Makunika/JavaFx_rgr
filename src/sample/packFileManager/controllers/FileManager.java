@@ -40,6 +40,7 @@ import sample.DataClient;
 import sample.connection.GetData;
 import sample.connection.NetworkData;
 import sample.packFileManager.DataFile;
+import sample.packFileManager.FilterableTreeItem;
 
 public class FileManager implements Initializable {
 
@@ -171,72 +172,52 @@ public class FileManager implements Initializable {
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
         pathName.setText("");
-        long storageAll = 0;
-        long storageFill = 0;
-        try {
-            NetworkData networkData = GetData.getDataMessage("STORAGE / ://200");
-            if (networkData.getCode() == 200) {
-                Pattern pattern = Pattern.compile("/");
-                String[] strings = pattern.split(networkData.getText());
-                storageAll = Long.parseLong(strings[0]);
-                storageFill = Long.parseLong(strings[1]);
-            }
-        } catch (ConnectException e)
-        {
-            e.printStackTrace();
-        }
 
 
-        double ratio = (double)storageFill / (double)storageAll;
+
+        double ratio = (double)DataClient.storageFill / (double)DataClient.storageAll;
         storageProgressBar.setProgress(ratio);
 
-        storageLabel.setText(getStorage(storageFill) + " / " + getStorage(storageAll));
+        storageLabel.setText(getStorage(DataClient.storageFill) + " / " + getStorage(DataClient.storageAll));
+
+
+        //загрузка в tree view
+        files = FXCollections.observableArrayList();
+        tableView.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
+
+        TreeItem<DataFile> root = new TreeItem<>(new DataFile("path",DataClient.login,"date","size"));
 
 
 
-        try {
-            //загрузка в tree view
-            files = FXCollections.observableArrayList();
-            tableView.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
+        Pattern pattern = Pattern.compile("\n");
+        parseTree(root,pattern.split(DataClient.tree), new Index(0), 0);
 
-            TreeItem<DataFile> root = new TreeItem<>(new DataFile("file:data1:23.01:245 kb"));
-            ObservableList<TreeItem<DataFile>> rootlist = FXCollections.observableArrayList(
-                    new TreeItem<>(new DataFile("d123d:data2:23.01:245 kb")),
-                    new TreeItem<>(new DataFile("file:data3:23.01:245 kb")),
-                    new TreeItem<>(new DataFile("d123d:data4:23.01:245 kb"))
-            );
-            root.getChildren().addAll(rootlist);
-            TreeItem<DataFile> data31 = new TreeItem<>(new DataFile("file:data41:23.01:245 kb"));
-            rootlist.get(2).getChildren().add(data31);
-            treeView.setRoot(root);
+        treeView.setRoot(root);
+        treeView.setShowRoot(false);
 
 
-            //настройка таблицы
-            iconColumn.setCellValueFactory(cellData -> cellData.getValue().iconProperty());
-            nameColumn.setCellValueFactory(cellData -> cellData.getValue().nameProperty());
-            sizeColumn.setCellValueFactory(cellData -> cellData.getValue().sizeProperty());
-            dateColumn.setCellValueFactory(cellData -> cellData.getValue().dateProperty());
+        //настройка таблицы
+        iconColumn.setCellValueFactory(cellData -> cellData.getValue().iconProperty());
+        nameColumn.setCellValueFactory(cellData -> cellData.getValue().nameProperty());
+        sizeColumn.setCellValueFactory(cellData -> cellData.getValue().sizeProperty());
+        dateColumn.setCellValueFactory(cellData -> cellData.getValue().dateProperty());
 
-            iconColumn.setPrefWidth(50);
-            iconColumn.setMaxWidth(50);
-            iconColumn.setMinWidth(50);
-            iconColumn.setSortable(false);
-
-
-            files.add(root.getValue());
-            for (TreeItem<DataFile> it : root.getChildren()) {
-                files.add(it.getValue());
-            }
-            tableView.setItems(files);
+        iconColumn.setPrefWidth(50);
+        iconColumn.setMaxWidth(50);
+        iconColumn.setMinWidth(50);
+        iconColumn.setSortable(false);
 
 
-            //загрузка для прсомотра картинок
-            loadImageView();
-
-
-        } catch (IOException e) {
-            e.printStackTrace();
+        files.add(root.getValue());
+        for (TreeItem<DataFile> it : root.getChildren()) {
+            files.add(it.getValue());
         }
+        tableView.setItems(files);
+
+
+        //загрузка для прсомотра картинок
+        loadImageView();
+
 
         buttonExitAccount.setOnMouseEntered(event -> {
             buttonExitAccount.setTextFill(Color.AQUA);
@@ -259,24 +240,74 @@ public class FileManager implements Initializable {
         });
     }
 
+    private class Index
+    {
+        public int index;
+
+        public Index(int index)
+        {
+            this.index = index;
+        }
+    }
+
+
+    private void parseTree(TreeItem<DataFile> root, String[] strings, Index index, int rank) {
+        Pattern pattern;
+
+        TreeItem<DataFile> newRoot = root;
+        while (index.index != strings.length)
+        {
+            pattern = Pattern.compile("\t");
+            String[] stringsItem = pattern.split(strings[index.index]);
+            if (Integer.parseInt(stringsItem[0]) > rank)
+            {
+                parseTree(newRoot, strings, index,rank + 1);
+                continue;
+            }
+            else if (Integer.parseInt(stringsItem[0]) < rank)
+            {
+                return;
+            }
+            else
+            {
+                pattern = Pattern.compile("\\\\");
+                String[] regex = pattern.split(stringsItem[2]);
+                String type = regex[0].equals("-1") ? "path" : "file";
+                String size = regex[0].equals("-1") ? "" : getStorage(Long.parseLong(regex[0]));
+                TreeItem<DataFile> newItem = null;
+                newItem = new TreeItem<>(new DataFile(type, stringsItem[1],regex[1], size));
+                root.getChildren().add(newItem);
+                newRoot = newItem;
+
+            }
+
+
+
+
+            index.index++;
+        }
+
+    }
+
     private void treeChildToTable() {
         TreeItem<DataFile> item = treeView.getSelectionModel().getSelectedItem();
-        backPath.setVisible(item.getParent() != null);
+        if (!item.getValue().isFile()) {
+            backPath.setVisible(item.getParent() != null);
 
-        files.clear();
+            files.clear();
 
-        for (TreeItem<DataFile> it: item.getChildren()) {
-            files.add(it.getValue());
+            for (TreeItem<DataFile> it : item.getChildren()) {
+                files.add(it.getValue());
+            }
+            System.out.println(item.toString());
+
+            StringBuffer sb = new StringBuffer("");
+            while (item != null) {
+                sb.insert(0, item.getValue().getName() + "\\");
+                item = item.getParent();
+            }
+            pathName.setText(sb.toString());
         }
-        System.out.println(item.toString());
-
-        StringBuffer sb = new StringBuffer("");
-        while (item != null)
-        {
-            sb.insert(0,item.getValue().getName() + "\\");
-            item = item.getParent();
-        }
-        pathName.setText(sb.toString());
     }
 
     private void changeViewImage()

@@ -1,9 +1,6 @@
 package sample.packFileManager;
 
-import javafx.beans.property.ObjectProperty;
-import javafx.beans.property.SimpleObjectProperty;
-import javafx.beans.property.SimpleStringProperty;
-import javafx.beans.property.StringProperty;
+import javafx.beans.property.*;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 
@@ -15,18 +12,35 @@ public class DataFile {
     private StringProperty name;
     private StringProperty date;
     private StringProperty size;
+    private boolean isFile;
 
-    public DataFile(String data) throws IOException {
-        icon = new SimpleObjectProperty<>();
-        name = new SimpleStringProperty();
-        date = new SimpleStringProperty();
-        size = new SimpleStringProperty();
-        parseString(data);
+    public DataFile(String type, String name, String date, String size) {
+        this.icon = new SimpleObjectProperty<>();
+        setIcon(new ImageView(new Image(type.equals("file") ? "sample/packFileManager/123.jpg" : "sample/packFileManager/14124.png")));
+        isFile = type.equals("file");
+
+        this.name = new SimpleStringProperty();
+        setName(name);
+        this.date = new SimpleStringProperty();
+        setDate(date);
+        this.size = new SimpleStringProperty();
+        setSize(size);
+        this.icon.getValue().setFitHeight(25);
+        this.icon.getValue().setFitWidth(25);
     }
 
-    public void setData(String data) throws IOException {
-        parseString(data);
+    public void setData(String type, String name, String date, String size) {
+        setIcon(new ImageView(new Image(type.equals("file") ? "sample/packFileManager/123.jpg" : "sample/packFileManager/14124.png")));
+        isFile = type.equals("file");
+        setName(name);
+        setDate(date);
+        setSize(size);
     }
+
+    public boolean isFile() {
+        return isFile;
+    }
+
 
     public StringProperty dateProperty() {
         return date;
@@ -76,23 +90,6 @@ public class DataFile {
         this.icon.set(icon);
     }
 
-    private void parseString(String data) throws IOException {
-        Pattern pattern = Pattern.compile(":");
-        String[] strings = pattern.split(data);
-        if (strings.length == 4)
-        {
-            setIcon(new ImageView(new Image(strings[0].equals("file") ? "sample/packFileManager/123.jpg" : "sample/packFileManager/14124.png")));
-            setName(strings[1]);
-            setDate(strings[2]);
-            setSize(strings[3]);
-            getIcon().setFitWidth(25);
-            getIcon().setFitHeight(25);
-        }
-        else
-        {
-            throw new IOException("length not 3");
-        }
-    }
 
     @Override
     public String toString() {

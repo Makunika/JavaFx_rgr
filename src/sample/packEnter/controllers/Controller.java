@@ -4,6 +4,7 @@ import java.io.*;
 import java.net.ConnectException;
 import java.net.URL;
 import java.util.ResourceBundle;
+import java.util.regex.Pattern;
 
 import javafx.application.Platform;
 import javafx.concurrent.Task;
@@ -20,6 +21,7 @@ import javafx.scene.layout.Pane;
 import javafx.stage.Stage;
 import sample.DataClient;
 import sample.connection.GetData;
+import sample.connection.NetworkData;
 import sample.packEnter.NavigatorEnter;
 import sample.packFileManager.DataFile;
 
@@ -78,7 +80,17 @@ public class Controller {
                 @Override
                 protected Void call() throws Exception {
                     try {
-                        if (GetData.getDataMessage("AUTHORIZATION / ://101").getCode() == 100) {
+
+                        NetworkData networkData = GetData.getDataMessage("AUTHORIZATION / ://101");
+                        if (networkData.getCode() == 100) {
+                            Pattern pattern = Pattern.compile("//");
+                            String[] strings = pattern.split(networkData.getText());
+                            if (strings.length != 2) return null;
+                            pattern = Pattern.compile("/");
+                            String[] storage = pattern.split(strings[0]);
+                            DataClient.storageAll = Long.parseLong(storage[0]);
+                            DataClient.storageFill = Long.parseLong(storage[1]);
+                            DataClient.tree = strings[1];
                             Platform.runLater(() -> {
                                 //загрузка в тектовик разные данные
                                 DataClient.SavedPreferences();

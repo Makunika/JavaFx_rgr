@@ -11,6 +11,9 @@ public class DataClient {
     public static boolean isAutoEnter;
     public static boolean isSavedPassword;
     public static String email;
+    public static String tree;
+    public static long storageAll;
+    public static long storageFill;
 
     public static final String SERVER = "localhost";
     public static final int PORT_MESSAGE = 24571;
