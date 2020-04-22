@@ -12,8 +12,11 @@
       <entry name="!?*.clj" />
     </wildcardResourcePatterns>
     <bytecodeTargetLevel>
+      <module name="buildGradle" target="1.8" />
       <module name="buildGradle.main" target="1.8" />
       <module name="buildGradle.test" target="1.8" />
+      <module name="javafxtest.buildGradle.main" target="1.8" />
+      <module name="javafxtest.buildGradle.test" target="1.8" />
     </bytecodeTargetLevel>
   </component>
 </project>

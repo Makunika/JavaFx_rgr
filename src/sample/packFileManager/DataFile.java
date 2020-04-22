@@ -1,36 +1,34 @@
 package sample.packFileManager;
 
 import javafx.beans.property.*;
-import javafx.scene.image.Image;
-import javafx.scene.image.ImageView;
-
-import java.io.IOException;
-import java.util.regex.Pattern;
 
 public class DataFile {
-    private ObjectProperty<ImageView> icon;
+    //private ObjectProperty<ImageView> icon;
+    private StringProperty icon;
     private StringProperty name;
     private StringProperty date;
     private StringProperty size;
     private boolean isFile;
 
     public DataFile(String type, String name, String date, String size) {
-        this.icon = new SimpleObjectProperty<>();
-        setIcon(new ImageView(new Image(type.equals("file") ? "sample/packFileManager/123.jpg" : "sample/packFileManager/14124.png")));
+        //this.icon = new SimpleObjectProperty<>();
+        this.icon = new SimpleStringProperty();
+        //setIcon(new ImageView(new Image(type.equals("file") ? "sample/packFileManager/123.jpg" : "sample/packFileManager/14124.png")));
         isFile = type.equals("file");
-
+        setIcon(type);
         this.name = new SimpleStringProperty();
         setName(name);
         this.date = new SimpleStringProperty();
         setDate(date);
         this.size = new SimpleStringProperty();
         setSize(size);
-        this.icon.getValue().setFitHeight(25);
-        this.icon.getValue().setFitWidth(25);
+        //this.icon.getValue().setFitHeight(25);
+        //this.icon.getValue().setFitWidth(25);
     }
 
     public void setData(String type, String name, String date, String size) {
-        setIcon(new ImageView(new Image(type.equals("file") ? "sample/packFileManager/123.jpg" : "sample/packFileManager/14124.png")));
+        //setIcon(new ImageView(new Image(type.equals("file") ? "sample/packFileManager/123.jpg" : "sample/packFileManager/14124.png")));
+        setIcon(type);
         isFile = type.equals("file");
         setName(name);
         setDate(date);
@@ -46,7 +44,7 @@ public class DataFile {
         return date;
     }
 
-    public ObjectProperty<ImageView> iconProperty() {
+    public StringProperty iconProperty() {
         return icon;
     }
 
@@ -58,7 +56,7 @@ public class DataFile {
         return size;
     }
 
-    public ImageView getIcon() {
+    public String getIcon() {
         return icon.get();
     }
 
@@ -86,7 +84,7 @@ public class DataFile {
         this.size.set(size);
     }
 
-    public void setIcon(ImageView icon) {
+    public void setIcon(String icon) {
         this.icon.set(icon);
     }
 

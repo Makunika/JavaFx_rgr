@@ -6,6 +6,9 @@ import java.io.*;
 import java.net.ConnectException;
 import java.net.Socket;
 import java.net.UnknownHostException;
+import java.nio.ByteBuffer;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.regex.Pattern;
 
 public class GetData {
@@ -20,7 +23,10 @@ public class GetData {
                 if (!socket.isOutputShutdown()) {
                     oos.writeUTF(loginpassword + request);
                     oos.flush();
-                    result = ois.readUTF();
+                    //result = ois.readUTF();
+                    int bytesLength = ois.readInt();
+                    byte[] bytes = ois.readAllBytes();
+                    result = new String(bytes, StandardCharsets.UTF_8);
                     Pattern pattern = Pattern.compile("://");
 
                     System.out.println("in: " + result);
@@ -41,16 +47,33 @@ public class GetData {
             return networkData;
     }
 
-    public static File getDataFile(String request) throws InterruptedException {
-        String result = "";
-        try (Socket socket = new Socket(DataClient.SERVER, DataClient.PORT_FILE);
-             DataOutputStream oos = new DataOutputStream(socket.getOutputStream());
-             DataInputStream ois = new DataInputStream(socket.getInputStream());)
+    public static int outDataFile(File file, boolean isFile, int port) throws InterruptedException {
+        Thread.sleep(300);
+
+        int result = -1;
+        try (Socket socket = new Socket(DataClient.SERVER, port);
+             BufferedOutputStream oos = new BufferedOutputStream(socket.getOutputStream());
+             DataInputStream ois = new DataInputStream(socket.getInputStream());
+             BufferedInputStream oif = new BufferedInputStream(new FileInputStream(file)))
         {
             if (!socket.isOutputShutdown()) {
-                oos.writeUTF(request);
-                oos.flush();
-                result = ois.readUTF();
+                if (isFile)
+                {
+                    oos.write(longToBytes(file.length()));
+                    byte[] buffer = new byte[8192];
+                    int i = 0;
+                    while ( (i = oif.read(buffer)) != -1)
+                    {
+                        oos.write(buffer,0,i);
+                    }
+                    oos.flush();
+
+                }
+                else
+                {
+
+                }
+                result = ois.readInt();
             }
         } catch (UnknownHostException e) {
             e.printStackTrace();
@@ -58,10 +81,10 @@ public class GetData {
 
             e.printStackTrace();
         }
-        return null;
+        return result;
     }
 
-    public static String outDataFile(String request) throws InterruptedException {
+    public static String getDataFile(String request) throws InterruptedException {
         String result = "";
         try (Socket socket = new Socket(DataClient.SERVER, DataClient.PORT_FILE);
              DataOutputStream oos = new DataOutputStream(socket.getOutputStream());
@@ -79,6 +102,13 @@ public class GetData {
             e.printStackTrace();
         }
         return result;
+    }
+
+
+    private static byte[] longToBytes(long x) {
+        ByteBuffer buffer = ByteBuffer.allocate(Long.BYTES);
+        buffer.putLong(x);
+        return buffer.array();
     }
 
 }

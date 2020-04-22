@@ -1,48 +1,52 @@
 package sample.packFileManager.controllers;
 
 
+import java.io.File;
 import java.io.IOException;
 import java.net.ConnectException;
 import java.net.URL;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.ResourceBundle;
 import java.util.regex.Pattern;
 
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.concurrent.Task;
 import javafx.event.ActionEvent;
-import javafx.event.Event;
-import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
 import javafx.geometry.Pos;
-import javafx.geometry.Rectangle2D;
 import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.control.Button;
-import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
+import javafx.scene.input.ContextMenuEvent;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.AnchorPane;
-import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.StackPane;
 import javafx.scene.paint.Color;
-import javafx.scene.paint.Paint;
 import javafx.scene.text.Font;
-import javafx.stage.Modality;
+import javafx.stage.DirectoryChooser;
+import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import sample.DataClient;
 import sample.connection.GetData;
-import sample.connection.NetworkData;
 import sample.packFileManager.DataFile;
-import sample.packFileManager.FilterableTreeItem;
 
 public class FileManager implements Initializable {
+
+    @FXML
+    public MenuItem contextMenuLoadPath;
+
+    @FXML
+    public MenuItem contextMenuLoad;
 
     private ObservableList<DataFile> files;
 
@@ -77,13 +81,16 @@ public class FileManager implements Initializable {
     private Label storageLabel;
 
     @FXML
+    private Label labelErr;
+
+    @FXML
     private Label loginLabel;
 
     @FXML
     private StackPane Holder;
 
     @FXML
-    private TableColumn<DataFile, ImageView> iconColumn;
+    private TableColumn<DataFile, String> iconColumn;
 
     @FXML
     private TableColumn<DataFile, String> nameColumn;
@@ -171,14 +178,14 @@ public class FileManager implements Initializable {
 
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
-        pathName.setText("");
+        pathName.setText(DataClient.login+ "\\");
 
 
 
         double ratio = (double)DataClient.storageFill / (double)DataClient.storageAll;
         storageProgressBar.setProgress(ratio);
 
-        storageLabel.setText(getStorage(DataClient.storageFill) + " / " + getStorage(DataClient.storageAll));
+        storageLabel.setText(getStringStorage(DataClient.storageFill) + " / " + getStringStorage(DataClient.storageAll));
 
 
         //загрузка в tree view
@@ -208,7 +215,7 @@ public class FileManager implements Initializable {
         iconColumn.setSortable(false);
 
 
-        files.add(root.getValue());
+        //files.add(root.getValue());
         for (TreeItem<DataFile> it : root.getChildren()) {
             files.add(it.getValue());
         }
@@ -238,6 +245,92 @@ public class FileManager implements Initializable {
             treeView.getSelectionModel().select(treeView.getSelectionModel().getSelectedItem().getParent());
             treeChildToTable();
         });
+
+        contextMenuLoad.setOnAction(event -> {
+            FileChooser fileChooser = new FileChooser();
+            fileChooser.setTitle("Выберете файл");
+            fileChooser.getExtensionFilters().addAll(
+                    new FileChooser.ExtensionFilter("All Files", "*.*"),
+                    new FileChooser.ExtensionFilter("Text Files", "*.txt"),
+                    new FileChooser.ExtensionFilter("Image Files", "*.png", "*.jpg", "*.gif"),
+                    new FileChooser.ExtensionFilter("Audio Files", "*.wav", "*.mp3", "*.aac"));
+            File selectedFile = fileChooser.showOpenDialog((Stage) pane.getScene().getWindow());
+            if (selectedFile != null) {
+
+                String request = "LOAD /" +
+                        pathName.getText().substring(DataClient.login.length()) + selectedFile.getName() +
+                        "//" + selectedFile.length() +
+                        "//1" +
+                        "://200";
+
+                Task<Void> task = new Task<Void>() {
+                    @Override
+                    protected Void call() throws Exception {
+
+                        try {
+                            if (GetData.getDataMessage(request).getCode() == 200) {
+                            } else {
+                                Platform.runLater(() -> {
+                                    labelErr.setText("Слишком большой размер");
+                                });
+                            }
+                        } catch (ConnectException e) {
+                            e.printStackTrace();
+                        }
+                        return null;
+                    }
+                };
+                new Thread(task).start();
+            }
+        });
+
+
+        contextMenuLoadPath.setOnAction(event -> {
+            DirectoryChooser dc = new DirectoryChooser();
+            dc.setTitle("Выберете папку");
+            File selectedPath = dc.showDialog((Stage) pane.getScene().getWindow());
+            if (selectedPath != null) {
+
+                long storageFill = 0;
+                try {
+                    storageFill= Files.walk(Paths.get(selectedPath.toURI()),Integer.MAX_VALUE)
+                            .filter(p -> p.toFile().isFile())
+                            .mapToLong(p -> p.toFile().length())
+                            .sum();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+                String request = "LOAD /" +
+                        pathName.getText().substring(DataClient.login.length()) + selectedPath.getName() +
+                        "//" + storageFill +
+                        "//0" +
+                        "://200";
+
+                Task<Void> task = new Task<Void>() {
+                    @Override
+                    protected Void call() throws Exception {
+
+                        try {
+                            if (GetData.getDataMessage(request).getCode() == 200) {
+                            } else {
+                                Platform.runLater(() -> {
+                                    labelErr.setText("Слишком большой размер");
+                                });
+                            }
+                        } catch (ConnectException e) {
+                            e.printStackTrace();
+                        }
+                        return null;
+                    }
+                };
+                new Thread(task).start();
+            }
+        });
+
+    }
+
+    public void contextMenuTable(ContextMenuEvent contextMenuEvent) {
+
     }
 
     private class Index
@@ -273,8 +366,10 @@ public class FileManager implements Initializable {
                 pattern = Pattern.compile("\\\\");
                 String[] regex = pattern.split(stringsItem[2]);
                 String type = regex[0].equals("-1") ? "path" : "file";
-                String size = regex[0].equals("-1") ? "" : getStorage(Long.parseLong(regex[0]));
+                String size = regex[0].equals("-1") ? "" : getStringStorage(Long.parseLong(regex[0]));
                 TreeItem<DataFile> newItem = null;
+                regex[1] = regex[1].replace("T", " ");
+                regex[1] = regex[1].substring(0,regex[1].length() - 8);
                 newItem = new TreeItem<>(new DataFile(type, stringsItem[1],regex[1], size));
                 root.getChildren().add(newItem);
                 newRoot = newItem;
@@ -291,7 +386,7 @@ public class FileManager implements Initializable {
 
     private void treeChildToTable() {
         TreeItem<DataFile> item = treeView.getSelectionModel().getSelectedItem();
-        if (!item.getValue().isFile()) {
+        if (item != null && !item.getValue().isFile()) {
             backPath.setVisible(item.getParent() != null);
 
             files.clear();
@@ -391,7 +486,7 @@ public class FileManager implements Initializable {
 
 
 
-    private String getStorage(long storage)
+    private String getStringStorage(long storage)
     {
         int i = 0;
         while (storage > 1023)
