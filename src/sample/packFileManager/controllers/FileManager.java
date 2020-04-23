@@ -7,6 +7,9 @@ import java.net.ConnectException;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.ResourceBundle;
 import java.util.regex.Pattern;
 
@@ -39,6 +42,7 @@ import javafx.stage.Stage;
 import sample.DataClient;
 import sample.connection.GetData;
 import sample.connection.NetworkData;
+import sample.connection.NetworkServiceFile;
 import sample.packFileManager.DataFile;
 
 public class FileManager implements Initializable {
@@ -49,7 +53,12 @@ public class FileManager implements Initializable {
     @FXML
     public MenuItem contextMenuLoad;
 
+    private TreeItem<DataFile> parent;
+
     private ObservableList<DataFile> files;
+
+    @FXML
+    private MenuItem contextMenuNewPath;
 
     @FXML
     private ImageView imageView;
@@ -61,10 +70,10 @@ public class FileManager implements Initializable {
     private Button backPath;
 
     @FXML
-    private ResourceBundle resources;
+    private ProgressIndicator progressUpload;
 
     @FXML
-    private Button b;
+    private ResourceBundle resources;
 
     @FXML
     private AnchorPane pane;
@@ -181,7 +190,8 @@ public class FileManager implements Initializable {
     public void initialize(URL url, ResourceBundle resourceBundle) {
         pathName.setText(DataClient.login+ "\\");
 
-
+        progressUpload.setVisible(false);
+        labelErr.setText("");
 
         double ratio = (double)DataClient.storageFill / (double)DataClient.storageAll;
         storageProgressBar.setProgress(ratio);
@@ -217,6 +227,7 @@ public class FileManager implements Initializable {
 
 
         //files.add(root.getValue());
+        parent = root;
         for (TreeItem<DataFile> it : root.getChildren()) {
             files.add(it.getValue());
         }
@@ -264,44 +275,46 @@ public class FileManager implements Initializable {
                         "//1" +
                         "://200";
 
-                Task<Void> task = new Task<Void>() {
-                    @Override
-                    protected Void call() throws Exception {
+                NetworkServiceFile networkServiceFile = new NetworkServiceFile(selectedFile,true,request);
 
-                        try {
-                            if (GetData.outDataFile(selectedFile,true,request).getCode() == 200) {
+                networkServiceFile.setOnFailed(event1 -> {
+                    Platform.runLater(() -> {
+                        labelErr.setText("Error");
+                        progressUpload.setVisible(false);
+                    });
+                });
 
-                                Platform.runLater(() -> {
-                                    //TODO: Оптимизировать
+                networkServiceFile.setOnSucceeded(event1 -> {
+                    NetworkData networkData = (NetworkData)networkServiceFile.getValue();
 
-                                    try {
-                                        DataClient.parseTreeFromResponse(GetData.getDataMessage("AUTHORIZATION / ://101").getText());
-                                        TreeItem<DataFile> item = treeView.getSelectionModel().getSelectedItem();
+                    if (networkData.getCode() == 200) {
+                        Platform.runLater(() -> {
+                            DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
+                            TreeItem<DataFile> newFile = new TreeItem<>(new DataFile("file",
+                                    selectedFile.getName(),
+                                    dateFormat.format(new Date()),
+                                    getStringStorage(selectedFile.length())));
+                            parent.getChildren().add(newFile);
+                            files.add(newFile.getValue());
+                            DataClient.storageFill += selectedFile.length();
+                            double ratiox = (double)DataClient.storageFill / (double)DataClient.storageAll;
+                            storageProgressBar.setProgress(ratiox);
+                            storageLabel.setText(getStringStorage(DataClient.storageFill) + " / " + getStringStorage(DataClient.storageAll));
+                            progressUpload.setVisible(false);
+                        });
 
-                                        TreeItem<DataFile> root = new TreeItem<>(new DataFile("path",DataClient.login,"date","size"));
-                                        Pattern pattern = Pattern.compile("\n");
-                                        parseTree(root,pattern.split(DataClient.tree), new Index(0), 0);
-                                        treeView.setRoot(root);
-                                        treeView.getSelectionModel().select(item);
-                                        treeChildToTable();
-                                    } catch (ConnectException e) {
-                                        e.printStackTrace();
-                                    }
-                                });
 
+                    } else {
+                        Platform.runLater(() -> {
+                            labelErr.setText("Слишком большой размер");
+                            progressUpload.setVisible(false);
+                        });
 
-                            } else {
-                                Platform.runLater(() -> {
-                                    labelErr.setText("Слишком большой размер");
-                                });
-                            }
-                        } catch (ConnectException e) {
-                            e.printStackTrace();
-                        }
-                        return null;
                     }
-                };
-                new Thread(task).start();
+                });
+                progressUpload.setVisible(true);
+                progressUpload.progressProperty().bind(networkServiceFile.progressProperty());
+                networkServiceFile.start();
             }
         });
 
@@ -326,26 +339,12 @@ public class FileManager implements Initializable {
                         "//" + storageFill +
                         "//0" +
                         "://200";
-
-                Task<Void> task = new Task<Void>() {
-                    @Override
-                    protected Void call() throws Exception {
-
-                        try {
-                            if (GetData.getDataMessage(request).getCode() == 200) {
-                            } else {
-                                Platform.runLater(() -> {
-                                    labelErr.setText("Слишком большой размер");
-                                });
-                            }
-                        } catch (ConnectException e) {
-                            e.printStackTrace();
-                        }
-                        return null;
-                    }
-                };
-                new Thread(task).start();
             }
+        });
+
+
+        contextMenuNewPath.setOnAction(event -> {
+
         });
 
     }
@@ -409,7 +408,7 @@ public class FileManager implements Initializable {
         TreeItem<DataFile> item = treeView.getSelectionModel().getSelectedItem();
         if (item != null && !item.getValue().isFile()) {
             backPath.setVisible(item.getParent() != null);
-
+            parent = item;
             files.clear();
 
             for (TreeItem<DataFile> it : item.getChildren()) {

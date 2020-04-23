@@ -5,6 +5,7 @@
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.MenuItem?>
 <?import javafx.scene.control.ProgressBar?>
+<?import javafx.scene.control.ProgressIndicator?>
 <?import javafx.scene.control.TableColumn?>
 <?import javafx.scene.control.TableView?>
 <?import javafx.scene.control.TreeView?>
@@ -38,6 +39,7 @@
                         <Font size="20.0" />
                      </font>
                   </Label>
+                  <ProgressIndicator fx:id="progressUpload" layoutX="16.0" layoutY="382.0" progress="0.0" AnchorPane.leftAnchor="16.0" AnchorPane.topAnchor="382.0" />
                </children>
             </AnchorPane>
             <AnchorPane layoutX="300.0" prefHeight="720.0" prefWidth="981.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="300.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
@@ -56,6 +58,7 @@
                      <contextMenu>
                         <ContextMenu>
                           <items>
+                              <MenuItem fx:id="contextMenuNewPath" mnemonicParsing="false" text="Создать новую папку" />
                             <MenuItem fx:id="contextMenuLoadPath" mnemonicParsing="false" text="Загрузить папку" />
                               <MenuItem fx:id="contextMenuLoad" mnemonicParsing="false" text="Загрузить" />
                           </items>

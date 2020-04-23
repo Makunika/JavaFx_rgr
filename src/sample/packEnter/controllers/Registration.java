@@ -13,6 +13,8 @@ import javafx.scene.control.*;
 import javafx.scene.layout.AnchorPane;
 import sample.DataClient;
 import sample.connection.GetData;
+import sample.connection.NetworkData;
+import sample.connection.NetworkServiceMessage;
 import sample.packEnter.NavigatorEnter;
 
 public class Registration {
@@ -56,39 +58,37 @@ public class Registration {
             DataClient.password = passwordText.getText();
             DataClient.email = emailText.getText();
             label.setText("");
-            Task<Void> task = new Task<Void>() {
-                @Override
-                protected Void call() throws Exception {
-                    try {
-                        if (GetData.getDataMessage("REGISTRATION /" + DataClient.email + "://100").getCode() == 100)
-                        {
-                            Platform.runLater(() -> {
-                                DataClient.SavedPreferences();
-                                NavigatorEnter.loadVista(NavigatorEnter.ENTER);
-                            });
 
-                        }
-                        else
-                        {
-                            Platform.runLater(() -> {
-                                label.setText("Такой пользователь уже существует");
-                                progressDownload.setVisible(false);
-                            });
-                        }
-                    } catch (ConnectException e) {
-                        e.printStackTrace();
-                        Platform.runLater(() -> {
-                            label.setText("lost connection");
-                            progressDownload.setVisible(false);
-                        });
-                    }
-                    return null;
+            NetworkServiceMessage networkServiceMessage = new NetworkServiceMessage("REGISTRATION /" + DataClient.email + "://100");
+
+            networkServiceMessage.setOnSucceeded(event1 -> {
+                NetworkData networkData = (NetworkData)networkServiceMessage.getValue();
+                if (networkData.getCode() == 100)
+                {
+                    Platform.runLater(() -> {
+                        DataClient.SavedPreferences();
+                        NavigatorEnter.loadVista(NavigatorEnter.ENTER);
+                    });
+
                 }
-            };
+                else
+                {
+                    Platform.runLater(() -> {
+                        label.setText("Такой пользователь уже существует");
+                        progressDownload.setVisible(false);
+                    });
+                }
+            });
 
+            networkServiceMessage.setOnFailed(event1 -> {
+                Platform.runLater(() -> {
+                    label.setText("lost connection");
+                    progressDownload.setVisible(false);
+                });
+            });
+
+            networkServiceMessage.start();
             progressDownload.setVisible(true);
-
-            new Thread(task).start();
 
 
         }

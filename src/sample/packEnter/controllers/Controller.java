@@ -8,6 +8,7 @@ import java.util.regex.Pattern;
 
 import javafx.application.Platform;
 import javafx.concurrent.Task;
+import javafx.concurrent.WorkerStateEvent;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
@@ -22,6 +23,7 @@ import javafx.stage.Stage;
 import sample.DataClient;
 import sample.connection.GetData;
 import sample.connection.NetworkData;
+import sample.connection.NetworkServiceMessage;
 import sample.packEnter.NavigatorEnter;
 import sample.packFileManager.DataFile;
 
@@ -76,56 +78,50 @@ public class Controller {
             DataClient.login = loginText.getText();
             DataClient.password = passwordText.getText();
             label.setText("");
-            Task<Void> task = new Task<Void>() {
-                @Override
-                protected Void call() throws Exception {
-                    try {
 
-                        NetworkData networkData = GetData.getDataMessage("AUTHORIZATION / ://101");
-                        if (networkData.getCode() == 100) {
-                            DataClient.parseTreeFromResponse(networkData.getText());
-                            Platform.runLater(() -> {
-                                //загрузка в тектовик разные данные
-                                DataClient.SavedPreferences();
-                                //Запуск новой сцены
-                                Parent root;
-                                try {
-                                    root = FXMLLoader.load(getClass().getClassLoader().getResource("sample/packFileManager/scenepack/FileManager.fxml"), resources);
-                                    Stage stage = new Stage();
-                                    stage.setTitle("File Manager");
-                                    stage.setScene(new Scene(root, 1280, 720));
-                                    ((Node) (event.getSource())).getScene().getWindow().hide();
-                                    stage.show();
+            NetworkServiceMessage networkServiceMessage = new NetworkServiceMessage("AUTHORIZATION / ://101");
 
-                                } catch (IOException e) {
-                                    e.printStackTrace();
-                                }
-                            });
-                        } else {
-                            Platform.runLater(() -> {
-                                label.setText("Неправильный логин или пароль");
-                                progressDownload.setVisible(false);
-                            });
+            networkServiceMessage.setOnFailed(event1 -> {
+                Platform.runLater(() -> {
+                    label.setText("lost connection");
+                    progressDownload.setVisible(false);
+                });
+            });
+
+            networkServiceMessage.setOnSucceeded(e -> {
+                NetworkData networkData = (NetworkData)networkServiceMessage.getValue();
+                if (networkData.getCode() == 100)
+                {
+                    DataClient.parseTreeFromResponse(networkData.getText());
+                    Platform.runLater(() -> {
+                        //загрузка в тектовик разные данные
+                        DataClient.SavedPreferences();
+                        //Запуск новой сцены
+                        Parent root;
+                        try {
+                            root = FXMLLoader.load(getClass().getClassLoader().getResource("sample/packFileManager/scenepack/FileManager.fxml"), resources);
+                            Stage stage = new Stage();
+                            stage.setTitle("File Manager");
+                            stage.setScene(new Scene(root, 1280, 720));
+                            ((Node) (event.getSource())).getScene().getWindow().hide();
+                            stage.show();
+
+                        } catch (IOException ex) {
+                            ex.printStackTrace();
                         }
-                    } catch (ConnectException e)
-                    {
-                        e.printStackTrace();
-                        Platform.runLater(() -> {
-                            label.setText("lost connection");
-                            progressDownload.setVisible(false);
-                        });
-                    }
-
-                    return null;
+                    });
                 }
-            };
+                else {
+                    Platform.runLater(() -> {
+                        label.setText("Неправильный логин или пароль");
+                        progressDownload.setVisible(false);
+                    });
+                }
+            });
 
-            new Thread(task).start();
+
+            networkServiceMessage.start();
             progressDownload.setVisible(true);
-
-
-
-
         }
 
 
