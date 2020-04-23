@@ -1,9 +1,13 @@
 package sample;
 
+import sample.connection.GetData;
+import sample.connection.NetworkData;
+
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.util.regex.Pattern;
 
 public class DataClient {
     public static String login;
@@ -44,5 +48,17 @@ public class DataClient {
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+    public static void parseTreeFromResponse(String response)
+    {
+        Pattern pattern = Pattern.compile("//");
+        String[] strings = pattern.split(response);
+        if (strings.length != 2) return;
+        pattern = Pattern.compile("/");
+        String[] storage = pattern.split(strings[0]);
+        DataClient.storageAll = Long.parseLong(storage[0]);
+        DataClient.storageFill = Long.parseLong(storage[1]);
+        DataClient.tree = strings[1];
     }
 }

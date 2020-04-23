@@ -83,14 +83,7 @@ public class Controller {
 
                         NetworkData networkData = GetData.getDataMessage("AUTHORIZATION / ://101");
                         if (networkData.getCode() == 100) {
-                            Pattern pattern = Pattern.compile("//");
-                            String[] strings = pattern.split(networkData.getText());
-                            if (strings.length != 2) return null;
-                            pattern = Pattern.compile("/");
-                            String[] storage = pattern.split(strings[0]);
-                            DataClient.storageAll = Long.parseLong(storage[0]);
-                            DataClient.storageFill = Long.parseLong(storage[1]);
-                            DataClient.tree = strings[1];
+                            DataClient.parseTreeFromResponse(networkData.getText());
                             Platform.runLater(() -> {
                                 //загрузка в тектовик разные данные
                                 DataClient.SavedPreferences();

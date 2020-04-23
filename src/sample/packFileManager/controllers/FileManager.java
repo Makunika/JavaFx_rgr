@@ -38,6 +38,7 @@ import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import sample.DataClient;
 import sample.connection.GetData;
+import sample.connection.NetworkData;
 import sample.packFileManager.DataFile;
 
 public class FileManager implements Initializable {
@@ -268,7 +269,27 @@ public class FileManager implements Initializable {
                     protected Void call() throws Exception {
 
                         try {
-                            if (GetData.getDataMessage(request).getCode() == 200) {
+                            if (GetData.outDataFile(selectedFile,true,request).getCode() == 200) {
+
+                                Platform.runLater(() -> {
+                                    //TODO: Оптимизировать
+
+                                    try {
+                                        DataClient.parseTreeFromResponse(GetData.getDataMessage("AUTHORIZATION / ://101").getText());
+                                        TreeItem<DataFile> item = treeView.getSelectionModel().getSelectedItem();
+
+                                        TreeItem<DataFile> root = new TreeItem<>(new DataFile("path",DataClient.login,"date","size"));
+                                        Pattern pattern = Pattern.compile("\n");
+                                        parseTree(root,pattern.split(DataClient.tree), new Index(0), 0);
+                                        treeView.setRoot(root);
+                                        treeView.getSelectionModel().select(item);
+                                        treeChildToTable();
+                                    } catch (ConnectException e) {
+                                        e.printStackTrace();
+                                    }
+                                });
+
+
                             } else {
                                 Platform.runLater(() -> {
                                     labelErr.setText("Слишком большой размер");

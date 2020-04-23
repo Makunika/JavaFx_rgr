@@ -13,29 +13,14 @@ import java.util.regex.Pattern;
 
 public class GetData {
     public static NetworkData getDataMessage(String request) throws ConnectException {
-        String result = "";
         NetworkData networkData = new NetworkData();
-        String loginpassword = DataClient.login + "/" + DataClient.password + "://";
             try (Socket socket = new Socket(DataClient.SERVER, DataClient.PORT_MESSAGE);
                  DataOutputStream oos = new DataOutputStream(socket.getOutputStream());
                  DataInputStream ois = new DataInputStream(socket.getInputStream());)
             {
                 if (!socket.isOutputShutdown()) {
-                    oos.writeUTF(loginpassword + request);
-                    oos.flush();
-                    //result = ois.readUTF();
-                    int bytesLength = ois.readInt();
-                    byte[] bytes = ois.readAllBytes();
-                    result = new String(bytes, StandardCharsets.UTF_8);
-                    Pattern pattern = Pattern.compile("://");
-
-                    System.out.println("in: " + result);
-                    String[] strings = pattern.split(result);
-                    //Если то, что пришло, неверно, то ставим код 599
-                    if (strings.length != 4) networkData.setCode(599);
-                    //Если все верно, то код и текст записываем в нетворкдату
-                    networkData.setCode(Integer.parseInt(strings[3]));
-                    networkData.setText(strings[2]);
+                    outMessage(oos,request);
+                    networkData = inMessage(ois);
                 }
             } catch (UnknownHostException e) {
                 e.printStackTrace();
@@ -47,42 +32,81 @@ public class GetData {
             return networkData;
     }
 
-    public static int outDataFile(File file, boolean isFile, int port) throws InterruptedException {
-        Thread.sleep(300);
-
-        int result = -1;
-        try (Socket socket = new Socket(DataClient.SERVER, port);
-             BufferedOutputStream oos = new BufferedOutputStream(socket.getOutputStream());
+    public static NetworkData outDataFile(File file, boolean isFile, String request) throws ConnectException {
+        NetworkData networkData = new NetworkData();
+        try (Socket socket = new Socket(DataClient.SERVER, DataClient.PORT_MESSAGE);
+             DataOutputStream oos = new DataOutputStream(socket.getOutputStream());
              DataInputStream ois = new DataInputStream(socket.getInputStream());
              BufferedInputStream oif = new BufferedInputStream(new FileInputStream(file)))
         {
             if (!socket.isOutputShutdown()) {
                 if (isFile)
                 {
-                    oos.write(longToBytes(file.length()));
-                    byte[] buffer = new byte[8192];
-                    int i = 0;
-                    while ( (i = oif.read(buffer)) != -1)
+                    outMessage(oos,request);
+                    networkData = inMessage(ois);
+                    if (networkData.getCode() == 200)
                     {
-                        oos.write(buffer,0,i);
+                        try {
+                            Thread.sleep(500);
+                        } catch (InterruptedException e) {
+                            e.printStackTrace();
+                        }
+                        outFile(new BufferedOutputStream(oos),file);
                     }
-                    oos.flush();
-
                 }
                 else
                 {
 
                 }
-                result = ois.readInt();
             }
         } catch (UnknownHostException e) {
             e.printStackTrace();
         } catch (IOException e) {
 
             e.printStackTrace();
+            throw new ConnectException("Lost connection");
         }
-        return result;
+        return networkData;
     }
+
+
+    private static void outMessage(DataOutputStream oos, String request) throws IOException {
+        String loginpassword = DataClient.login + "/" + DataClient.password + "://";
+        oos.writeUTF(loginpassword + request);
+        oos.flush();
+    }
+
+    private static NetworkData inMessage(DataInputStream ois) throws IOException {
+        NetworkData networkData = new NetworkData();
+        int bytesLength = ois.readInt();
+        byte[] bytes = new byte[bytesLength];
+        ois.readNBytes(bytes,0,bytesLength);
+        String result = new String(bytes, StandardCharsets.UTF_8);
+        Pattern pattern = Pattern.compile("://");
+        System.out.println("in: " + result);
+        String[] strings = pattern.split(result);
+        //Если то, что пришло, неверно, то ставим код 599
+        if (strings.length != 4) networkData.setCode(599);
+        else {
+            //Если все верно, то код и текст записываем в нетворкдату
+            networkData.setCode(Integer.parseInt(strings[3]));
+            networkData.setText(strings[2]);
+        }
+        return networkData;
+    }
+
+    private static void outFile(BufferedOutputStream bos, File file) throws IOException {
+        BufferedInputStream oif = new BufferedInputStream(new FileInputStream(file));
+        bos.write(longToBytes(file.length()));
+        byte[] buffer = new byte[8192];
+        int i = 0;
+        while ( (i = oif.read(buffer)) != -1)
+        {
+            bos.write(buffer,0,i);
+        }
+        bos.flush();
+    }
+
 
     public static String getDataFile(String request) throws InterruptedException {
         String result = "";
