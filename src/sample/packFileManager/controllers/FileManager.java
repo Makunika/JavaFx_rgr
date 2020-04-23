@@ -206,9 +206,10 @@ public class FileManager implements Initializable {
         TreeItem<DataFile> root = new TreeItem<>(new DataFile("path",DataClient.login,"date","size"));
 
 
-
-        Pattern pattern = Pattern.compile("\n");
-        parseTree(root,pattern.split(DataClient.tree), new Index(0), 0);
+        if (DataClient.tree != null) {
+            Pattern pattern = Pattern.compile("\n");
+            parseTree(root, pattern.split(DataClient.tree), new Index(0), 0);
+        }
 
         treeView.setRoot(root);
         treeView.setShowRoot(false);
