@@ -2,7 +2,7 @@ package sample.connection;
 
 import javafx.concurrent.Service;
 import javafx.concurrent.Task;
-import sample.DataClient;
+import sample.client.DataClient;
 
 import java.io.DataInputStream;
 import java.io.DataOutputStream;

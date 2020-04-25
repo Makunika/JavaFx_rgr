@@ -1,16 +1,11 @@
 package sample.packEnter.controllers;
 
 import java.io.*;
-import java.net.ConnectException;
 import java.net.URL;
 import java.util.ResourceBundle;
-import java.util.regex.Pattern;
 
 import javafx.application.Platform;
-import javafx.concurrent.Task;
-import javafx.concurrent.WorkerStateEvent;
 import javafx.event.ActionEvent;
-import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Node;
@@ -18,14 +13,11 @@ import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.layout.AnchorPane;
-import javafx.scene.layout.Pane;
 import javafx.stage.Stage;
-import sample.DataClient;
-import sample.connection.GetData;
+import sample.client.DataClient;
 import sample.connection.NetworkData;
 import sample.connection.NetworkServiceMessage;
 import sample.packEnter.NavigatorEnter;
-import sample.packFileManager.DataFile;
 
 public class Controller {
 
@@ -99,7 +91,7 @@ public class Controller {
                         //Запуск новой сцены
                         Parent root;
                         try {
-                            root = FXMLLoader.load(getClass().getClassLoader().getResource("sample/packFileManager/scenepack/FileManager.fxml"), resources);
+                            root = FXMLLoader.load(getClass().getClassLoader().getResource("sample/resources/scenepack/FileManager.fxml"), resources);
                             Stage stage = new Stage();
                             stage.setTitle("File Manager");
                             stage.setScene(new Scene(root, 1280, 720));

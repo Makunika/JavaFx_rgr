@@ -3,7 +3,6 @@ package sample.packFileManager.controllers;
 
 import java.io.File;
 import java.io.IOException;
-import java.net.ConnectException;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -16,7 +15,6 @@ import java.util.regex.Pattern;
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
-import javafx.concurrent.Task;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -39,11 +37,13 @@ import javafx.scene.text.Font;
 import javafx.stage.DirectoryChooser;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
-import sample.DataClient;
-import sample.connection.GetData;
+import sample.client.DataClient;
 import sample.connection.NetworkData;
 import sample.connection.NetworkServiceFile;
 import sample.packFileManager.DataFile;
+import sample.packFileManager.FuncStatic;
+import sample.packFileManager.PicterViewer;
+import sample.packFileManager.TreeTableController;
 
 public class FileManager implements Initializable {
 
@@ -53,15 +53,12 @@ public class FileManager implements Initializable {
     @FXML
     public MenuItem contextMenuLoad;
 
-    private TreeItem<DataFile> parent;
+    private TreeTableController treeTableController;
 
-    private ObservableList<DataFile> files;
+    private PicterViewer picterViewer;
 
     @FXML
     private MenuItem contextMenuNewPath;
-
-    @FXML
-    private ImageView imageView;
 
     @FXML
     private Label pathName;
@@ -128,7 +125,7 @@ public class FileManager implements Initializable {
         DataClient.SavedPreferences();
         Parent root;
         try {
-            root = FXMLLoader.load(getClass().getClassLoader().getResource("sample/packEnter/scenepack/sample.fxml"), resources);
+            root = FXMLLoader.load(getClass().getClassLoader().getResource("/sample/resources/scenepack/sample.fxml"), resources);
             Stage stage = new Stage();
             stage.setTitle("Авторизация");
             stage.setScene(new Scene(root));
@@ -142,8 +139,8 @@ public class FileManager implements Initializable {
 
     @FXML
     void exitClicked(ActionEvent event) {
-        loadImg("sample/packFileManager/123.jpg");
-        changeViewImage();
+        picterViewer.loadImg("sample/resources/picters/123.jpg");
+        picterViewer.changeView();
         //Platform.exit();
     }
 
@@ -161,12 +158,6 @@ public class FileManager implements Initializable {
     }
 
 
-    void clickedBackImage(MouseEvent mouseEvent) {
-        changeViewImage();
-
-    }
-
-
 
     @FXML
     void SelectedTable(MouseEvent event) {
@@ -180,7 +171,7 @@ public class FileManager implements Initializable {
 
     @FXML
     void SelectedNode(MouseEvent event) {
-        treeChildToTable();
+        treeTableController.treeChildToTable(pathName,backPath);
     }
 
 
@@ -196,24 +187,12 @@ public class FileManager implements Initializable {
         double ratio = (double)DataClient.storageFill / (double)DataClient.storageAll;
         storageProgressBar.setProgress(ratio);
 
-        storageLabel.setText(getStringStorage(DataClient.storageFill) + " / " + getStringStorage(DataClient.storageAll));
+        storageLabel.setText(FuncStatic.getStringStorage(DataClient.storageFill) + " / " + FuncStatic.getStringStorage(DataClient.storageAll));
 
 
         //загрузка в tree view
-        files = FXCollections.observableArrayList();
-        tableView.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
 
-        TreeItem<DataFile> root = new TreeItem<>(new DataFile("path",DataClient.login,"date","size"));
-
-
-        if (DataClient.tree != null) {
-            Pattern pattern = Pattern.compile("\n");
-            parseTree(root, pattern.split(DataClient.tree), new Index(0), 0);
-        }
-
-        treeView.setRoot(root);
-        treeView.setShowRoot(false);
-
+        treeTableController = new TreeTableController(tableView,treeView);
 
         //настройка таблицы
         iconColumn.setCellValueFactory(cellData -> cellData.getValue().iconProperty());
@@ -227,16 +206,8 @@ public class FileManager implements Initializable {
         iconColumn.setSortable(false);
 
 
-        //files.add(root.getValue());
-        parent = root;
-        for (TreeItem<DataFile> it : root.getChildren()) {
-            files.add(it.getValue());
-        }
-        tableView.setItems(files);
-
-
         //загрузка для прсомотра картинок
-        loadImageView();
+        picterViewer = new PicterViewer(Holder);
 
 
         buttonExitAccount.setOnMouseEntered(event -> {
@@ -256,7 +227,7 @@ public class FileManager implements Initializable {
         backPath.setOnAction(event -> {
             //treeView.getSelectionModel().selectPrevious();
             treeView.getSelectionModel().select(treeView.getSelectionModel().getSelectedItem().getParent());
-            treeChildToTable();
+            treeTableController.treeChildToTable(pathName,backPath);
         });
 
         contextMenuLoad.setOnAction(event -> {
@@ -294,13 +265,13 @@ public class FileManager implements Initializable {
                             TreeItem<DataFile> newFile = new TreeItem<>(new DataFile("file",
                                     selectedFile.getName(),
                                     dateFormat.format(new Date()),
-                                    getStringStorage(selectedFile.length())));
-                            parent.getChildren().add(newFile);
-                            files.add(newFile.getValue());
+                                    FuncStatic.getStringStorage(selectedFile.length())));
+                            treeTableController.getParent().getChildren().add(newFile);
+                            treeTableController.add(newFile);
                             DataClient.storageFill += selectedFile.length();
                             double ratiox = (double)DataClient.storageFill / (double)DataClient.storageAll;
                             storageProgressBar.setProgress(ratiox);
-                            storageLabel.setText(getStringStorage(DataClient.storageFill) + " / " + getStringStorage(DataClient.storageAll));
+                            storageLabel.setText(FuncStatic.getStringStorage(DataClient.storageFill) + " / " + FuncStatic.getStringStorage(DataClient.storageAll));
                             progressUpload.setVisible(false);
                         });
 
@@ -354,195 +325,8 @@ public class FileManager implements Initializable {
 
     }
 
-    private class Index
-    {
-        public int index;
-
-        public Index(int index)
-        {
-            this.index = index;
-        }
-    }
 
 
-    private void parseTree(TreeItem<DataFile> root, String[] strings, Index index, int rank) {
-        Pattern pattern;
-
-        TreeItem<DataFile> newRoot = root;
-        while (index.index != strings.length)
-        {
-            pattern = Pattern.compile("\t");
-            String[] stringsItem = pattern.split(strings[index.index]);
-            if (Integer.parseInt(stringsItem[0]) > rank)
-            {
-                parseTree(newRoot, strings, index,rank + 1);
-                continue;
-            }
-            else if (Integer.parseInt(stringsItem[0]) < rank)
-            {
-                return;
-            }
-            else
-            {
-                pattern = Pattern.compile("\\\\");
-                String[] regex = pattern.split(stringsItem[2]);
-                String type = regex[0].equals("-1") ? "path" : "file";
-                String size = regex[0].equals("-1") ? "" : getStringStorage(Long.parseLong(regex[0]));
-                TreeItem<DataFile> newItem = null;
-                regex[1] = regex[1].replace("T", " ");
-                regex[1] = regex[1].substring(0,regex[1].length() - 8);
-                newItem = new TreeItem<>(new DataFile(type, stringsItem[1],regex[1], size));
-                root.getChildren().add(newItem);
-                newRoot = newItem;
-
-            }
-
-
-
-
-            index.index++;
-        }
-
-    }
-
-    private void treeChildToTable() {
-        TreeItem<DataFile> item = treeView.getSelectionModel().getSelectedItem();
-        if (item != null && !item.getValue().isFile()) {
-            backPath.setVisible(item.getParent() != null);
-            parent = item;
-            files.clear();
-
-            for (TreeItem<DataFile> it : item.getChildren()) {
-                files.add(it.getValue());
-            }
-            System.out.println(item.toString());
-
-            StringBuffer sb = new StringBuffer("");
-            while (item != null) {
-                sb.insert(0, item.getValue().getName() + "\\");
-                item = item.getParent();
-            }
-            pathName.setText(sb.toString());
-        }
-    }
-
-    private void changeViewImage()
-    {
-        ObservableList<Node> childs = Holder.getChildren();
-        if (childs.size() > 1) {
-            //
-            Node topNode = childs.get(childs.size()-1);
-            topNode.toBack();
-        }
-    }
-
-    private void loadImageView()
-    {
-        AnchorPane anchorPane = new AnchorPane();
-
-        Pane pane = new Pane();
-        pane.setStyle("-fx-background-color:  #696969; -fx-opacity: 0.4");
-
-        pane.setPrefSize(1280,720);
-        pane.setLayoutX(0);
-        pane.setLayoutY(0);
-        anchorPane.getChildren().add(pane);
-
-        Button button = new Button();
-        button.setText("Back");
-        button.setFont(Font.font(22));
-        button.setPrefSize(166,40);
-        button.setLayoutX(557);
-        button.setLayoutY(630);
-        button.setStyle("-fx-background-color: #578eff");
-        button.setOnMouseClicked(event -> clickedBackImage(event));
-        anchorPane.getChildren().add(button);
-
-
-        imageView = new ImageView();
-        imageView.setStyle("-fx-background-color: #ff0900");
-        imageView.setFitWidth(760);
-        imageView.setFitHeight(540);
-        imageView.setPreserveRatio(true);
-        imageView.setLayoutX(260);
-        imageView.setLayoutY(45);
-
-        StackPane stackPane = new StackPane();
-        stackPane.setPrefSize(760,540);
-
-        stackPane.getChildren().add(imageView);
-        stackPane.setAlignment(imageView, Pos.CENTER);
-
-        anchorPane.getChildren().add(stackPane);
-
-        AnchorPane.setTopAnchor(button, (double) 630);
-        AnchorPane.setRightAnchor(button, (double) 557);
-        AnchorPane.setBottomAnchor(button, (double) 45);
-
-        AnchorPane.setBottomAnchor(pane, (double) 0);
-        AnchorPane.setTopAnchor(pane, (double) 0);
-        AnchorPane.setRightAnchor(pane, (double) 0);
-        AnchorPane.setLeftAnchor(pane, (double) 0);
-
-        AnchorPane.setBottomAnchor(stackPane, (double) 135);
-        AnchorPane.setTopAnchor(stackPane, (double) 45);
-        AnchorPane.setRightAnchor(stackPane, (double) 260);
-
-        //AnchorPane.setRightAnchor(imageView, (double) 260);
-        //AnchorPane.setBottomAnchor(imageView,(double) 135);
-        //AnchorPane.setTopAnchor(imageView,(double) 45);
-
-
-        Holder.getChildren().add(anchorPane);
-
-        changeViewImage();
-
-
-    }
-
-    private void loadImg(String url)
-    {
-        imageView.setImage(new Image(url));
-    }
-
-
-
-    private String getStringStorage(long storage)
-    {
-        int i = 0;
-        while (storage > 1023)
-        {
-            i++;
-            if (i == 4) break;
-            storage /= 1024;
-        }
-        String str = Long.toString(storage);
-        switch (i)
-        {
-            case 0:
-            {
-                str += " Байт";
-                break;
-            }
-            case 1:
-            {
-                str += " Кб";
-                break;
-            }
-            case 2:
-            {
-                str += " Мб";
-                break;
-            }
-            case 3:
-            {
-                str += " Гб";
-                break;
-            }
-            default: break;
-        }
-        return str;
-    }
 
 }
 

@@ -2,14 +2,11 @@ package sample.connection;
 
 import javafx.concurrent.Service;
 import javafx.concurrent.Task;
-import sample.DataClient;
+import sample.client.DataClient;
 
 import java.io.*;
-import java.net.ConnectException;
 import java.net.Socket;
 import java.net.UnknownHostException;
-import java.nio.charset.StandardCharsets;
-import java.util.regex.Pattern;
 
 public class NetworkServiceFile extends Service<NetworkData> {
 
@@ -52,11 +49,6 @@ public class NetworkServiceFile extends Service<NetworkData> {
                                 BufferedOutputStream bos = new BufferedOutputStream(oos);
                                 long fileSize = file.length();
                                 byte[] sizeas = GetData.longToBytes(fileSize);
-                                for (byte b:
-                                     sizeas) {
-                                    System.out.println(b + ": ");
-                                }
-                                System.out.println(fileSize);
                                 bos.write(sizeas);
                                 byte[] buffer = new byte[8192];
                                 int i = 0;

@@ -1,7 +1,4 @@
-package sample;
-
-import sample.connection.GetData;
-import sample.connection.NetworkData;
+package sample.client;
 
 import java.io.BufferedWriter;
 import java.io.File;
@@ -54,11 +51,12 @@ public class DataClient {
     {
         Pattern pattern = Pattern.compile("//");
         String[] strings = pattern.split(response);
-        if (strings.length != 2) return;
+        if (strings.length > 2) return;
         pattern = Pattern.compile("/");
         String[] storage = pattern.split(strings[0]);
         DataClient.storageAll = Long.parseLong(storage[0]);
         DataClient.storageFill = Long.parseLong(storage[1]);
-        DataClient.tree = strings[1];
+        if (strings.length == 2)
+            DataClient.tree = strings[1];
     }
 }

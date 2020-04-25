@@ -1,13 +1,10 @@
 package sample.connection;
 
-import sample.DataClient;
+import sample.client.DataClient;
 
 import java.io.*;
-import java.net.ConnectException;
 import java.net.Socket;
 import java.net.UnknownHostException;
-import java.nio.ByteBuffer;
-import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.regex.Pattern;
 
@@ -76,6 +73,15 @@ public class GetData {
         for (int i = 7; i >= 0; i--) {
             result[i] = (byte)(x & 0xFF);
             x >>= 8;
+        }
+        return result;
+    }
+
+    public static long bytesToLong(byte[] bytes) {
+        long result = 0;
+        for (int i = 0; i < Long.BYTES; i++) {
+            result <<= Long.BYTES;
+            result |= (bytes[i] & 0xFF);
         }
         return result;
     }

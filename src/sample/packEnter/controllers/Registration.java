@@ -1,18 +1,15 @@
 package sample.packEnter.controllers;
 
-import java.net.ConnectException;
 import java.net.URL;
 import java.util.ResourceBundle;
 import java.util.regex.Pattern;
 
 import javafx.application.Platform;
-import javafx.concurrent.Task;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.scene.layout.AnchorPane;
-import sample.DataClient;
-import sample.connection.GetData;
+import sample.client.DataClient;
 import sample.connection.NetworkData;
 import sample.connection.NetworkServiceMessage;
 import sample.packEnter.NavigatorEnter;

@@ -14,8 +14,8 @@ import java.io.IOException;
 public class NavigatorEnter {
 
 
-    public static final String ENTER   = "scenepack/sample.fxml";
-    public static final String SIGN_UP = "scenepack/registration.fxml";
+    public static final String ENTER   = "/sample/resources/scenepack/sample.fxml";
+    public static final String SIGN_UP = "/sample/resources/scenepack/registration.fxml";
 
     private static Controller mainController;
 
