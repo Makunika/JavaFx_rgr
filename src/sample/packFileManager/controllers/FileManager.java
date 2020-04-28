@@ -10,36 +10,33 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.ResourceBundle;
-import java.util.regex.Pattern;
 
 import javafx.application.Platform;
+import javafx.beans.binding.Bindings;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
-import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.control.Button;
-import javafx.scene.image.Image;
-import javafx.scene.image.ImageView;
 import javafx.scene.input.ContextMenuEvent;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.AnchorPane;
-import javafx.scene.layout.Pane;
 import javafx.scene.layout.StackPane;
 import javafx.scene.paint.Color;
-import javafx.scene.text.Font;
 import javafx.stage.DirectoryChooser;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
+import javafx.util.Callback;
 import sample.client.DataClient;
 import sample.connection.NetworkData;
-import sample.connection.NetworkServiceFile;
+import sample.connection.NetworkServiceFileDownload;
+import sample.connection.NetworkServiceFileUpload;
 import sample.packFileManager.DataFile;
 import sample.packFileManager.FuncStatic;
 import sample.packFileManager.PicterViewer;
@@ -110,9 +107,6 @@ public class FileManager implements Initializable {
 
     @FXML
     private TableView<DataFile> tableView;
-
-    @FXML
-    private URL location;
 
     @FXML
     private TreeView<DataFile> treeView;
@@ -247,21 +241,21 @@ public class FileManager implements Initializable {
                         "//1" +
                         "://200";
 
-                NetworkServiceFile networkServiceFile = new NetworkServiceFile(selectedFile,true,request);
+                NetworkServiceFileUpload networkServiceFileUpload = new NetworkServiceFileUpload(selectedFile,true,request);
 
-                networkServiceFile.setOnFailed(event1 -> {
+                networkServiceFileUpload.setOnFailed(event1 -> {
                     Platform.runLater(() -> {
                         labelErr.setText("Error");
                         progressUpload.setVisible(false);
                     });
                 });
 
-                networkServiceFile.setOnSucceeded(event1 -> {
-                    NetworkData networkData = (NetworkData)networkServiceFile.getValue();
+                networkServiceFileUpload.setOnSucceeded(event1 -> {
+                    NetworkData networkData = (NetworkData) networkServiceFileUpload.getValue();
 
                     if (networkData.getCode() == 200) {
                         Platform.runLater(() -> {
-                            DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
+                            DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
                             TreeItem<DataFile> newFile = new TreeItem<>(new DataFile("file",
                                     selectedFile.getName(),
                                     dateFormat.format(new Date()),
@@ -285,8 +279,8 @@ public class FileManager implements Initializable {
                     }
                 });
                 progressUpload.setVisible(true);
-                progressUpload.progressProperty().bind(networkServiceFile.progressProperty());
-                networkServiceFile.start();
+                progressUpload.progressProperty().bind(networkServiceFileUpload.progressProperty());
+                networkServiceFileUpload.start();
             }
         });
 
@@ -318,6 +312,118 @@ public class FileManager implements Initializable {
         contextMenuNewPath.setOnAction(event -> {
 
         });
+
+
+
+
+        ContextMenu cm = new ContextMenu();
+
+
+        ObservableList<MenuItem> menuItems = FXCollections.observableArrayList(
+                new MenuItem("Скачать"),
+                new MenuItem("Удалить"),
+                new MenuItem("Переименовать"),
+                new MenuItem("Переместить"),
+                new MenuItem("Переместить сюда...")
+        );
+
+        cm.getItems().addAll(menuItems);
+
+        /*tableView.addEventHandler(MouseEvent.MOUSE_CLICKED, new EventHandler<MouseEvent>() {
+
+            @Override
+            public void handle(MouseEvent t) {
+                if(t.getButton() == MouseButton.SECONDARY) {
+                    cm.show(tableView, t.getScreenX(), t.getScreenY());
+                }
+            }
+        });*/
+
+        tableView.setRowFactory(new Callback<TableView<DataFile>, TableRow<DataFile>>() {
+            @Override
+            public TableRow<DataFile> call(TableView<DataFile> param) {
+                final TableRow<DataFile> row = new TableRow<>();
+                final ContextMenu contextMenu = new ContextMenu();
+                ObservableList<MenuItem> menuItems = FXCollections.observableArrayList(
+                        new MenuItem("Скачать"),
+                        new MenuItem("Удалить"),
+                        new MenuItem("Переименовать"),
+                        new MenuItem("Переместить"),
+                        new MenuItem("Переместить сюда...")
+                );
+
+                //Скачать
+                menuItems.get(0).setOnAction(event -> {
+                    DirectoryChooser directoryChooser = new DirectoryChooser();
+                    File selectedPath = directoryChooser.showDialog((Stage) pane.getScene().getWindow());
+                    if (selectedPath != null)
+                    {
+                        String nameFile = treeTableController.getFiles().get(row.getIndex()).getName();
+
+                        String request = "UPLOAD /" +
+                                pathName.getText().substring(DataClient.login.length()) + nameFile +
+                                "://201";
+
+
+                        NetworkServiceFileDownload networkServiceFileDownload = new NetworkServiceFileDownload(
+                                selectedPath,
+                                true,
+                                request,
+                                nameFile);
+
+
+
+                        networkServiceFileDownload.setOnFailed(event1 -> {
+                            Platform.runLater(() -> {
+                                labelErr.setText("Download Failed");
+                                progressUpload.setVisible(false);
+                            });
+                        });
+
+                        networkServiceFileDownload.setOnSucceeded(event1 -> {
+                            NetworkData networkData = (NetworkData)networkServiceFileDownload.getValue();
+
+                            if (networkData.getCode() == 201)
+                            {
+                                Platform.runLater(() -> {
+                                    try {
+                                        Runtime.getRuntime().exec("explorer.exe /select," + selectedPath.getAbsolutePath() + "\\" + nameFile);
+                                    } catch (IOException e) {
+                                        e.printStackTrace();
+                                    }
+                                    progressUpload.setVisible(false);
+                                });
+                            }
+                            else
+                            {
+                                Platform.runLater(() -> {
+                                    labelErr.setText("Download Failed");
+                                    progressUpload.setVisible(false);
+                                });
+                            }
+                        });
+
+                        progressUpload.progressProperty().bind(networkServiceFileDownload.progressProperty());
+                        progressUpload.setVisible(true);
+                        networkServiceFileDownload.start();
+
+                    }
+
+
+                });
+                contextMenu.getItems().addAll(menuItems);
+                // Set context menu on row, but use a binding to make it only show for non-empty rows:
+                row.contextMenuProperty().bind(
+                        Bindings.when(row.emptyProperty())
+                                .then((ContextMenu)null)
+                                .otherwise(contextMenu)
+                );
+                return row;
+            }
+        });
+
+
+
 
     }
 

@@ -8,13 +8,13 @@ import java.io.*;
 import java.net.Socket;
 import java.net.UnknownHostException;
 
-public class NetworkServiceFile extends Service<NetworkData> {
+public class NetworkServiceFileUpload extends Service<NetworkData> {
 
-    private File file;
-    private boolean isFile;
-    private String request;
+    private final File file;
+    private final boolean isFile;
+    private final String request;
 
-    public NetworkServiceFile(File file, boolean isFile, String request)
+    public NetworkServiceFileUpload(File file, boolean isFile, String request)
     {
         super();
         this.file = file;
@@ -62,6 +62,10 @@ public class NetworkServiceFile extends Service<NetworkData> {
                                 }
                                 bos.flush();
                                 updateProgress(fileSize,fileSize);
+                                bos.close();
+                                ois.close();
+                                oos.close();
+                                socket.close();
                             }
                         }
                         else

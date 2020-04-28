@@ -40,6 +40,10 @@ public class TreeTableController {
         }
         refTableView.setItems(files);
 
+
+
+
+
     }
 
     private class Index
@@ -123,6 +127,9 @@ public class TreeTableController {
         this.parent = parent;
     }
 
+    public ObservableList<DataFile> getFiles() {
+        return files;
+    }
 
     public void add(TreeItem<DataFile> newElement)
     {
