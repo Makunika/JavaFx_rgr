@@ -14,7 +14,7 @@ import sample.connection.NetworkData;
 import sample.connection.NetworkServiceMessage;
 import sample.packEnter.NavigatorEnter;
 
-public class Registration {
+public class Registration  {
 
     @FXML
     private ResourceBundle resources;

@@ -13,13 +13,15 @@ import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.layout.AnchorPane;
+import javafx.scene.paint.Color;
+import javafx.stage.Modality;
 import javafx.stage.Stage;
 import sample.client.DataClient;
 import sample.connection.NetworkData;
 import sample.connection.NetworkServiceMessage;
 import sample.packEnter.NavigatorEnter;
 
-public class Controller {
+public class Controller  {
 
     @FXML
     private ResourceBundle resources;
@@ -27,8 +29,15 @@ public class Controller {
     @FXML
     private URL location;
 
+    public String email;
+
+    public Boolean isCanceled;
+
     @FXML
     private TextField loginText;
+
+    @FXML
+    private Button remembeButton;
 
     @FXML
     private PasswordField passwordText;
@@ -93,6 +102,7 @@ public class Controller {
                         try {
                             root = FXMLLoader.load(getClass().getClassLoader().getResource("sample/resources/scenepack/FileManager.fxml"), resources);
                             Stage stage = new Stage();
+
                             stage.setTitle("File Manager");
                             stage.setScene(new Scene(root, 1280, 720));
                             ((Node) (event.getSource())).getScene().getWindow().hide();
@@ -192,7 +202,84 @@ public class Controller {
             }
         });
 
+        remembeButton.setOnMouseEntered(event -> {
+            remembeButton.setTextFill(Color.web("#8686ff"));
+        });
+        remembeButton.setOnMouseExited(event -> {
+            remembeButton.setTextFill(Color.web("#797979"));
+        });
+
+        remembeButton.setOnAction(event -> {
+            try {
+                FXMLLoader loader = new FXMLLoader(getClass().getResource("/sample/resources/scenepack/rememberPassword.fxml"));
+                Parent root = (Parent) loader.load();
+                RememberPasswordController rpc = loader.getController();
+                rpc.setEmail(email);
+                rpc.setCanceled(isCanceled);
+                Stage stage = new Stage();
+                stage.setTitle("Восстановление пароля");
+                stage.setIconified(false);
+                stage.setScene(new Scene(root));
+                stage.initModality(Modality.WINDOW_MODAL);
+                stage.initOwner(
+                        ((Node)event.getSource()).getScene().getWindow() );
+                stage.showAndWait();
+
+
+                isCanceled = rpc.isCanceled;
+                email = rpc.email;
+                if (!isCanceled)
+                {
+                    DataClient.login = DataClient.password = "null";
+                    String request = "Remember Password /" + email + "://300";
+                    NetworkServiceMessage networkServiceMessage = new NetworkServiceMessage(request);
+
+                    networkServiceMessage.setOnFailed(event1 -> {
+                        Platform.runLater(() -> {
+                            label.setText("lost connection");
+                            progressDownload.setVisible(false);
+                        });
+                    });
+
+                    networkServiceMessage.setOnSucceeded(event1 -> {
+                        NetworkData networkData = networkServiceMessage.getValue();
+
+                        if (networkData.getCode() == 300)
+                        {
+                            Platform.runLater(() -> {
+                                label.setText("Проверьте почту " + email);
+                                progressDownload.setVisible(false);
+                            });
+                        }
+                        else
+                        {
+                            Platform.runLater(() -> {
+                                label.setText("Fail");
+                                progressDownload.setVisible(false);
+                            });
+                        }
+
+                    });
+
+                    progressDownload.setVisible(true);
+                    networkServiceMessage.start();
+
+
+
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        });
+
+
     }
+
+    private void sendController(RememberPasswordController rememberPasswordController)
+    {
+        rememberPasswordController.mainController = this;
+    }
+
 
     public void setVista(Node node) {
         Holder.getChildren().setAll(node);
