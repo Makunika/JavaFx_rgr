@@ -39,8 +39,7 @@ public class RememberPasswordController implements Initializable {
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
-        email = "pshblo.max@gmail.com";
-        emailField.setText(email);
+        email = "";
         isCanceled = true;
         okButton.setOnAction(event -> {
             String regex = "(?:[a-z0-9!#$%&'*+/=?^_`{|}~-]+" +

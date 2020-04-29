@@ -11,6 +11,9 @@ import javafx.scene.layout.Pane;
 import javafx.scene.layout.StackPane;
 import javafx.scene.text.Font;
 
+import java.io.File;
+import java.io.IOException;
+
 public class PicterViewer {
     private StackPane refHolder;
     private ImageView imageView;
@@ -18,6 +21,7 @@ public class PicterViewer {
     private Button button;
     private AnchorPane anchorPane;
     private StackPane stackPane;
+    private File file;
 
 
     public PicterViewer(StackPane Holder)
@@ -48,6 +52,7 @@ public class PicterViewer {
         button.setLayoutY(630);
         button.setStyle("-fx-background-color: #578eff");
         button.setOnMouseClicked(event -> {
+            file.delete();
             changeView();
         });
         anchorPane.getChildren().add(button);
@@ -92,7 +97,7 @@ public class PicterViewer {
         changeView();
     }
 
-    public void loadImg(String url)
+    public void setImage(String url)
     {
         imageView.setImage(new Image(url));
     }
@@ -107,5 +112,26 @@ public class PicterViewer {
         }
     }
 
+    public ImageView getImageView() {
+        return imageView;
+    }
 
+    public void loadImage()
+    {
+        String url = file.getAbsolutePath();
+
+        imageView.setImage(new Image(file.toURI().toString()));
+    }
+
+    public File getTmpFile(String suffix)
+    {
+        try {
+            if (file != null && file.exists())
+                file.delete();
+            file = File.createTempFile("Manager", suffix);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return file;
+    }
 }

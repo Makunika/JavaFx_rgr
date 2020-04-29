@@ -24,6 +24,15 @@ public class NetworkServiceFileDownload extends Service<NetworkData> {
         this.nameFile = nameFile;
     }
 
+    public NetworkServiceFileDownload(File file, boolean isFile, String request)
+    {
+        super();
+        this.file = file;
+        this.isFile = isFile;
+        this.request = request;
+        this.nameFile = "null";
+    }
+
     @Override
     protected Task<NetworkData> createTask() {
 
@@ -40,16 +49,17 @@ public class NetworkServiceFileDownload extends Service<NetworkData> {
                         {
                             GetData.outMessage(oos,request);
                             networkData = GetData.inMessage(ois);
-                            if (networkData.getCode() == 201)
-                            {
+                            if (networkData.getCode() == 201) {
                                 try {
                                     Thread.sleep(500);
                                 } catch (InterruptedException e) {
                                     e.printStackTrace();
                                 }
-
-                                file = new File(file.getAbsolutePath() + "\\" + nameFile);
-                                file.createNewFile();
+                                if (!nameFile.equals("null"))
+                                {
+                                    file = new File(file.getAbsolutePath() + "\\" + nameFile);
+                                    file.createNewFile();
+                                }
                                 FileOutputStream fos=new FileOutputStream(file);
                                 BufferedInputStream bis = new BufferedInputStream(ois);
 

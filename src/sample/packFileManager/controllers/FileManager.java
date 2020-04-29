@@ -24,7 +24,9 @@ import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.control.Button;
+import javafx.scene.image.Image;
 import javafx.scene.input.ContextMenuEvent;
+import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.StackPane;
@@ -133,7 +135,7 @@ public class FileManager implements Initializable {
 
     @FXML
     void exitClicked(ActionEvent event) {
-        picterViewer.loadImg("sample/resources/picters/123.jpg");
+        picterViewer.setImage("sample/resources/picters/123.jpg");
         picterViewer.changeView();
         //Platform.exit();
     }
@@ -187,6 +189,7 @@ public class FileManager implements Initializable {
         //загрузка в tree view
 
         treeTableController = new TreeTableController(tableView,treeView);
+        backPath.setVisible(false);
 
         //настройка таблицы
         iconColumn.setCellValueFactory(cellData -> cellData.getValue().iconProperty());
@@ -314,31 +317,6 @@ public class FileManager implements Initializable {
         });
 
 
-
-
-        ContextMenu cm = new ContextMenu();
-
-
-        ObservableList<MenuItem> menuItems = FXCollections.observableArrayList(
-                new MenuItem("Скачать"),
-                new MenuItem("Удалить"),
-                new MenuItem("Переименовать"),
-                new MenuItem("Переместить"),
-                new MenuItem("Переместить сюда...")
-        );
-
-        cm.getItems().addAll(menuItems);
-
-        /*tableView.addEventHandler(MouseEvent.MOUSE_CLICKED, new EventHandler<MouseEvent>() {
-
-            @Override
-            public void handle(MouseEvent t) {
-                if(t.getButton() == MouseButton.SECONDARY) {
-                    cm.show(tableView, t.getScreenX(), t.getScreenY());
-                }
-            }
-        });*/
-
         tableView.setRowFactory(new Callback<TableView<DataFile>, TableRow<DataFile>>() {
             @Override
             public TableRow<DataFile> call(TableView<DataFile> param) {
@@ -358,9 +336,9 @@ public class FileManager implements Initializable {
                     File selectedPath = directoryChooser.showDialog((Stage) pane.getScene().getWindow());
                     if (selectedPath != null)
                     {
-                        String nameFile = treeTableController.getFiles().get(row.getIndex()).getName();
+                        String nameFile = row.getItem().getName();
 
-                        String request = "UPLOAD /" +
+                        String request = "DOWNLOAD /" +
                                 pathName.getText().substring(DataClient.login.length()) + nameFile +
                                 "://201";
 
@@ -411,7 +389,70 @@ public class FileManager implements Initializable {
 
 
                 });
+
+
+
+
+
                 contextMenu.getItems().addAll(menuItems);
+
+                row.setOnMouseClicked(event -> {
+                    if (event.getClickCount() == 2 && event.getButton().equals(MouseButton.PRIMARY)) {
+                        DataFile item = row.getItem();
+                        if (!item.isFile()) {
+                            treeView.getSelectionModel().select(treeTableController.getParent().getChildren().get(row.getIndex()));
+                            treeView.getSelectionModel().getSelectedItem().setExpanded(true);
+                            treeTableController.treeChildToTable(pathName, backPath);
+                            System.out.println(123);
+                        }
+                        else if (item.isPng())
+                        {
+                            String request = "UPLOAD /" +
+                                    pathName.getText().substring(DataClient.login.length()) + item.getName() +
+                                    "://201";
+
+                            NetworkServiceFileDownload networkServiceFileDownload = new NetworkServiceFileDownload(
+                                    picterViewer.getTmpFile(item.getSuffix()),
+                                    true,
+                                    request);
+
+                            networkServiceFileDownload.setOnFailed(event1 -> {
+                                Platform.runLater(() -> {
+                                    labelErr.setText("Fail download");
+                                    progressUpload.setVisible(false);
+                                });
+                            });
+
+                            networkServiceFileDownload.setOnSucceeded(event1 -> {
+                                NetworkData networkData = networkServiceFileDownload.getValue();
+
+                                if (networkData.getCode() == 201)
+                                {
+                                    Platform.runLater(() -> {
+                                        progressUpload.setVisible(false);
+                                        picterViewer.loadImage();
+                                        picterViewer.changeView();
+                                    });
+                                }
+                                else
+                                {
+                                    Platform.runLater(() -> {
+                                        labelErr.setText("Fail download");
+                                        progressUpload.setVisible(false);
+                                    });
+                                }
+                            });
+
+                            progressUpload.progressProperty().bind(networkServiceFileDownload.progressProperty());
+
+                            progressUpload.setVisible(true);
+                            networkServiceFileDownload.start();
+
+                        }
+                    }
+                });
+
+
                 // Set context menu on row, but use a binding to make it only show for non-empty rows:
                 row.contextMenuProperty().bind(
                         Bindings.when(row.emptyProperty())

@@ -31,7 +31,8 @@ public class TreeTableController {
         }
 
         refTreeView.setRoot(root);
-        refTreeView.setShowRoot(false);
+        refTreeView.setShowRoot(true);
+        root.setExpanded(true);
 
 
         parent = root;

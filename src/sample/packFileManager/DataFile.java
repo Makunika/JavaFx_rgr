@@ -2,6 +2,8 @@ package sample.packFileManager;
 
 import javafx.beans.property.*;
 
+import java.util.regex.Pattern;
+
 public class DataFile {
     //private ObjectProperty<ImageView> icon;
     private StringProperty icon;
@@ -9,21 +11,19 @@ public class DataFile {
     private StringProperty date;
     private StringProperty size;
     private boolean isFile;
+    private boolean isPng;
+    private String suffix;
 
     public DataFile(String type, String name, String date, String size) {
         //this.icon = new SimpleObjectProperty<>();
         this.icon = new SimpleStringProperty();
         //setIcon(new ImageView(new Image(type.equals("file") ? "sample/packFileManager/123.jpg" : "sample/packFileManager/14124.png")));
-        isFile = type.equals("file");
-        setIcon(type);
         this.name = new SimpleStringProperty();
-        setName(name);
         this.date = new SimpleStringProperty();
-        setDate(date);
         this.size = new SimpleStringProperty();
-        setSize(size);
         //this.icon.getValue().setFitHeight(25);
         //this.icon.getValue().setFitWidth(25);
+        setData(type, name, date, size);
     }
 
     public void setData(String type, String name, String date, String size) {
@@ -33,6 +33,35 @@ public class DataFile {
         setName(name);
         setDate(date);
         setSize(size);
+        isPng = false;
+        suffix = ".file";
+        if (isFile) {
+            Pattern pattern = Pattern.compile("\\.");
+            String[] strings = pattern.split(name);
+            String[] formatPicter = new String[]{
+                "png",
+                "jpg",
+                "bmp"
+            };
+            for (String format:
+                 formatPicter) {
+                if (format.equals(strings[strings.length-1])) {
+                    isPng = true;
+                    suffix = "." + format;
+                    break;
+                }
+
+            }
+        }
+
+    }
+
+    public String getSuffix() {
+        return suffix;
+    }
+
+    public boolean isPng() {
+        return isPng;
     }
 
     public boolean isFile() {
