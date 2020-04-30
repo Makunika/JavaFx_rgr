@@ -4,7 +4,6 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.scene.control.*;
 import sample.client.DataClient;
-import sample.packFileManager.controllers.FileManager;
 
 import java.util.regex.Pattern;
 
@@ -13,7 +12,7 @@ public class TreeTableController {
     private TreeView<DataFile> refTreeView;
     private ObservableList<DataFile> files;
     private TreeItem<DataFile> parent;
-
+    private Moved moved;
 
     public TreeTableController(TableView< ? extends DataFile> tableView, TreeView< ? extends DataFile> treeView)
     {
@@ -45,6 +44,20 @@ public class TreeTableController {
 
 
 
+    }
+
+    public void updateTree() {
+        getParent().setExpanded(!getParent().isExpanded());
+        getParent().setExpanded(!getParent().isExpanded());
+    }
+
+    public void updateTable() {
+        files.clear();
+
+        for (TreeItem<DataFile> it : parent.getChildren()) {
+            files.add(it.getValue());
+        }
+        refTableView.setItems(files);
     }
 
     private class Index
@@ -103,12 +116,7 @@ public class TreeTableController {
         if (item != null && !item.getValue().isFile()) {
             backPath.setVisible(item.getParent() != null);
             parent = item;
-            files.clear();
-
-            for (TreeItem<DataFile> it : item.getChildren()) {
-                files.add(it.getValue());
-            }
-            System.out.println(item.toString());
+            updateTable();
 
             StringBuffer sb = new StringBuffer("");
             while (item != null) {
@@ -135,5 +143,39 @@ public class TreeTableController {
     public void add(TreeItem<DataFile> newElement)
     {
         files.add(newElement.getValue());
+    }
+
+    public void setMoved(TreeItem<DataFile> moved, String path) {
+        this.moved = new Moved();
+        this.moved.movedDataFile = moved;
+        this.moved.oldPathNameMoved = path;
+    }
+
+    public Moved getMoved() {
+        moved.newParent = parent;
+        return moved;
+    }
+
+    public Moved initMoved() {
+        moved.movedDataFile.getParent().getChildren().remove(moved.movedDataFile);
+        moved.newParent.getChildren().add(moved.movedDataFile);
+        updateTree();
+        updateTable();
+
+        return moved;
+    }
+
+    public TreeItem<DataFile> findByDataFile(DataFile item)
+    {
+        TreeItem<DataFile> find = getParent().getChildren().get(0);
+        for (TreeItem<DataFile> it:
+                getParent().getChildren()) {
+            if (it.getValue() == item)
+            {
+                find = it;
+                break;
+            }
+        }
+        return find;
     }
 }

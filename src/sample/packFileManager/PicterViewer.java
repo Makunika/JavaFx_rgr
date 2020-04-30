@@ -55,7 +55,7 @@ public class PicterViewer {
             file.delete();
             changeView();
         });
-        anchorPane.getChildren().add(button);
+        //anchorPane.getChildren().add(button);
 
 
         imageView = new ImageView();
@@ -63,16 +63,18 @@ public class PicterViewer {
         imageView.setFitWidth(760);
         imageView.setFitHeight(540);
         imageView.setPreserveRatio(true);
-        imageView.setLayoutX(260);
-        imageView.setLayoutY(45);
+        //imageView.setLayoutX(260);
+        //imageView.setLayoutY(45);
 
         stackPane = new StackPane();
+        //stackPane.setPrefSize(760,540);
         stackPane.setPrefSize(760,540);
 
         stackPane.getChildren().add(imageView);
         stackPane.setAlignment(imageView, Pos.CENTER);
 
         anchorPane.getChildren().add(stackPane);
+        anchorPane.getChildren().add(button);
 
         AnchorPane.setTopAnchor(button, (double) 630);
         AnchorPane.setRightAnchor(button, (double) 557);

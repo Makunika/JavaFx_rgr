@@ -10,6 +10,7 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.ResourceBundle;
+import java.util.regex.Pattern;
 
 import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
@@ -24,7 +25,7 @@ import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.control.Button;
-import javafx.scene.image.Image;
+import javafx.scene.control.cell.TextFieldTableCell;
 import javafx.scene.input.ContextMenuEvent;
 import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
@@ -33,16 +34,16 @@ import javafx.scene.layout.StackPane;
 import javafx.scene.paint.Color;
 import javafx.stage.DirectoryChooser;
 import javafx.stage.FileChooser;
+import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.util.Callback;
 import sample.client.DataClient;
 import sample.connection.NetworkData;
 import sample.connection.NetworkServiceFileDownload;
 import sample.connection.NetworkServiceFileUpload;
-import sample.packFileManager.DataFile;
-import sample.packFileManager.FuncStatic;
-import sample.packFileManager.PicterViewer;
-import sample.packFileManager.TreeTableController;
+import sample.connection.NetworkServiceMessage;
+import sample.packEnter.controllers.RememberPasswordController;
+import sample.packFileManager.*;
 
 public class FileManager implements Initializable {
 
@@ -51,6 +52,9 @@ public class FileManager implements Initializable {
 
     @FXML
     public MenuItem contextMenuLoad;
+
+    @FXML
+    public MenuItem contextMenuRelocaeMaybe;
 
     private TreeTableController treeTableController;
 
@@ -188,10 +192,17 @@ public class FileManager implements Initializable {
 
         //загрузка в tree view
 
-        treeTableController = new TreeTableController(tableView,treeView);
         backPath.setVisible(false);
 
         //настройка таблицы
+        //nameColumn.setSortType(TableColumn.SortType.ASCENDING);
+
+        iconColumn = new TableColumn<>("Icon");
+        nameColumn = new TableColumn<>("Name");
+        sizeColumn = new TableColumn<>("Size");
+        dateColumn = new TableColumn<>("Date");
+
+
         iconColumn.setCellValueFactory(cellData -> cellData.getValue().iconProperty());
         nameColumn.setCellValueFactory(cellData -> cellData.getValue().nameProperty());
         sizeColumn.setCellValueFactory(cellData -> cellData.getValue().sizeProperty());
@@ -201,7 +212,18 @@ public class FileManager implements Initializable {
         iconColumn.setMaxWidth(50);
         iconColumn.setMinWidth(50);
         iconColumn.setSortable(false);
+        nameColumn.setSortable(false);
+        sizeColumn.setSortable(false);
+        dateColumn.setSortable(false);
 
+
+
+
+        treeTableController = new TreeTableController(tableView,treeView);
+        tableView.getColumns().addAll(iconColumn,nameColumn,dateColumn,sizeColumn);
+
+
+        //Collections.sort(tableView.getItems(),(Comparator.comparing(DataFile::getName)));
 
         //загрузка для прсомотра картинок
         picterViewer = new PicterViewer(Holder);
@@ -226,6 +248,10 @@ public class FileManager implements Initializable {
             treeView.getSelectionModel().select(treeView.getSelectionModel().getSelectedItem().getParent());
             treeTableController.treeChildToTable(pathName,backPath);
         });
+
+
+
+
 
         contextMenuLoad.setOnAction(event -> {
             FileChooser fileChooser = new FileChooser();
@@ -317,6 +343,54 @@ public class FileManager implements Initializable {
         });
 
 
+        contextMenuRelocaeMaybe.setDisable(true);
+
+
+        contextMenuRelocaeMaybe.setOnAction(event -> {
+            Moved moved = treeTableController.getMoved();
+
+
+            String request = "RELOCATE /" +
+                    moved.oldPathNameMoved
+                    + moved.movedDataFile.getValue().getName() +
+                    "//"
+                    + pathName.getText().substring(DataClient.login.length()) +
+                    moved.movedDataFile.getValue().getName() +
+                    "://203";
+
+            NetworkServiceMessage networkServiceMessage = new NetworkServiceMessage(request);
+
+            networkServiceMessage.setOnSucceeded(event1 -> {
+                NetworkData networkData = networkServiceMessage.getValue();
+
+                if (networkData.getCode() == 203)
+                {
+                    Platform.runLater(() -> {
+                        treeTableController.initMoved();
+
+                    });
+                }
+                else {
+                    Platform.runLater(() -> {
+                        labelErr.setText("fail relocate");
+                    });
+                }
+                Platform.runLater(() -> {
+                    contextMenuRelocaeMaybe.setDisable(true);
+                });
+            });
+
+            networkServiceMessage.setOnFailed(event1 -> {
+                Platform.runLater(() -> {
+                    labelErr.setText("lost connection");
+                    contextMenuRelocaeMaybe.setDisable(true);
+                });
+            });
+
+            networkServiceMessage.start();
+        });
+
+
         tableView.setRowFactory(new Callback<TableView<DataFile>, TableRow<DataFile>>() {
             @Override
             public TableRow<DataFile> call(TableView<DataFile> param) {
@@ -326,8 +400,7 @@ public class FileManager implements Initializable {
                         new MenuItem("Скачать"),
                         new MenuItem("Удалить"),
                         new MenuItem("Переименовать"),
-                        new MenuItem("Переместить"),
-                        new MenuItem("Переместить сюда...")
+                        new MenuItem("Переместить")
                 );
 
                 //Скачать
@@ -390,8 +463,89 @@ public class FileManager implements Initializable {
 
                 });
 
+                //Удалить
+                menuItems.get(1).setOnAction(event -> {
+
+                });
 
 
+                //Переименовать
+                menuItems.get(2).setOnAction(event -> {
+                    Platform.runLater(() -> {
+                        try {
+                            String oldName = row.getItem().getName().toString();
+                            FXMLLoader loader = new FXMLLoader(getClass().getResource("/sample/resources/scenepack/rename.fxml"));
+                            Parent root = (Parent) loader.load();
+                            Rename rename = loader.getController();
+
+                            rename.dataFile = row.getItem();
+                            rename.setName();
+                            Stage stage = new Stage();
+                            stage.setTitle("Восстановление пароля");
+                            stage.setIconified(false);
+                            stage.setScene(new Scene(root));
+                            stage.initModality(Modality.WINDOW_MODAL);
+                            stage.initOwner(
+                                    buttonExitAccount.getScene().getWindow());
+                            stage.showAndWait();
+
+
+                            if (rename.isEdit) {
+
+                                treeTableController.updateTable();
+                                treeTableController.updateTree();
+
+                                String request = "RENAME /" +
+                                        pathName.getText().substring(DataClient.login.length()) + oldName +
+                                        "//" + row.getItem().getName() +
+                                        "://202";
+
+
+                                NetworkServiceMessage networkServiceMessage = new NetworkServiceMessage(request);
+
+
+                                networkServiceMessage.setOnSucceeded(event1 -> {
+                                    NetworkData networkData = networkServiceMessage.getValue();
+
+                                    if (networkData.getCode() != 202)
+                                    {
+                                        Platform.runLater(() ->{
+                                            row.getItem().setName(oldName);
+                                            labelErr.setText("Fail Rename");
+                                            treeTableController.updateTable();
+                                            treeTableController.updateTree();
+                                        });
+                                    }
+                                });
+
+
+                                networkServiceMessage.setOnFailed(event1 -> {
+                                    Platform.runLater(() ->{
+                                        row.getItem().setName(oldName);
+                                        labelErr.setText("Fail Rename");
+                                        treeTableController.updateTable();
+                                        treeTableController.updateTree();
+                                    });
+                                });
+
+                                networkServiceMessage.start();
+
+                            }
+                        } catch (IOException ex)
+                        {
+                            ex.printStackTrace();
+                        }
+                    });
+                });
+
+                //Переместить
+                menuItems.get(3).setOnAction(event -> {
+
+
+                    treeTableController.setMoved(treeTableController.findByDataFile(row.getItem()),
+                            pathName.getText().substring(DataClient.login.length()));
+                    contextMenuRelocaeMaybe.setDisable(false);
+                });
 
 
                 contextMenu.getItems().addAll(menuItems);
@@ -400,10 +554,9 @@ public class FileManager implements Initializable {
                     if (event.getClickCount() == 2 && event.getButton().equals(MouseButton.PRIMARY)) {
                         DataFile item = row.getItem();
                         if (!item.isFile()) {
-                            treeView.getSelectionModel().select(treeTableController.getParent().getChildren().get(row.getIndex()));
+                            treeView.getSelectionModel().select(treeTableController.findByDataFile(item));
                             treeView.getSelectionModel().getSelectedItem().setExpanded(true);
                             treeTableController.treeChildToTable(pathName, backPath);
-                            System.out.println(123);
                         }
                         else if (item.isPng())
                         {
