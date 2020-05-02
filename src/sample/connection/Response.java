@@ -1,8 +1,21 @@
 package sample.connection;
 
-public class NetworkData {
+public class Response {
     private int code;
     private String text;
+    private final int validCode;
+
+    public Response(int validCode)
+    {
+        this.validCode = validCode;
+        code = 0;
+        text = "";
+    }
+
+    public boolean isValidCode()
+    {
+        return code == validCode;
+    }
 
     public void setCode(int code) {
         this.code = code;
@@ -19,4 +32,5 @@ public class NetworkData {
     public int getCode() {
         return code;
     }
+
 }

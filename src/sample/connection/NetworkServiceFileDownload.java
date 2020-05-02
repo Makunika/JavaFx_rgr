@@ -8,14 +8,14 @@ import java.io.*;
 import java.net.Socket;
 import java.net.UnknownHostException;
 
-public class NetworkServiceFileDownload extends Service<NetworkData> {
+public class NetworkServiceFileDownload extends Service<Response> {
 
     private File file;
     private final boolean isFile;
-    private final String request;
+    private final Request request;
     private final String nameFile;
 
-    public NetworkServiceFileDownload(File file, boolean isFile, String request, String nameFile)
+    public NetworkServiceFileDownload(File file, boolean isFile, Request request, String nameFile)
     {
         super();
         this.file = file;
@@ -24,7 +24,7 @@ public class NetworkServiceFileDownload extends Service<NetworkData> {
         this.nameFile = nameFile;
     }
 
-    public NetworkServiceFileDownload(File file, boolean isFile, String request)
+    public NetworkServiceFileDownload(File file, boolean isFile, Request request)
     {
         super();
         this.file = file;
@@ -34,12 +34,12 @@ public class NetworkServiceFileDownload extends Service<NetworkData> {
     }
 
     @Override
-    protected Task<NetworkData> createTask() {
+    protected Task<Response> createTask() {
 
-        Task<NetworkData> task = new Task<NetworkData>() {
+        Task<Response> task = new Task<Response>() {
             @Override
-            protected NetworkData call() throws Exception {
-                NetworkData networkData = new NetworkData();
+            protected Response call() throws Exception {
+                Response response = new Response(request.getCode());
                 try (Socket socket = new Socket(DataClient.SERVER, DataClient.PORT_MESSAGE);
                      DataOutputStream oos = new DataOutputStream(socket.getOutputStream());
                      DataInputStream ois = new DataInputStream(socket.getInputStream());)
@@ -48,8 +48,8 @@ public class NetworkServiceFileDownload extends Service<NetworkData> {
                         if (isFile)
                         {
                             GetData.outMessage(oos,request);
-                            networkData = GetData.inMessage(ois);
-                            if (networkData.getCode() == 201) {
+                            response = GetData.inMessage(ois, request.getCode());
+                            if (response.getCode() == 201) {
                                 try {
                                     Thread.sleep(500);
                                 } catch (InterruptedException e) {
@@ -94,7 +94,7 @@ public class NetworkServiceFileDownload extends Service<NetworkData> {
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
-                return networkData;
+                return response;
             }
         };
 

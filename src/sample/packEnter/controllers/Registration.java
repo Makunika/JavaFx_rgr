@@ -10,9 +10,11 @@ import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.scene.layout.AnchorPane;
 import sample.client.DataClient;
-import sample.connection.NetworkData;
+import sample.connection.Request;
+import sample.connection.Response;
 import sample.connection.NetworkServiceMessage;
 import sample.packEnter.NavigatorEnter;
+import sample.packFileManager.DataFile;
 
 public class Registration  {
 
@@ -56,11 +58,12 @@ public class Registration  {
             DataClient.email = emailText.getText();
             label.setText("");
 
-            NetworkServiceMessage networkServiceMessage = new NetworkServiceMessage("REGISTRATION /" + DataClient.email + "://100");
+            Request request = new Request("REGISTRATION", DataClient.email,100);
+            NetworkServiceMessage networkServiceMessage = new NetworkServiceMessage(request);
 
             networkServiceMessage.setOnSucceeded(event1 -> {
-                NetworkData networkData = (NetworkData)networkServiceMessage.getValue();
-                if (networkData.getCode() == 100)
+                Response response = (Response)networkServiceMessage.getValue();
+                if (response.isValidCode())
                 {
                     Platform.runLater(() -> {
                         DataClient.SavedPreferences();

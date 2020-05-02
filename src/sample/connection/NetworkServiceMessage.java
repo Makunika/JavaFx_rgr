@@ -11,12 +11,12 @@ import java.net.ConnectException;
 import java.net.Socket;
 import java.net.UnknownHostException;
 
-public class NetworkServiceMessage extends Service<NetworkData> {
+public class NetworkServiceMessage extends Service<Response> {
 
-    private String request;
+    private final Request request;
 
 
-    public NetworkServiceMessage(String request)
+    public NetworkServiceMessage(Request request)
     {
         super();
         this.request = request;
@@ -24,19 +24,19 @@ public class NetworkServiceMessage extends Service<NetworkData> {
 
 
     @Override
-    protected Task<NetworkData> createTask() {
+    protected Task<Response> createTask() {
 
-        Task<NetworkData> task = new Task<NetworkData>() {
+        Task<Response> task = new Task<Response>() {
             @Override
-            protected NetworkData call() throws Exception {
-                NetworkData networkData = new NetworkData();
+            protected Response call() throws Exception {
+                Response response = new Response(request.getCode());
                 try (Socket socket = new Socket(DataClient.SERVER, DataClient.PORT_MESSAGE);
                      DataOutputStream oos = new DataOutputStream(socket.getOutputStream());
                      DataInputStream ois = new DataInputStream(socket.getInputStream());)
                 {
                     if (!socket.isOutputShutdown()) {
                         GetData.outMessage(oos,request);
-                        networkData = GetData.inMessage(ois);
+                        response = GetData.inMessage(ois, request.getCode());
                     }
                 } catch (UnknownHostException e) {
                     e.printStackTrace();
@@ -45,7 +45,7 @@ public class NetworkServiceMessage extends Service<NetworkData> {
                     e.printStackTrace();
                     throw new ConnectException("Lost connection");
                 }
-                return networkData;
+                return response;
             }
         };
 

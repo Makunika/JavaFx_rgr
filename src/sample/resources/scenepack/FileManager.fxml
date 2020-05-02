@@ -19,7 +19,7 @@
          <children>
             <AnchorPane prefHeight="720.0" prefWidth="300.0" style="-fx-background-color: #79a6f2;" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.topAnchor="0.0">
                <children>
-                  <Button fx:id="buttonExit" layoutX="14.0" layoutY="628.0" mnemonicParsing="false" onAction="#exitClicked" onMouseClicked="#click" prefHeight="76.0" prefWidth="121.0" style="-fx-background-color: #FFFFFF00;" text="Закрыть" textFill="WHITE" AnchorPane.leftAnchor="14.0" AnchorPane.topAnchor="628.0">
+                  <Button fx:id="buttonExit" layoutX="14.0" layoutY="628.0" mnemonicParsing="false" onAction="#exitClicked" prefHeight="76.0" prefWidth="121.0" style="-fx-background-color: #FFFFFF00;" text="Закрыть" textFill="WHITE" AnchorPane.leftAnchor="14.0" AnchorPane.topAnchor="628.0">
                      <font>
                         <Font size="21.0" />
                      </font></Button>
@@ -45,7 +45,7 @@
             <AnchorPane layoutX="300.0" prefHeight="720.0" prefWidth="981.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="300.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
                <children>
                   <TreeView fx:id="treeView" layoutX="14.0" layoutY="19.0" onContextMenuRequested="#SelectedNode" onMouseClicked="#SelectedNode" prefHeight="682.0" prefWidth="261.0" style="-fx-border-color: #0080FF80; -fx-border-width: 2; -fx-border-radius: 4;" AnchorPane.bottomAnchor="19.0" AnchorPane.leftAnchor="14.0" AnchorPane.topAnchor="19.0" />
-                  <TableView fx:id="tableView" layoutX="298.0" layoutY="57.0" onContextMenuRequested="#contextMenuTable" onMouseClicked="#SelectedTable" onSort="#SortTable" prefHeight="644.0" prefWidth="655.0" style="-fx-border-color: #0080FF80; -fx-border-width: 2; -fx-border-radius: 4;" AnchorPane.bottomAnchor="19.0" AnchorPane.leftAnchor="298.0" AnchorPane.topAnchor="57.0">
+                  <TableView fx:id="tableView" layoutX="298.0" layoutY="57.0" onMouseClicked="#SelectedTable" onSort="#SortTable" prefHeight="644.0" prefWidth="655.0" style="-fx-border-color: #0080FF80; -fx-border-width: 2; -fx-border-radius: 4;" AnchorPane.bottomAnchor="19.0" AnchorPane.leftAnchor="298.0" AnchorPane.topAnchor="57.0">
                       <!--<columns>
                           <TableColumn fx:id="iconColumn" editable="false" prefWidth="57.0" text="Icon" />
                           <TableColumn fx:id="nameColumn" editable="false" prefWidth="317.0" text="Name" />
@@ -56,7 +56,7 @@
                         <TableView fx:constant="CONSTRAINED_RESIZE_POLICY" />
                      </columnResizePolicy>
                      <contextMenu>
-                        <ContextMenu>
+                        <ContextMenu fx:id="contextMenuNotRow" >
                           <items>
                               <MenuItem fx:id="contextMenuNewPath" mnemonicParsing="false" text="Создать новую папку" />
                             <MenuItem fx:id="contextMenuLoadPath" mnemonicParsing="false" text="Загрузить папку" />

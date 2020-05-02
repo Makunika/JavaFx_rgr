@@ -17,7 +17,8 @@ import javafx.scene.paint.Color;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import sample.client.DataClient;
-import sample.connection.NetworkData;
+import sample.connection.Request;
+import sample.connection.Response;
 import sample.connection.NetworkServiceMessage;
 import sample.packEnter.NavigatorEnter;
 
@@ -80,7 +81,8 @@ public class Controller  {
             DataClient.password = passwordText.getText();
             label.setText("");
 
-            NetworkServiceMessage networkServiceMessage = new NetworkServiceMessage("AUTHORIZATION / ://101");
+            Request request = new Request("AUTHORIZATION",101);
+            NetworkServiceMessage networkServiceMessage = new NetworkServiceMessage(request);
 
             networkServiceMessage.setOnFailed(event1 -> {
                 Platform.runLater(() -> {
@@ -90,10 +92,10 @@ public class Controller  {
             });
 
             networkServiceMessage.setOnSucceeded(e -> {
-                NetworkData networkData = (NetworkData)networkServiceMessage.getValue();
-                if (networkData.getCode() == 100)
+                Response response = (Response)networkServiceMessage.getValue();
+                if (response.isValidCode())
                 {
-                    DataClient.parseTreeFromResponse(networkData.getText());
+                    DataClient.parseTreeFromResponse(response.getText());
                     Platform.runLater(() -> {
                         //загрузка в тектовик разные данные
                         DataClient.SavedPreferences();
@@ -116,6 +118,7 @@ public class Controller  {
                 else {
                     Platform.runLater(() -> {
                         label.setText("Неправильный логин или пароль");
+                        passwordText.clear();
                         progressDownload.setVisible(false);
                     });
                 }
@@ -231,7 +234,7 @@ public class Controller  {
                 if (!isCanceled)
                 {
                     DataClient.login = DataClient.password = "null";
-                    String request = "Remember Password /" + email + "://300";
+                    Request request = new Request("REMPASS", email,300);
                     NetworkServiceMessage networkServiceMessage = new NetworkServiceMessage(request);
 
                     networkServiceMessage.setOnFailed(event1 -> {
@@ -242,9 +245,9 @@ public class Controller  {
                     });
 
                     networkServiceMessage.setOnSucceeded(event1 -> {
-                        NetworkData networkData = networkServiceMessage.getValue();
+                        Response response = networkServiceMessage.getValue();
 
-                        if (networkData.getCode() == 300)
+                        if (response.isValidCode())
                         {
                             Platform.runLater(() -> {
                                 label.setText("Проверьте почту " + email);

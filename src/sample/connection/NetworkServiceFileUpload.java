@@ -8,13 +8,13 @@ import java.io.*;
 import java.net.Socket;
 import java.net.UnknownHostException;
 
-public class NetworkServiceFileUpload extends Service<NetworkData> {
+public class NetworkServiceFileUpload extends Service<Response> {
 
     private final File file;
     private final boolean isFile;
-    private final String request;
+    private final Request request;
 
-    public NetworkServiceFileUpload(File file, boolean isFile, String request)
+    public NetworkServiceFileUpload(File file, boolean isFile, Request request)
     {
         super();
         this.file = file;
@@ -23,12 +23,12 @@ public class NetworkServiceFileUpload extends Service<NetworkData> {
     }
 
     @Override
-    protected Task<NetworkData> createTask() {
+    protected Task<Response> createTask() {
 
-        Task<NetworkData> task = new Task<NetworkData>() {
+        Task<Response> task = new Task<Response>() {
             @Override
-            protected NetworkData call() throws Exception {
-                NetworkData networkData = new NetworkData();
+            protected Response call() throws Exception {
+                Response response = new Response(request.getCode());
                 try (Socket socket = new Socket(DataClient.SERVER, DataClient.PORT_MESSAGE);
                      DataOutputStream oos = new DataOutputStream(socket.getOutputStream());
                      DataInputStream ois = new DataInputStream(socket.getInputStream());
@@ -38,8 +38,8 @@ public class NetworkServiceFileUpload extends Service<NetworkData> {
                         if (isFile)
                         {
                             GetData.outMessage(oos,request);
-                            networkData = GetData.inMessage(ois);
-                            if (networkData.getCode() == 200)
+                            response = GetData.inMessage(ois, request.getCode());
+                            if (response.getCode() == 200)
                             {
                                 try {
                                     Thread.sleep(500);
@@ -51,7 +51,7 @@ public class NetworkServiceFileUpload extends Service<NetworkData> {
                                 byte[] sizeas = GetData.longToBytes(fileSize);
                                 bos.write(sizeas);
                                 byte[] buffer = new byte[8192];
-                                int i = 0;
+                                int i;
                                 int size = 0;
                                 updateProgress(size,fileSize);
                                 while ( (i = oif.read(buffer)) != -1)
@@ -78,7 +78,7 @@ public class NetworkServiceFileUpload extends Service<NetworkData> {
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
-                return networkData;
+                return response;
             }
         };
 

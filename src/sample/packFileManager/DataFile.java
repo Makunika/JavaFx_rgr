@@ -35,23 +35,24 @@ public class DataFile {
         setSize(size);
         isPng = false;
         suffix = ".file";
+
         if (isFile) {
             Pattern pattern = Pattern.compile("\\.");
             String[] strings = pattern.split(name);
             String[] formatPicter = new String[]{
-                "png",
-                "jpg",
-                "bmp"
+                ".png",
+                ".jpg",
+                ".bmp"
             };
-            for (String format:
-                 formatPicter) {
-                if (format.equals(strings[strings.length-1])) {
+            suffix = "." + strings[strings.length-1];
+            for (String format: formatPicter) {
+                if (format.equals(suffix)) {
                     isPng = true;
-                    suffix = "." + format;
                     break;
                 }
 
             }
+
         }
 
     }

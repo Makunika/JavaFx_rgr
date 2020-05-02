@@ -8,42 +8,42 @@ import sample.client.DataClient;
 import java.util.regex.Pattern;
 
 public class TreeTableController {
-    private TableView<DataFile> refTableView;
-    private TreeView<DataFile> refTreeView;
-    private ObservableList<DataFile> files;
-    private TreeItem<DataFile> parent;
-    private Moved moved;
+    private final TableView<DataFile>       refTableView;
+    private final TreeView<DataFile>        refTreeView;
+    private final ObservableList<DataFile>  files;
+    private final Button                    backPath;
+    private final Label                     pathName;
+    private TreeItem<DataFile>              parent;
+    private Moved                           moved;
 
-    public TreeTableController(TableView< ? extends DataFile> tableView, TreeView< ? extends DataFile> treeView)
+    public TreeTableController(TableView< ? extends DataFile> tableView, TreeView< ? extends DataFile> treeView,
+                               Button backPath,Label pathName)
     {
         refTableView = (TableView<DataFile>) tableView;
         refTreeView = (TreeView<DataFile>) treeView;
+        this.backPath = backPath;
+        this.pathName = pathName;
         files = FXCollections.observableArrayList();
-        tableView.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
+        init();
+    }
+
+    private void init() {
+        refTableView.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
 
         TreeItem<DataFile> root = new TreeItem<>(new DataFile("path", DataClient.login,"date","size"));
-
 
         if (DataClient.tree != null) {
             Pattern pattern = Pattern.compile("\n");
             parseTree(root, pattern.split(DataClient.tree), new Index(0), 0);
         }
-
         refTreeView.setRoot(root);
         refTreeView.setShowRoot(true);
         root.setExpanded(true);
-
-
         parent = root;
         for (TreeItem<DataFile> it : root.getChildren()) {
             files.add(it.getValue());
         }
         refTableView.setItems(files);
-
-
-
-
-
     }
 
     public void updateTree() {
@@ -93,7 +93,7 @@ public class TreeTableController {
                 pattern = Pattern.compile("\\\\");
                 String[] regex = pattern.split(stringsItem[2]);
                 String type = regex[0].equals("-1") ? "path" : "file";
-                String size = regex[0].equals("-1") ? "" : FuncStatic.getStringStorage(Long.parseLong(regex[0]));
+                String size = regex[0].equals("-1") ? "" : regex[0];
                 TreeItem<DataFile> newItem = null;
                 regex[1] = regex[1].replace("T", " ");
                 regex[1] = regex[1].substring(0,regex[1].length() - 8);
@@ -111,7 +111,7 @@ public class TreeTableController {
 
     }
 
-    public void treeChildToTable(Label pathName, Button backPath) {
+    public void treeChildToTable() {
         TreeItem<DataFile> item = refTreeView.getSelectionModel().getSelectedItem();
         if (item != null && !item.getValue().isFile()) {
             backPath.setVisible(item.getParent() != null);
@@ -140,9 +140,12 @@ public class TreeTableController {
         return files;
     }
 
-    public void add(TreeItem<DataFile> newElement)
+    public void addItem(TreeItem<DataFile> newElement)
     {
-        files.add(newElement.getValue());
+        parent.getChildren().add(newElement);
+        treeChildToTable();
+        updateTree();
+        updateTable();
     }
 
     public void setMoved(TreeItem<DataFile> moved, String path) {
@@ -177,5 +180,42 @@ public class TreeTableController {
             }
         }
         return find;
+    }
+
+    public void deleteItem(DataFile item)
+    {
+        TreeItem<DataFile> it = findByDataFile(item);
+        it.getParent().getChildren().remove(it);
+        treeChildToTable();
+        updateTable();
+        updateTree();
+    }
+
+    public void deleteItem(TreeItem<DataFile> item)
+    {
+        item.getParent().getChildren().remove(item);
+        updateTable();
+        updateTree();
+    }
+
+    public void addItem(DataFile item)
+    {
+        addItem(new TreeItem<>(item));
+    }
+
+    public Button getBackPath() {
+        return backPath;
+    }
+
+    public Label getPathName() {
+        return pathName;
+    }
+
+    public TableView<DataFile> getRefTableView() {
+        return refTableView;
+    }
+
+    public TreeView<DataFile> getRefTreeView() {
+        return refTreeView;
     }
 }
