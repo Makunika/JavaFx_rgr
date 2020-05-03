@@ -306,7 +306,7 @@ public class ContextMenusController {
                     selectedPath,
                     true,
                     request,
-                    nameFile);
+                    nameFileForExplorer);
 
 
             networkServiceFileDownload.setOnFailed(event1 -> {
