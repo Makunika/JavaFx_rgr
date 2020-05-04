@@ -1,5 +1,6 @@
 package sample.connection;
 
+import javafx.concurrent.Service;
 import sample.client.DataClient;
 
 import java.io.*;
@@ -8,13 +9,13 @@ import java.net.UnknownHostException;
 import java.nio.charset.StandardCharsets;
 import java.util.regex.Pattern;
 
-public class GetData {
-    public static void outMessage(DataOutputStream oos, Request request) throws IOException {
+public abstract class GetData extends Service<Response> {
+    protected void outMessage(DataOutputStream oos, Request request) throws IOException {
         oos.writeUTF(request.toString());
         oos.flush();
     }
 
-    public static Response inMessage(DataInputStream ois, int validCode) throws IOException {
+    protected Response inMessage(DataInputStream ois, int validCode) throws IOException {
         Response response = new Response(validCode);
         int bytesLength = ois.readInt();
         byte[] bytes = new byte[bytesLength];
@@ -33,41 +34,8 @@ public class GetData {
         return response;
     }
 
-    public static void outFile(BufferedOutputStream bos, File file) throws IOException {
-        BufferedInputStream oif = new BufferedInputStream(new FileInputStream(file));
-        bos.write(longToBytes(file.length()));
-        byte[] buffer = new byte[8192];
-        int i = 0;
-        while ( (i = oif.read(buffer)) != -1)
-        {
-            bos.write(buffer,0,i);
-        }
-        bos.flush();
-    }
 
-
-    public static String getDataFile(Request request) throws InterruptedException {
-        String result = "";
-        try (Socket socket = new Socket(DataClient.SERVER, DataClient.PORT_FILE);
-             DataOutputStream oos = new DataOutputStream(socket.getOutputStream());
-             DataInputStream ois = new DataInputStream(socket.getInputStream());)
-        {
-            if (!socket.isOutputShutdown()) {
-                oos.writeUTF(request.toString());
-                oos.flush();
-                result = ois.readUTF();
-            }
-        } catch (UnknownHostException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-
-            e.printStackTrace();
-        }
-        return result;
-    }
-
-
-    public static byte[] longToBytes(long x) {
+    protected static byte[] longToBytes(long x) {
         byte[] result = new byte[8];
         for (int i = 7; i >= 0; i--) {
             result[i] = (byte)(x & 0xFF);
@@ -76,7 +44,7 @@ public class GetData {
         return result;
     }
 
-    public static long bytesToLong(byte[] bytes) {
+    protected static long bytesToLong(byte[] bytes) {
         long result = 0;
         for (int i = 0; i < Long.BYTES; i++) {
             result <<= Long.BYTES;

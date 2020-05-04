@@ -18,7 +18,7 @@
             <font>
                 <Font size="15.0" />
             </font></Button>
-        <Label fx:id="labelErr" layoutX="32.0" layoutY="88.0" textFill="#f80000" AnchorPane.leftAnchor="32.0" AnchorPane.topAnchor="88.0" />
+        <Label fx:id="labelErr" layoutX="28.0" layoutY="177.0" textFill="#f80000" AnchorPane.leftAnchor="28.0" AnchorPane.topAnchor="177.0" />
         <Label layoutX="27.0" layoutY="43.0" text="Новое имя" AnchorPane.leftAnchor="27.0" AnchorPane.topAnchor="43.0">
             <font>
                 <Font size="17.0" />

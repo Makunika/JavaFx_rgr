@@ -17,6 +17,7 @@ import javafx.scene.paint.Color;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import sample.client.DataClient;
+import sample.client.Timer;
 import sample.connection.Request;
 import sample.connection.Response;
 import sample.connection.NetworkServiceMessage;
@@ -87,6 +88,7 @@ public class Controller  {
             networkServiceMessage.setOnFailed(event1 -> {
                 Platform.runLater(() -> {
                     label.setText("lost connection");
+                    Timer timer = new Timer(label,3);
                     progressDownload.setVisible(false);
                 });
             });
@@ -118,6 +120,7 @@ public class Controller  {
                 else {
                     Platform.runLater(() -> {
                         label.setText("Неправильный логин или пароль");
+                        Timer timer = new Timer(label,10);
                         passwordText.clear();
                         progressDownload.setVisible(false);
                     });

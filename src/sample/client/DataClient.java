@@ -17,8 +17,7 @@ public class DataClient {
     public static long storageFill;
 
     public static final String SERVER = "localhost";
-    public static final int PORT_MESSAGE = 24571;
-    public static final int PORT_FILE = 24570;
+    public static final int PORT = 24571;
 
 
     public static void loadPreferences()

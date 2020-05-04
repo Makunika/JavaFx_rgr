@@ -6,7 +6,6 @@
 <?import javafx.scene.control.MenuItem?>
 <?import javafx.scene.control.ProgressBar?>
 <?import javafx.scene.control.ProgressIndicator?>
-<?import javafx.scene.control.TableColumn?>
 <?import javafx.scene.control.TableView?>
 <?import javafx.scene.control.TreeView?>
 <?import javafx.scene.layout.AnchorPane?>
@@ -39,7 +38,12 @@
                         <Font size="20.0" />
                      </font>
                   </Label>
-                  <ProgressIndicator fx:id="progressUpload" layoutX="16.0" layoutY="382.0" progress="0.0" AnchorPane.leftAnchor="16.0" AnchorPane.topAnchor="382.0" />
+                  <ProgressIndicator fx:id="progressUpload" layoutX="16.0" layoutY="382.0" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="40.0" prefWidth="27.0" progress="0.0" AnchorPane.leftAnchor="16.0" AnchorPane.topAnchor="382.0" />
+                  <Label fx:id="labelDownload" layoutX="56.0" layoutY="390.0" text="Архивация" textFill="WHITE" visible="false" AnchorPane.leftAnchor="56.0" AnchorPane.topAnchor="390.0">
+                     <font>
+                        <Font size="16.0" />
+                     </font>
+                  </Label>
                </children>
             </AnchorPane>
             <AnchorPane layoutX="300.0" prefHeight="720.0" prefWidth="981.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="300.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
@@ -56,7 +60,7 @@
                         <TableView fx:constant="CONSTRAINED_RESIZE_POLICY" />
                      </columnResizePolicy>
                      <contextMenu>
-                        <ContextMenu fx:id="contextMenuNotRow" >
+                        <ContextMenu fx:id="contextMenuNotRow">
                           <items>
                               <MenuItem fx:id="contextMenuNewPath" mnemonicParsing="false" text="Создать новую папку" />
                             <MenuItem fx:id="contextMenuLoadPath" mnemonicParsing="false" text="Загрузить папку" />

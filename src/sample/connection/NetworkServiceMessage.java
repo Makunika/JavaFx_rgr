@@ -1,6 +1,5 @@
 package sample.connection;
 
-import javafx.concurrent.Service;
 import javafx.concurrent.Task;
 import sample.client.DataClient;
 
@@ -11,7 +10,7 @@ import java.net.ConnectException;
 import java.net.Socket;
 import java.net.UnknownHostException;
 
-public class NetworkServiceMessage extends Service<Response> {
+public class NetworkServiceMessage extends GetData {
 
     private final Request request;
 
@@ -30,13 +29,13 @@ public class NetworkServiceMessage extends Service<Response> {
             @Override
             protected Response call() throws Exception {
                 Response response = new Response(request.getCode());
-                try (Socket socket = new Socket(DataClient.SERVER, DataClient.PORT_MESSAGE);
+                try (Socket socket = new Socket(DataClient.SERVER, DataClient.PORT);
                      DataOutputStream oos = new DataOutputStream(socket.getOutputStream());
                      DataInputStream ois = new DataInputStream(socket.getInputStream());)
                 {
                     if (!socket.isOutputShutdown()) {
-                        GetData.outMessage(oos,request);
-                        response = GetData.inMessage(ois, request.getCode());
+                        outMessage(oos,request);
+                        response = inMessage(ois, request.getCode());
                     }
                 } catch (UnknownHostException e) {
                     e.printStackTrace();

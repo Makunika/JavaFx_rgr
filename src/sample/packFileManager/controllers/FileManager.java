@@ -65,6 +65,9 @@ public class FileManager implements Initializable {
     private MenuItem contextMenuNewPath;
 
     @FXML
+    private Label labelDownload;
+
+    @FXML
     private Label pathName;
 
     @FXML
@@ -223,7 +226,7 @@ public class FileManager implements Initializable {
 
         //загрузка всех контекстных менюшек
         contextMenusController = new ContextMenusController(contextMenuNotRow,treeTableController,
-                progressUpload,storageLabel,storageProgressBar,labelErr,picterViewer);
+                progressUpload,labelDownload,storageLabel,storageProgressBar,labelErr,picterViewer);
 
 
         buttonExitAccount.setOnMouseEntered(event -> {

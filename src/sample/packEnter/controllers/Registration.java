@@ -10,6 +10,7 @@ import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.scene.layout.AnchorPane;
 import sample.client.DataClient;
+import sample.client.Timer;
 import sample.connection.Request;
 import sample.connection.Response;
 import sample.connection.NetworkServiceMessage;
@@ -75,6 +76,7 @@ public class Registration  {
                 {
                     Platform.runLater(() -> {
                         label.setText("Такой пользователь уже существует");
+                        Timer timer = new Timer(label,10);
                         progressDownload.setVisible(false);
                     });
                 }
@@ -83,6 +85,7 @@ public class Registration  {
             networkServiceMessage.setOnFailed(event1 -> {
                 Platform.runLater(() -> {
                     label.setText("lost connection");
+                    Timer timer = new Timer(label,3);
                     progressDownload.setVisible(false);
                 });
             });

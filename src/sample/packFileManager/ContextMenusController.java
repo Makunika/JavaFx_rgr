@@ -9,18 +9,22 @@ import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.input.MouseButton;
+import javafx.scene.input.MouseEvent;
 import javafx.stage.DirectoryChooser;
 import javafx.stage.FileChooser;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import sample.client.DataClient;
+import sample.client.Timer;
 import sample.connection.*;
+import sample.packFileManager.controllers.FileManager;
 import sample.packFileManager.controllers.Rename;
 
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.nio.file.attribute.BasicFileAttributes;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -29,13 +33,15 @@ public class ContextMenusController {
     private final ContextMenu           notRowContextMenu;
     private final TreeTableController   treeTableController;
     private final ProgressIndicator     progressIndicator;
+    private final Label                 labelIndicator;
     private final Label                 labelErr;
     private final Label                 storageLabel;
     private final ProgressBar           storageProgress;
     private final PicterViewer          picterViewer;
+    private ContextMenu                 contextMenuForTree;
 
     public ContextMenusController(ContextMenu notRowContextMenu,TreeTableController treeTableController,
-                                  ProgressIndicator progressIndicator,Label storageLabel,
+                                  ProgressIndicator progressIndicator, Label labelIndicator , Label storageLabel,
                                   ProgressBar storageProgress, Label labelErr, PicterViewer picterViewer)
     {
         this.notRowContextMenu = notRowContextMenu;
@@ -45,6 +51,7 @@ public class ContextMenusController {
         this.storageProgress = storageProgress;
         this.storageLabel = storageLabel;
         this.picterViewer = picterViewer;
+        this.labelIndicator = labelIndicator;
         load();
     }
 
@@ -52,6 +59,7 @@ public class ContextMenusController {
         loadNotRow();
         loadInRow();
     }
+
 
     private void loadInRow() {
         treeTableController.getRefTableView().setRowFactory(call -> {
@@ -66,17 +74,17 @@ public class ContextMenusController {
 
                 //Скачать
                 menuItems.get(0).setOnAction(event -> {
-                        downloadFile(row);
+                        downloadFile(row.getItem());
                 });
 
                 //Удалить
                 menuItems.get(1).setOnAction(event -> {
-                    delete(row);
+                    delete(row.getItem());
                 });
 
                 //Переименовать
                 menuItems.get(2).setOnAction(event -> {
-                    rename(row);
+                    rename(row.getItem());
                 });
 
                 //Переместить
@@ -125,11 +133,11 @@ public class ContextMenusController {
         }
     }
 
-    private void delete(TableRow<DataFile> row) {
-        TreeItem<DataFile> item = treeTableController.findByDataFile(row.getItem());
+    private void delete(DataFile item) {
+        TreeItem<DataFile> itemInTree = treeTableController.findByDataFile(item);
         Request request = new Request(
                 "DELETE",
-                treeTableController.getPathName().getText().substring(DataClient.login.length()) + item.getValue().getName(),
+                treeTableController.getPathName().getText().substring(DataClient.login.length()) + itemInTree.getValue().getName(),
                 205);
 
         NetworkServiceMessage networkServiceMessage = new NetworkServiceMessage(request);
@@ -141,11 +149,11 @@ public class ContextMenusController {
             {
                 Platform.runLater(() -> {
                     treeTableController.deleteItem(item);
-                    if (item.getValue().isFile()) {
-                        DataClient.storageFill -= Long.parseLong(item.getValue().getSize());
+                    if (itemInTree.getValue().isFile()) {
+                        DataClient.storageFill -= Long.parseLong(itemInTree.getValue().getSize());
                     } else {
                         Int size = new Int(0);
-                        recursiveGetSize(item, size);
+                        recursiveGetSize(itemInTree, size);
                         DataClient.storageFill -= size.i;
                     }
                     double ratiox = (double)DataClient.storageFill / (double)DataClient.storageAll;
@@ -157,6 +165,7 @@ public class ContextMenusController {
             {
                 Platform.runLater(() -> {
                     labelErr.setText("Delete error");
+                    Timer timer = new Timer(labelErr,6);
                 });
             }
         });
@@ -164,6 +173,7 @@ public class ContextMenusController {
         networkServiceMessage.setOnFailed(event -> {
             Platform.runLater(() -> {
                 labelErr.setText("lost connection");
+                Timer timer = new Timer(labelErr,6);
             });
         });
 
@@ -173,7 +183,7 @@ public class ContextMenusController {
     private void recursiveGetSize(TreeItem<DataFile> item, Int size) {
         for (TreeItem<DataFile> it:
              item.getChildren()) {
-            if (it.getChildren().size() != 0)
+            if (it.getValue().isFile())
             {
                 recursiveGetSize(it,size);
             }
@@ -197,7 +207,8 @@ public class ContextMenusController {
 
         networkServiceFileDownload.setOnFailed(event1 -> {
             Platform.runLater(() -> {
-                labelErr.setText("Fail download");
+                labelErr.setText("lost connection");
+                Timer timer = new Timer(labelErr,6);
                 progressIndicator.setVisible(false);
             });
         });
@@ -214,6 +225,7 @@ public class ContextMenusController {
             } else {
                 Platform.runLater(() -> {
                     labelErr.setText("Fail download");
+                    Timer timer = new Timer(labelErr,6);
                     progressIndicator.setVisible(false);
                 });
             }
@@ -225,15 +237,15 @@ public class ContextMenusController {
         networkServiceFileDownload.start();
     }
 
-    private void rename(TableRow<DataFile> row) {
+    private void rename(DataFile item) {
         Platform.runLater(() -> {
             try {
-                String oldName = row.getItem().getName();
+                String oldName = item.getName();
                 FXMLLoader loader = new FXMLLoader(getClass().getResource("/sample/resources/scenepack/rename.fxml"));
                 Parent root = loader.load();
                 Rename rename = loader.getController();
 
-                rename.dataFile = row.getItem();
+                rename.dataFile = item;
                 rename.setName();
                 Stage stage = new Stage();
                 stage.setTitle("Восстановление пароля");
@@ -252,7 +264,7 @@ public class ContextMenusController {
                     Request request = new Request(
                             "RENAME",
                             treeTableController.getPathName().getText().substring(DataClient.login.length()) + oldName +
-                                    "//" + row.getItem().getName(),
+                                    "//" + item.getName(),
                             202);
 
                     NetworkServiceMessage networkServiceMessage = new NetworkServiceMessage(request);
@@ -263,8 +275,9 @@ public class ContextMenusController {
 
                         if (!response.isValidCode()) {
                             Platform.runLater(() -> {
-                                row.getItem().setName(oldName);
+                                item.setName(oldName);
                                 labelErr.setText("Fail Rename");
+                                Timer timer = new Timer(labelErr,6);
                                 treeTableController.updateTable();
                                 treeTableController.updateTree();
                             });
@@ -274,8 +287,9 @@ public class ContextMenusController {
 
                     networkServiceMessage.setOnFailed(event1 -> {
                         Platform.runLater(() -> {
-                            row.getItem().setName(oldName);
-                            labelErr.setText("Fail Rename");
+                            item.setName(oldName);
+                            labelErr.setText("lost connection");
+                            Timer timer = new Timer(labelErr,6);
                             treeTableController.updateTable();
                             treeTableController.updateTree();
                         });
@@ -290,12 +304,12 @@ public class ContextMenusController {
         });
     }
 
-    private void downloadFile(TableRow<DataFile> row) {
+    private void downloadFile(DataFile item) {
         DirectoryChooser directoryChooser = new DirectoryChooser();
         File selectedPath = directoryChooser.showDialog(labelErr.getScene().getWindow());
         if (selectedPath != null) {
-            String nameFile = row.getItem().getName();
-            String nameFileForExplorer = row.getItem().isFile() ? nameFile : nameFile + ".zip";
+            String nameFile = item.getName();
+            String nameFileForExplorer = item.isFile() ? nameFile : nameFile + ".zip";
 
             Request request = new Request(
                     "DOWNLOAD",
@@ -304,15 +318,17 @@ public class ContextMenusController {
 
             NetworkServiceFileDownload networkServiceFileDownload = new NetworkServiceFileDownload(
                     selectedPath,
-                    true,
+                    item.isFile(),
                     request,
                     nameFileForExplorer);
 
 
             networkServiceFileDownload.setOnFailed(event1 -> {
                 Platform.runLater(() -> {
-                    labelErr.setText("Download Failed");
+                    labelErr.setText("lost connection");
+                    Timer timer = new Timer(labelErr,6);
                     progressIndicator.setVisible(false);
+                    labelIndicator.setVisible(false);
                 });
             });
 
@@ -327,16 +343,21 @@ public class ContextMenusController {
                             e.printStackTrace();
                         }
                         progressIndicator.setVisible(false);
+                        labelIndicator.setVisible(false);
                     });
                 } else {
                     Platform.runLater(() -> {
                         labelErr.setText("Download Failed");
+                        Timer timer = new Timer(labelErr,6);
                         progressIndicator.setVisible(false);
+                        labelIndicator.setVisible(false);
                     });
                 }
             });
 
             progressIndicator.progressProperty().bind(networkServiceFileDownload.progressProperty());
+            labelIndicator.textProperty().bind(networkServiceFileDownload.messageProperty());
+            labelIndicator.setVisible(true);
             progressIndicator.setVisible(true);
             networkServiceFileDownload.start();
 
@@ -413,6 +434,7 @@ public class ContextMenusController {
                         else {
                             Platform.runLater(() -> {
                                 labelErr.setText("Fail create new path");
+                                Timer timer = new Timer(labelErr,6);
                             });
                         }
                     });
@@ -421,6 +443,7 @@ public class ContextMenusController {
                     networkServiceMessage.setOnFailed(event1 -> {
                         Platform.runLater(() -> {
                             labelErr.setText("lost connection");
+                            Timer timer = new Timer(labelErr,6);
                         });
                     });
 
@@ -458,7 +481,8 @@ public class ContextMenusController {
             }
             else {
                 Platform.runLater(() -> {
-                    labelErr.setText("fail relocate");
+                    labelErr.setText("Fail relocate");
+                    Timer timer = new Timer(labelErr,6);
                 });
             }
             Platform.runLater(() -> {
@@ -469,6 +493,7 @@ public class ContextMenusController {
         networkServiceMessage.setOnFailed(event1 -> {
             Platform.runLater(() -> {
                 labelErr.setText("lost connection");
+                Timer timer = new Timer(labelErr,6);
                 notRowContextMenu.getItems().get(3).setDisable(true);
             });
         });
@@ -488,7 +513,7 @@ public class ContextMenusController {
         if (selectedFile != null) {
 
             Request request = new Request(
-                    "LOAD",
+                    "UPLOAD",
                     treeTableController.getPathName().getText().substring(DataClient.login.length()) + selectedFile.getName() +
                             "//" + selectedFile.length() + "//1",
                     200);
@@ -497,8 +522,10 @@ public class ContextMenusController {
 
             networkServiceFileUpload.setOnFailed(event1 -> {
                 Platform.runLater(() -> {
-                    labelErr.setText("Error");
+                    labelErr.setText("lost connection");
+                    Timer timer = new Timer(labelErr,6);
                     progressIndicator.setVisible(false);
+                    labelIndicator.setVisible(false);
                 });
             });
 
@@ -518,20 +545,25 @@ public class ContextMenusController {
                         storageProgress.setProgress(ratiox);
                         storageLabel.setText(FuncStatic.getStringStorage(DataClient.storageFill) + " / " + FuncStatic.getStringStorage(DataClient.storageAll));
                         progressIndicator.setVisible(false);
+                        labelIndicator.setVisible(false);
                     });
 
 
                 } else {
                     Platform.runLater(() -> {
                         labelErr.setText("Слишком большой размер");
+                        Timer timer = new Timer(labelErr,6);
                         progressIndicator.setVisible(false);
+                        labelIndicator.setVisible(false);
                     });
 
                 }
             });
             progressIndicator.setVisible(true);
             progressIndicator.progressProperty().bind(networkServiceFileUpload.progressProperty());
+            labelIndicator.textProperty().bind(networkServiceFileUpload.messageProperty());
             networkServiceFileUpload.start();
+            labelIndicator.setVisible(true);
         }
     }
 
@@ -550,13 +582,93 @@ public class ContextMenusController {
             } catch (IOException e) {
                 e.printStackTrace();
             }
-            String request = "LOAD /" +
+            Request request = new Request(
+                    "UPLOAD",
                     treeTableController.getPathName().getText().substring(DataClient.login.length()) + selectedPath.getName() +
-                    "//" + storageFill +
-                    "//0" +
-                    "://200";
+                            "//" + storageFill + "//0",
+                    200);
+
+            NetworkServiceFileUpload networkServiceFileUpload = new NetworkServiceFileUpload(selectedPath,false,request);
+
+            networkServiceFileUpload.setOnFailed(event1 -> {
+                Platform.runLater(() -> {
+                    labelErr.setText("lost connection");
+                    Timer timer = new Timer(labelErr,6);
+                    progressIndicator.setVisible(false);
+                    labelIndicator.setVisible(false);
+                });
+            });
+
+            networkServiceFileUpload.setOnSucceeded(event1 -> {
+                Response response = networkServiceFileUpload.getValue();
+
+                if (response.isValidCode()) {
+                    Platform.runLater(() -> {
+                        DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+                        TreeItem<DataFile> newFile = new TreeItem<>(new DataFile("path",
+                                selectedPath.getName(),
+                                dateFormat.format(new Date()),
+                                ""));
+                        treeTableController.addItem(newFile);
+                        recTree(selectedPath,newFile);
+                        double ratiox = (double)DataClient.storageFill / (double)DataClient.storageAll;
+                        storageProgress.setProgress(ratiox);
+                        storageLabel.setText(FuncStatic.getStringStorage(DataClient.storageFill) + " / " + FuncStatic.getStringStorage(DataClient.storageAll));
+                        progressIndicator.setVisible(false);
+                        labelIndicator.setVisible(false);
+                    });
+
+
+                } else {
+                    Platform.runLater(() -> {
+                        labelErr.setText("Слишком большой размер");
+                        Timer timer = new Timer(labelErr,6);
+                        progressIndicator.setVisible(false);
+                        labelIndicator.setVisible(false);
+                    });
+
+                }
+            });
+            progressIndicator.setVisible(true);
+            progressIndicator.progressProperty().bind(networkServiceFileUpload.progressProperty());
+            labelIndicator.textProperty().bind(networkServiceFileUpload.messageProperty());
+            networkServiceFileUpload.start();
+            labelIndicator.setVisible(true);
+
+
+
         }
     }
+
+    private void recTree(File fileSource, TreeItem<DataFile> parent) {
+        for (File file : fileSource.listFiles()) {
+            try {
+                BasicFileAttributes atr = Files.readAttributes(file.toPath(), BasicFileAttributes.class);
+                if (atr.isDirectory()) {
+                    String data = atr.creationTime().toString();
+                    TreeItem<DataFile> newPath = new TreeItem<>(new DataFile(
+                            "path",
+                            file.getName(),
+                            data.replace("T", " ").substring(0,data.length() - 8),
+                            ""));
+                    parent.getChildren().add(newPath);
+                    recTree(file,newPath);
+                } else {
+                    String data = atr.creationTime().toString();
+                    TreeItem<DataFile> newFile = new TreeItem<>(new DataFile(
+                            "file",
+                            file.getName(),
+                            data.replace("T", " ").substring(0,data.length() - 8),
+                            Long.toString(file.length())));
+                    parent.getChildren().add(newFile);
+                    DataClient.storageFill += file.length();
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
 
 
 }
