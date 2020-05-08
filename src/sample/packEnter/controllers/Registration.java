@@ -4,6 +4,11 @@ import java.net.URL;
 import java.util.ResourceBundle;
 import java.util.regex.Pattern;
 
+import com.jfoenix.controls.JFXButton;
+import com.jfoenix.controls.JFXPasswordField;
+import com.jfoenix.controls.JFXSpinner;
+import com.jfoenix.controls.JFXTextField;
+import com.jfoenix.validation.RegexValidator;
 import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -23,36 +28,38 @@ public class Registration  {
     private ResourceBundle resources;
 
     @FXML
-    private ProgressIndicator progressDownload;
-
-    @FXML
     private AnchorPane paneReg;
 
     @FXML
     private URL location;
 
     @FXML
-    private TextField loginText;
+    private JFXTextField emailText;
 
     @FXML
-    private PasswordField passwordText;
+    private JFXTextField loginText;
 
     @FXML
-    private Button signUp;
+    private JFXPasswordField passwordText;
 
     @FXML
-    private TextField emailText;
+    private JFXButton signUp;
 
     @FXML
-    private Button back;
+    private JFXButton back;
 
     @FXML
     private Label label;
 
     @FXML
+    private JFXSpinner progressDownload;
+
+    @FXML
     void signUpClicked(ActionEvent event) {
 
-        if (checkFields())
+
+
+        if (loginText.validate() & emailText.validate() & passwordText.validate())
         {
             DataClient.login = loginText.getText();
             DataClient.password = passwordText.getText();
@@ -108,14 +115,6 @@ public class Registration  {
 
     @FXML
     void initialize() {
-
-
-    }
-
-
-
-    private boolean checkFields()
-    {
         String regex = "(?:[a-z0-9!#$%&'*+/=?^_`{|}~-]+" +
                 "(?:\\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*|\"" +
                 "(?:[\\x01-\\x08\\x0b\\x0c\\x0e-\\x1f\\x21\\x23-\\x5b\\x5d-\\x7f]|" +
@@ -126,45 +125,22 @@ public class Registration  {
                 "{3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?|" +
                 "[a-z0-9-]*[a-z0-9]:(?:" +
                 "[\\x01-\\x08\\x0b\\x0c\\x0e-\\x1f\\x21-\\x5a\\x53-\\x7f]|\\\\[\\x01-\\x09\\x0b\\x0c\\x0e-\\x7f])+)\\])";
-        Pattern pattern = Pattern.compile(regex);
-        boolean bool = true;
-        if (loginText.getText().equals(""))
-        {
-            loginText.setPromptText("Заполните поле");
-            loginText.clear();
-            bool = false;
-        }
-        else if (loginText.getText().length() < 3)
-        {
-            loginText.setPromptText("Больше трех символов");
-            loginText.clear();
-            bool = false;
-        }
-        else if (passwordText.getText().equals(""))
-        {
-            passwordText.setPromptText("Заполните поле");
-            passwordText.clear();
-            bool = false;
-        }
-        else if (passwordText.getText().length() < 3)
-        {
-            passwordText.setPromptText("Больше трех символов");
-            passwordText.clear();
-            bool = false;
-        }
-        else if (emailText.getText().equals(""))
-        {
-            emailText.setPromptText("Заполните поле");
-            emailText.clear();
-            bool = false;
-        }
-        else if (!pattern.matcher(emailText.getText()).matches())
-        {
-            emailText.setPromptText("Неправильные данные");
-            emailText.clear();
-            bool = false;
-        }
-        return bool;
+        String regex2 = "\\w{3,}";
+
+        RegexValidator emailValidator = new RegexValidator();
+        RegexValidator textValidator = new RegexValidator();
+
+        emailValidator.setRegexPattern(regex);
+        textValidator.setRegexPattern(regex2);
+
+        emailValidator.setMessage("Неправильные данные");
+        textValidator.setMessage("Неправильные данные, необходимо больше трех символов");
+        loginText.getValidators().add(textValidator);
+        emailText.getValidators().add(emailValidator);
+        passwordText.getValidators().add(textValidator);
+
+
     }
+
 }
 

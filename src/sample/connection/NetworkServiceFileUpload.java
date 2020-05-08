@@ -30,6 +30,7 @@ public class NetworkServiceFileUpload extends GetData {
         Task<Response> task = new Task<Response>() {
             @Override
             protected Response call() throws Exception {
+                updateProgress(0,10);
                 Response response = new Response(request.getCode());
                 try (Socket socket = new Socket(DataClient.SERVER, DataClient.PORT);
                      DataOutputStream oos = new DataOutputStream(socket.getOutputStream());
@@ -56,7 +57,6 @@ public class NetworkServiceFileUpload extends GetData {
                             {
                                 updateMessage("Архивация");
                                 file = Zip(file, File.createTempFile("archive",".zip"));
-                                Runtime.getRuntime().exec("explorer.exe /select," + file.getAbsolutePath());
                                 BufferedInputStream oif = new BufferedInputStream(new FileInputStream(file));
                                 Thread.sleep(500);
                                 updateMessage("Загрузка");

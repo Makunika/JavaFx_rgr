@@ -1,38 +1,43 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import javafx.scene.control.Button?>
+<?import com.jfoenix.controls.JFXButton?>
+<?import com.jfoenix.controls.JFXPasswordField?>
+<?import com.jfoenix.controls.JFXSpinner?>
+<?import com.jfoenix.controls.JFXTextField?>
 <?import javafx.scene.control.Label?>
-<?import javafx.scene.control.PasswordField?>
-<?import javafx.scene.control.ProgressIndicator?>
-<?import javafx.scene.control.TextField?>
 <?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.text.Font?>
 
 <AnchorPane fx:id="paneReg" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="500.0" prefWidth="800.0" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="sample.packEnter.controllers.Registration">
     <children>
-      <TextField fx:id="emailText" layoutX="353.0" layoutY="188.0" prefHeight="42.0" prefWidth="302.0" promptText="E-mail" AnchorPane.leftAnchor="340.0" AnchorPane.topAnchor="188.0">
+      <JFXTextField fx:id="emailText" focusColor="#317beb" labelFloat="true" layoutX="340.0" layoutY="190.0" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="40.0" prefWidth="302.0" promptText="Email" unFocusColor="#968f8f" AnchorPane.leftAnchor="340.0" AnchorPane.topAnchor="190.0">
          <font>
             <Font size="22.0" />
          </font>
-      </TextField>
-        <TextField fx:id="loginText" layoutX="353.0" layoutY="258.0" prefHeight="42.0" prefWidth="302.0" promptText="Login" AnchorPane.leftAnchor="340.0" AnchorPane.topAnchor="258.0">
-            <font>
-                <Font size="22.0" />
-            </font>
-        </TextField>
-        <PasswordField fx:id="passwordText" layoutX="353.0" layoutY="328.0" prefHeight="40.0" prefWidth="302.0" promptText="Password" AnchorPane.leftAnchor="340.0" AnchorPane.topAnchor="328.0">
-            <font>
-                <Font size="22.0" />
-            </font>
-        </PasswordField>
-        <Button fx:id="signUp" layoutX="353.0" layoutY="397.0" mnemonicParsing="false" onAction="#signUpClicked" prefHeight="42.0" prefWidth="119.0" style="-fx-background-color: #30c21a;" text="Sign up" AnchorPane.leftAnchor="340.0" AnchorPane.topAnchor="397.0">
-            <font>
-                <Font size="17.0" />
-            </font>
-        </Button>
-        <AnchorPane layoutX="340.0" layoutY="61.0" prefHeight="108.0" prefWidth="302.0" style="-fx-border-color: #0080FF80; -fx-border-radius: 15; -fx-border-width: 6;" AnchorPane.bottomAnchor="331.0" AnchorPane.leftAnchor="340.0" AnchorPane.topAnchor="61.0">
+      </JFXTextField>
+      <JFXTextField fx:id="loginText" focusColor="#317beb" labelFloat="true" layoutX="340.0" layoutY="344.0" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="40.0" prefWidth="302.0" promptText="Username" unFocusColor="#968f8f" AnchorPane.leftAnchor="340.0" AnchorPane.topAnchor="271.0">
+         <font>
+            <Font size="22.0" />
+         </font>
+      </JFXTextField>
+      <JFXPasswordField fx:id="passwordText" focusColor="#317beb" labelFloat="true" layoutX="340.0" layoutY="372.0" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="40.0" prefWidth="302.0" promptText="Password" unFocusColor="#968f8f" AnchorPane.leftAnchor="340.0" AnchorPane.topAnchor="352.0">
+         <font>
+            <Font size="22.0" />
+         </font>
+      </JFXPasswordField>
+      <JFXButton fx:id="signUp" layoutX="341.0" layoutY="430.0" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" onAction="#signUpClicked" prefHeight="42.0" prefWidth="119.0" ripplerFill="#3f9724" style="-fx-background-color: #4ad623;" text="Регистрация" textFill="WHITE" AnchorPane.leftAnchor="340.0" AnchorPane.topAnchor="430.0">
+         <font>
+            <Font size="16.0" />
+         </font>
+      </JFXButton>
+      <JFXButton fx:id="back" layoutX="527.0" layoutY="430.0" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" onAction="#backClicked" prefHeight="42.0" prefWidth="119.0" ripplerFill="#3537bc" style="-fx-background-color: #79a6f2;" text="Назад" textFill="WHITE" AnchorPane.leftAnchor="527.0" AnchorPane.topAnchor="430.0">
+         <font>
+            <Font size="16.0" />
+         </font>
+      </JFXButton>
+        <AnchorPane layoutX="340.0" layoutY="61.0" prefHeight="108.0" prefWidth="302.0" style="-fx-border-color: #0080FF80; -fx-border-radius: 15; -fx-border-width: 6;" AnchorPane.leftAnchor="340.0" AnchorPane.topAnchor="40.0">
             <children>
-                <Label layoutX="75.0" layoutY="34.0" text="File Manager">
+                <Label layoutX="94.0" layoutY="34.0" text="Bolt Drive">
                     <font>
                         <Font name="Segoe UI Light" size="28.0" />
                     </font>
@@ -40,16 +45,11 @@
             </children>
         </AnchorPane>
         <AnchorPane layoutX="-7.0" layoutY="-9.0" prefHeight="510.0" prefWidth="145.0" style="-fx-background-color: #79a6f2;" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.topAnchor="0.0" />
-      <Button fx:id="back" layoutX="523.0" layoutY="397.0" mnemonicParsing="false" onAction="#backClicked" prefHeight="42.0" prefWidth="119.0" style="-fx-background-color: #79a6f2;" text="Back" AnchorPane.leftAnchor="523.0" AnchorPane.topAnchor="397.0">
+      <Label fx:id="label" focusTraversable="false" layoutX="341.0" layoutY="476.0" textFill="RED" AnchorPane.leftAnchor="340.0" AnchorPane.topAnchor="476.0">
          <font>
-            <Font size="17.0" />
-         </font>
-      </Button>
-      <Label fx:id="label" layoutX="353.0" layoutY="456.0" textFill="RED">
-         <font>
-            <Font size="17.0" />
+            <Font size="15.0" />
          </font>
       </Label>
-      <ProgressIndicator fx:id="progressDownload" focusTraversable="false" layoutX="269.0" layoutY="392.0" visible="false" AnchorPane.leftAnchor="269.0" AnchorPane.topAnchor="392.0" />
+      <JFXSpinner fx:id="progressDownload" focusTraversable="false" layoutX="286.0" layoutY="430.0" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="42.0" prefWidth="42.0" visible="false" AnchorPane.leftAnchor="286.0" AnchorPane.topAnchor="430.0" />
     </children>
 </AnchorPane>

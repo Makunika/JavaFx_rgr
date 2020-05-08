@@ -11,6 +11,7 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.ResourceBundle;
 
+import com.jfoenix.controls.*;
 import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.SimpleStringProperty;
@@ -31,12 +32,14 @@ import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.StackPane;
+import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.stage.DirectoryChooser;
 import javafx.stage.FileChooser;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.util.Callback;
+import javafx.util.Duration;
 import sample.client.DataClient;
 import sample.connection.*;
 import sample.packFileManager.*;
@@ -73,8 +76,6 @@ public class FileManager implements Initializable {
     @FXML
     private Button backPath;
 
-    @FXML
-    private ProgressIndicator progressUpload;
 
     @FXML
     private ResourceBundle resources;
@@ -88,8 +89,12 @@ public class FileManager implements Initializable {
     @FXML
     private Button buttonExitAccount;
 
+
     @FXML
-    private ProgressBar storageProgressBar;
+    private JFXSpinner progressUpload;
+
+    @FXML
+    private JFXProgressBar storageProgressBar;
 
     @FXML
     private Label storageLabel;
@@ -120,6 +125,7 @@ public class FileManager implements Initializable {
 
     @FXML
     private TreeView<DataFile> treeView;
+
 
     @FXML
     void exitAccountClicked(ActionEvent event) {
@@ -175,7 +181,7 @@ public class FileManager implements Initializable {
         storageProgressBar.setProgress(ratio);
 
         storageLabel.setText(FuncStatic.getStringStorage(DataClient.storageFill) + " / " + FuncStatic.getStringStorage(DataClient.storageAll));
-
+        progressUpload.setProgress(ProgressIndicator.INDETERMINATE_PROGRESS);
 
         //загрузка в tree view
 
@@ -219,7 +225,6 @@ public class FileManager implements Initializable {
         treeTableController = new TreeTableController(tableView,treeView,backPath,pathName);
         tableView.getColumns().addAll(iconColumn,nameColumn,dateColumn,sizeColumn);
 
-        //Collections.sort(tableView.getItems(),(Comparator.comparing(DataFile::getName)));
 
         //загрузка для прсомотра картинок
         picterViewer = new PicterViewer(Holder);

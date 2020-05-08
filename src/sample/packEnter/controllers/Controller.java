@@ -4,6 +4,8 @@ import java.io.*;
 import java.net.URL;
 import java.util.ResourceBundle;
 
+import com.jfoenix.controls.*;
+import com.jfoenix.validation.RequiredFieldValidator;
 import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -13,9 +15,15 @@ import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.layout.AnchorPane;
+import javafx.scene.layout.Border;
+import javafx.scene.layout.Region;
+import javafx.scene.layout.StackPane;
 import javafx.scene.paint.Color;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
+import javafx.stage.StageStyle;
+import org.kordamp.ikonli.fontawesome5.FontAwesomeSolid;
+import org.kordamp.ikonli.javafx.FontIcon;
 import sample.client.DataClient;
 import sample.client.Timer;
 import sample.connection.Request;
@@ -36,22 +44,31 @@ public class Controller  {
     public Boolean isCanceled;
 
     @FXML
-    private TextField loginText;
+    private StackPane rootStackPane;
 
     @FXML
     private Button remembeButton;
 
     @FXML
-    private PasswordField passwordText;
+    private JFXTextField loginText;
 
     @FXML
-    private Button signIn;
+    private JFXPasswordField passwordText;
 
     @FXML
-    private ProgressIndicator progressDownload;
+    private JFXCheckBox checkPassword;
 
     @FXML
-    private Button signUp;
+    private JFXCheckBox checkAuto;
+
+    @FXML
+    private JFXButton signIn;
+
+    @FXML
+    private JFXButton signUp;
+
+    @FXML
+    private JFXSpinner progressDownload;
 
     @FXML
     private AnchorPane Holder;
@@ -59,24 +76,11 @@ public class Controller  {
     @FXML
     private Label label;
 
-    @FXML
-    private CheckBox checkPassword;
 
     @FXML
-    private CheckBox checkAuto;
+    void signInClicked(ActionEvent event) {
 
-    @FXML
-    void signInClicked(ActionEvent event) throws InterruptedException, IOException {
-
-        if (loginText.getText().equals(""))
-        {
-            loginText.setPromptText("Заполните поле");
-        }
-        else if (passwordText.getText().equals(""))
-        {
-            passwordText.setPromptText("Заполните поле");
-        }
-        else
+        if (loginText.validate() & passwordText.validate())
         {
             DataClient.login = loginText.getText();
             DataClient.password = passwordText.getText();
@@ -150,6 +154,10 @@ public class Controller  {
         DataClient.isAutoEnter = false;
         DataClient.isSavedPassword = false;
 
+        RequiredFieldValidator validator = new RequiredFieldValidator();
+        validator.setMessage("Поле не может быть пустым");
+        loginText.getValidators().add(validator);
+        passwordText.getValidators().add(validator);
         try {
             File filePreferences = new File(new File(new File(".").getCanonicalPath()),"Preferences.txt");
             if (filePreferences.exists())
@@ -222,57 +230,48 @@ public class Controller  {
                 RememberPasswordController rpc = loader.getController();
                 rpc.setEmail(email);
                 rpc.setCanceled(isCanceled);
-                Stage stage = new Stage();
-                stage.setTitle("Восстановление пароля");
-                stage.setIconified(false);
-                stage.setScene(new Scene(root));
-                stage.initModality(Modality.WINDOW_MODAL);
-                stage.initOwner(
-                        ((Node)event.getSource()).getScene().getWindow() );
-                stage.showAndWait();
+                JFXDialog dialog = new JFXDialog();
+                rpc.setParentDialog(dialog);
+                dialog.setContent((Region) root);
+                dialog.show(rootStackPane);
 
 
-                isCanceled = rpc.isCanceled;
-                email = rpc.email;
-                if (!isCanceled)
-                {
-                    DataClient.login = DataClient.password = "null";
-                    Request request = new Request("REMPASS", email,300);
-                    NetworkServiceMessage networkServiceMessage = new NetworkServiceMessage(request);
+                dialog.setOnDialogClosed(event1 -> {
+                    isCanceled = rpc.isCanceled;
+                    email = rpc.email;
+                    if (isCanceled != null && !isCanceled) {
+                        DataClient.login = DataClient.password = "null";
+                        Request request = new Request("REMPASS", email, 300);
+                        NetworkServiceMessage networkServiceMessage = new NetworkServiceMessage(request);
 
-                    networkServiceMessage.setOnFailed(event1 -> {
-                        Platform.runLater(() -> {
-                            label.setText("lost connection");
-                            progressDownload.setVisible(false);
+                        networkServiceMessage.setOnFailed(event2 -> {
+                            Platform.runLater(() -> {
+                                label.setText("lost connection");
+                                progressDownload.setVisible(false);
+                            });
                         });
-                    });
 
-                    networkServiceMessage.setOnSucceeded(event1 -> {
-                        Response response = networkServiceMessage.getValue();
+                        networkServiceMessage.setOnSucceeded(event2 -> {
+                            Response response = networkServiceMessage.getValue();
 
-                        if (response.isValidCode())
-                        {
-                            Platform.runLater(() -> {
-                                label.setText("Проверьте почту " + email);
-                                progressDownload.setVisible(false);
-                            });
-                        }
-                        else
-                        {
-                            Platform.runLater(() -> {
-                                label.setText("Fail");
-                                progressDownload.setVisible(false);
-                            });
-                        }
+                            if (response.isValidCode()) {
+                                Platform.runLater(() -> {
+                                    label.setText("Проверьте почту " + email);
+                                    progressDownload.setVisible(false);
+                                });
+                            } else {
+                                Platform.runLater(() -> {
+                                    label.setText("Fail");
+                                    progressDownload.setVisible(false);
+                                });
+                            }
 
-                    });
+                        });
 
-                    progressDownload.setVisible(true);
-                    networkServiceMessage.start();
-
-
-
-                }
+                        progressDownload.setVisible(true);
+                        networkServiceMessage.start();
+                    }
+                });
             } catch (IOException e) {
                 e.printStackTrace();
             }

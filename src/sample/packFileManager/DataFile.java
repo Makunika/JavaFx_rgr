@@ -4,7 +4,7 @@ import javafx.beans.property.*;
 
 import java.util.regex.Pattern;
 
-public class DataFile {
+public class DataFile{
     //private ObjectProperty<ImageView> icon;
     private StringProperty icon;
     private StringProperty name;

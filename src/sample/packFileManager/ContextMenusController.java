@@ -360,7 +360,6 @@ public class ContextMenusController {
             labelIndicator.setVisible(true);
             progressIndicator.setVisible(true);
             networkServiceFileDownload.start();
-
         }
     }
 
@@ -372,7 +371,7 @@ public class ContextMenusController {
         });
 
 
-        //TODO: Загрузить папку
+        //Загрузить папку
         notRowContextMenu.getItems().get(1).setOnAction(event -> {
             uploadPath();
         });
@@ -634,7 +633,6 @@ public class ContextMenusController {
             labelIndicator.textProperty().bind(networkServiceFileUpload.messageProperty());
             networkServiceFileUpload.start();
             labelIndicator.setVisible(true);
-
 
 
         }

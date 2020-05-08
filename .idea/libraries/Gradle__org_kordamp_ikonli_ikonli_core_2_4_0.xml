@@ -1,0 +1,11 @@
+<component name="libraryTable">
+  <library name="Gradle: org.kordamp.ikonli:ikonli-core:2.4.0">
+    <CLASSES>
+      <root url="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/org.kordamp.ikonli/ikonli-core/2.4.0/10481fda6118f618a729705b7869331bd5e1d6d8/ikonli-core-2.4.0.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES>
+      <root url="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/org.kordamp.ikonli/ikonli-core/2.4.0/5dbec3a38eaa2fc5e2f5259f58bfd4419bd9d4ef/ikonli-core-2.4.0-sources.jar!/" />
+    </SOURCES>
+  </library>
+</component>

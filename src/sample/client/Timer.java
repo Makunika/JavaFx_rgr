@@ -24,11 +24,17 @@ public class Timer {
     }
 
     private void init() {
+        labelUpdate.setVisible(true);
         Timeline timeline = new Timeline(new KeyFrame(Duration.millis(100),event -> {
             sec4[0]--;
-            labelUpdate.setOpacity(labelUpdate.getOpacity() - step[0]);
+            if (sec4[0] <= 0)
+            {
+                labelUpdate.setVisible(false);
+                labelUpdate.setOpacity(1.0);
+            }
+            else labelUpdate.setOpacity(labelUpdate.getOpacity() - step[0]);
         }));
-        timeline.setCycleCount(allStep[0]);
+        timeline.setCycleCount(allStep[0] + 1);
         timeline.play();
     }
 

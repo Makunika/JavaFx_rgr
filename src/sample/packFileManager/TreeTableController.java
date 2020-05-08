@@ -1,5 +1,7 @@
 package sample.packFileManager;
 
+import com.jfoenix.controls.JFXTreeTableView;
+import com.jfoenix.controls.JFXTreeView;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.scene.control.*;
@@ -15,9 +17,8 @@ public class TreeTableController {
     private final Label                     pathName;
     private TreeItem<DataFile>              parent;
     private Moved                           moved;
-
-    public TreeTableController(TableView< ? extends DataFile> tableView, TreeView< ? extends DataFile> treeView,
-                               Button backPath,Label pathName)
+    public TreeTableController(TableView<? extends DataFile> tableView, TreeView<? extends DataFile> treeView,
+                               Button backPath, Label pathName)
     {
         refTableView = (TableView<DataFile>) tableView;
         refTreeView = (TreeView<DataFile>) treeView;

@@ -1,11 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import com.jfoenix.controls.JFXProgressBar?>
+<?import com.jfoenix.controls.JFXSpinner?>
+<?import com.jfoenix.controls.JFXTreeTableView?>
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.ContextMenu?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.MenuItem?>
-<?import javafx.scene.control.ProgressBar?>
-<?import javafx.scene.control.ProgressIndicator?>
 <?import javafx.scene.control.TableView?>
 <?import javafx.scene.control.TreeView?>
 <?import javafx.scene.layout.AnchorPane?>
@@ -27,7 +28,6 @@
                         <Font size="20.0" />
                      </font>
                   </Button>
-                  <ProgressBar fx:id="storageProgressBar" layoutX="16.0" layoutY="357.0" prefHeight="9.0" prefWidth="208.0" progress="0.0" AnchorPane.leftAnchor="16.0" AnchorPane.topAnchor="357.0" />
                   <Label fx:id="storageLabel" layoutX="14.0" layoutY="318.0" text="12/15" textFill="WHITE" AnchorPane.leftAnchor="14.0" AnchorPane.topAnchor="318.0">
                      <font>
                         <Font size="20.0" />
@@ -38,12 +38,13 @@
                         <Font size="20.0" />
                      </font>
                   </Label>
-                  <ProgressIndicator fx:id="progressUpload" layoutX="16.0" layoutY="382.0" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="40.0" prefWidth="27.0" progress="0.0" AnchorPane.leftAnchor="16.0" AnchorPane.topAnchor="382.0" />
-                  <Label fx:id="labelDownload" layoutX="56.0" layoutY="390.0" text="Архивация" textFill="WHITE" visible="false" AnchorPane.leftAnchor="56.0" AnchorPane.topAnchor="390.0">
+                  <Label fx:id="labelDownload" layoutX="65.0" layoutY="391.0" text="Архивация" textFill="WHITE" visible="false" AnchorPane.leftAnchor="65.0" AnchorPane.topAnchor="391.0">
                      <font>
                         <Font size="16.0" />
                      </font>
                   </Label>
+                  <JFXSpinner fx:id="progressUpload" layoutX="14.0" layoutY="383.0" prefHeight="40.0" prefWidth="40.0" progress="0.41" stylesheets="@../css/my-spinner.css" AnchorPane.leftAnchor="14.0" AnchorPane.topAnchor="383.0" />
+                  <JFXProgressBar fx:id="storageProgressBar" layoutX="14.0" layoutY="359.0" progress="0.24" stylesheets="@../css/my-progress-bar.css" AnchorPane.leftAnchor="14.0" AnchorPane.topAnchor="359.0" />
                </children>
             </AnchorPane>
             <AnchorPane layoutX="300.0" prefHeight="720.0" prefWidth="981.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="300.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
@@ -70,6 +71,7 @@
                         </ContextMenu>
                      </contextMenu>
                   </TableView>
+                  <JFXTreeTableView fx:id="test" layoutX="-13.0" layoutY="135.0" prefHeight="400.0" prefWidth="577.0" />
                   <Label fx:id="pathName" layoutX="362.0" layoutY="20.0" text="Папка" textFill="#4834cd" AnchorPane.leftAnchor="362.0" AnchorPane.topAnchor="20.0">
                      <font>
                         <Font size="20.0" />
