@@ -2,7 +2,7 @@
 
 <?import com.jfoenix.controls.JFXProgressBar?>
 <?import com.jfoenix.controls.JFXSpinner?>
-<?import com.jfoenix.controls.JFXTreeTableView?>
+<?import com.jfoenix.svg.SVGGlyph?>
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.ContextMenu?>
 <?import javafx.scene.control.Label?>
@@ -45,6 +45,7 @@
                   </Label>
                   <JFXSpinner fx:id="progressUpload" layoutX="14.0" layoutY="383.0" prefHeight="40.0" prefWidth="40.0" progress="0.41" stylesheets="@../css/my-spinner.css" AnchorPane.leftAnchor="14.0" AnchorPane.topAnchor="383.0" />
                   <JFXProgressBar fx:id="storageProgressBar" layoutX="14.0" layoutY="359.0" progress="0.24" stylesheets="@../css/my-progress-bar.css" AnchorPane.leftAnchor="14.0" AnchorPane.topAnchor="359.0" />
+                  <SVGGlyph fx:id="svgf" fill="#7c4c4c" layoutX="113.0" layoutY="153.0" />
                </children>
             </AnchorPane>
             <AnchorPane layoutX="300.0" prefHeight="720.0" prefWidth="981.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="300.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
@@ -71,7 +72,6 @@
                         </ContextMenu>
                      </contextMenu>
                   </TableView>
-                  <JFXTreeTableView fx:id="test" layoutX="-13.0" layoutY="135.0" prefHeight="400.0" prefWidth="577.0" />
                   <Label fx:id="pathName" layoutX="362.0" layoutY="20.0" text="Папка" textFill="#4834cd" AnchorPane.leftAnchor="362.0" AnchorPane.topAnchor="20.0">
                      <font>
                         <Font size="20.0" />

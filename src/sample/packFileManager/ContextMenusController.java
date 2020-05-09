@@ -9,7 +9,8 @@ import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.input.MouseButton;
-import javafx.scene.input.MouseEvent;
+import javafx.scene.layout.StackPane;
+import javafx.scene.media.MediaPlayer;
 import javafx.stage.DirectoryChooser;
 import javafx.stage.FileChooser;
 import javafx.stage.Modality;
@@ -17,8 +18,11 @@ import javafx.stage.Stage;
 import sample.client.DataClient;
 import sample.client.Timer;
 import sample.connection.*;
-import sample.packFileManager.controllers.FileManager;
 import sample.packFileManager.controllers.Rename;
+import sample.packFileManager.viewers.MediaViewer;
+import sample.packFileManager.viewers.PicterViewer;
+import sample.packFileManager.viewers.TextViewer;
+import sample.packFileManager.viewers.Viewer;
 
 import java.io.File;
 import java.io.IOException;
@@ -38,11 +42,13 @@ public class ContextMenusController {
     private final Label                 storageLabel;
     private final ProgressBar           storageProgress;
     private final PicterViewer          picterViewer;
+    private final TextViewer            textViewer;
+    private final MediaViewer           mediaViewer;
     private ContextMenu                 contextMenuForTree;
 
-    public ContextMenusController(ContextMenu notRowContextMenu,TreeTableController treeTableController,
+    public ContextMenusController(ContextMenu notRowContextMenu, TreeTableController treeTableController,
                                   ProgressIndicator progressIndicator, Label labelIndicator , Label storageLabel,
-                                  ProgressBar storageProgress, Label labelErr, PicterViewer picterViewer)
+                                  ProgressBar storageProgress, Label labelErr, StackPane stackPane)
     {
         this.notRowContextMenu = notRowContextMenu;
         this.progressIndicator = progressIndicator;
@@ -50,7 +56,9 @@ public class ContextMenusController {
         this.labelErr = labelErr;
         this.storageProgress = storageProgress;
         this.storageLabel = storageLabel;
-        this.picterViewer = picterViewer;
+        this.picterViewer = new PicterViewer(stackPane);
+        this.textViewer = new TextViewer(stackPane);
+        this.mediaViewer = new MediaViewer(stackPane);
         this.labelIndicator = labelIndicator;
         load();
     }
@@ -71,7 +79,6 @@ public class ContextMenusController {
                         new MenuItem("Переименовать"),
                         new MenuItem("Переместить")
                 );
-
                 //Скачать
                 menuItems.get(0).setOnAction(event -> {
                         downloadFile(row.getItem());
@@ -97,16 +104,22 @@ public class ContextMenusController {
 
 
                 contextMenu.getItems().addAll(menuItems);
-
+                //двойной клик
                 row.setOnMouseClicked(event -> {
                     if (event.getClickCount() == 2 && event.getButton().equals(MouseButton.PRIMARY)) {
                         DataFile item = row.getItem();
-                        if (item != null && !item.isFile()) {
-                            treeTableController.getRefTreeView().getSelectionModel().select(treeTableController.findByDataFile(item));
-                            treeTableController.getRefTreeView().getSelectionModel().getSelectedItem().setExpanded(true);
-                            treeTableController.treeChildToTable();
-                        } else if (item != null && item.isPng()) {
-                            picterViewerLoad(item);
+                        if (item != null) {
+                            if (!item.isFile()) {
+                                treeTableController.getRefTreeView().getSelectionModel().select(treeTableController.findByDataFile(item));
+                                treeTableController.getRefTreeView().getSelectionModel().getSelectedItem().setExpanded(true);
+                                treeTableController.treeChildToTable();
+                            } else if (item.isPng()) {
+                                picterViewerLoad(item);
+                            } else if (item.isTxt()) {
+                                txtViewerLoad(item);
+                            } else if (item.isMedia()) {
+                                mediaViewerLoad(item);
+                            }
                         }
                     }
                 });
@@ -194,14 +207,28 @@ public class ContextMenusController {
         }
     }
 
+    private void txtViewerLoad(DataFile item)
+    {
+        viewerLoad(item, textViewer);
+    }
+
     private void picterViewerLoad(DataFile item) {
+        viewerLoad(item, picterViewer);
+    }
+
+    private void mediaViewerLoad(DataFile item)
+    {
+        viewerLoad(item, mediaViewer);
+    }
+
+    private void viewerLoad(DataFile item, Viewer viewer) {
         Request request = new Request(
                 "UPLOAD",
                 treeTableController.getPathName().getText().substring(DataClient.login.length()) + item.getName(),
                 201);
 
         NetworkServiceFileDownload networkServiceFileDownload = new NetworkServiceFileDownload(
-                picterViewer.getTmpFile(item.getSuffix()),
+                viewer.getTmpFile(item.getSuffix()),
                 true,
                 request);
 
@@ -210,6 +237,7 @@ public class ContextMenusController {
                 labelErr.setText("lost connection");
                 Timer timer = new Timer(labelErr,6);
                 progressIndicator.setVisible(false);
+                labelIndicator.setVisible(false);
             });
         });
 
@@ -219,21 +247,25 @@ public class ContextMenusController {
             if (response.isValidCode()) {
                 Platform.runLater(() -> {
                     progressIndicator.setVisible(false);
-                    picterViewer.loadImage();
-                    picterViewer.changeView();
+                    labelIndicator.setVisible(false);
+                    viewer.loadBody();
+                    viewer.addHeader(item.getName());
+                    viewer.dialogView();
                 });
             } else {
                 Platform.runLater(() -> {
                     labelErr.setText("Fail download");
                     Timer timer = new Timer(labelErr,6);
                     progressIndicator.setVisible(false);
+                    labelIndicator.setVisible(false);
                 });
             }
         });
 
         progressIndicator.progressProperty().bind(networkServiceFileDownload.progressProperty());
-
+        labelIndicator.textProperty().bind(networkServiceFileDownload.messageProperty());
         progressIndicator.setVisible(true);
+        labelIndicator.setVisible(true);
         networkServiceFileDownload.start();
     }
 

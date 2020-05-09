@@ -11,7 +11,6 @@
 <?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.text.Font?>
 
-
 <StackPane fx:id="rootStackPane" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="sample.packEnter.controllers.Controller">
    <children>
       <AnchorPane fx:id="Holder" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="500.0" prefWidth="800.0">
@@ -52,7 +51,7 @@
                   <Font size="16.0" />
                </font>
             </JFXCheckBox>
-            <JFXButton fx:id="signIn" layoutX="341.0" layoutY="430.0" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" onAction="#signInClicked" prefHeight="42.0" prefWidth="152.0" ripplerFill="#3537bc" style="-fx-background-color: #79a6f2;" text="Войти" textFill="WHITE" AnchorPane.leftAnchor="341.0" AnchorPane.topAnchor="430.0">
+            <JFXButton fx:id="signIn" defaultButton="true" layoutX="341.0" layoutY="430.0" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" onAction="#signInClicked" prefHeight="42.0" prefWidth="152.0" ripplerFill="#3537bc" style="-fx-background-color: #79a6f2;" text="Войти" textFill="WHITE" AnchorPane.leftAnchor="341.0" AnchorPane.topAnchor="430.0">
                <font>
                   <Font size="16.0" />
                </font>

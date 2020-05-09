@@ -1,23 +1,15 @@
 package sample.packFileManager.controllers;
 
 
-import java.io.File;
 import java.io.IOException;
 import java.net.URL;
-import java.nio.file.Files;
-import java.nio.file.Paths;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
-import java.util.Date;
 import java.util.ResourceBundle;
 
 import com.jfoenix.controls.*;
+import com.jfoenix.svg.SVGGlyph;
 import javafx.application.Platform;
-import javafx.beans.binding.Bindings;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.value.ObservableValue;
-import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -27,22 +19,17 @@ import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.control.Button;
-import javafx.scene.input.ContextMenuEvent;
-import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.StackPane;
-import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
-import javafx.stage.DirectoryChooser;
-import javafx.stage.FileChooser;
-import javafx.stage.Modality;
+import javafx.scene.shape.SVGPath;
 import javafx.stage.Stage;
 import javafx.util.Callback;
-import javafx.util.Duration;
 import sample.client.DataClient;
-import sample.connection.*;
 import sample.packFileManager.*;
+import sample.packFileManager.viewers.PicterViewer;
+import sample.packFileManager.viewers.TextViewer;
 
 public class FileManager implements Initializable {
 
@@ -59,8 +46,6 @@ public class FileManager implements Initializable {
     public ContextMenu contextMenuNotRow;
 
     private TreeTableController treeTableController;
-
-    private PicterViewer picterViewer;
 
     private ContextMenusController contextMenusController;
 
@@ -173,7 +158,6 @@ public class FileManager implements Initializable {
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
         pathName.setText(DataClient.login+ "\\");
-
         progressUpload.setVisible(false);
         labelErr.setText("");
 
@@ -189,6 +173,7 @@ public class FileManager implements Initializable {
 
         //настройка таблицы
         //nameColumn.setSortType(TableColumn.SortType.ASCENDING);
+
 
         iconColumn = new TableColumn<>("Icon");
         nameColumn = new TableColumn<>("Name");
@@ -226,12 +211,9 @@ public class FileManager implements Initializable {
         tableView.getColumns().addAll(iconColumn,nameColumn,dateColumn,sizeColumn);
 
 
-        //загрузка для прсомотра картинок
-        picterViewer = new PicterViewer(Holder);
-
         //загрузка всех контекстных менюшек
         contextMenusController = new ContextMenusController(contextMenuNotRow,treeTableController,
-                progressUpload,labelDownload,storageLabel,storageProgressBar,labelErr,picterViewer);
+                progressUpload,labelDownload,storageLabel,storageProgressBar,labelErr, Holder);
 
 
         buttonExitAccount.setOnMouseEntered(event -> {

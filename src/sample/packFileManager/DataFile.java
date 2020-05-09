@@ -12,6 +12,9 @@ public class DataFile{
     private StringProperty size;
     private boolean isFile;
     private boolean isPng;
+    private boolean isTxt;
+    private boolean isMedia;
+    private boolean isNone;
     private String suffix;
 
     public DataFile(String type, String name, String date, String size) {
@@ -34,6 +37,9 @@ public class DataFile{
         setDate(date);
         setSize(size);
         isPng = false;
+        isNone = false;
+        isTxt = false;
+        isMedia = false;
         suffix = ".file";
 
         if (isFile) {
@@ -52,7 +58,9 @@ public class DataFile{
                 }
 
             }
-
+            if (!isPng && suffix.equals(".txt")) isTxt = true;
+            else if (!isPng && suffix.equals(".mp4")) isMedia = true;
+            else isNone = true;
         }
 
     }
@@ -69,6 +77,17 @@ public class DataFile{
         return isFile;
     }
 
+    public boolean isMedia() {
+        return isMedia;
+    }
+
+    public boolean isNone() {
+        return isNone;
+    }
+
+    public boolean isTxt() {
+        return isTxt;
+    }
 
     public StringProperty dateProperty() {
         return date;

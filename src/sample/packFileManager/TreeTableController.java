@@ -17,6 +17,7 @@ public class TreeTableController {
     private final Label                     pathName;
     private TreeItem<DataFile>              parent;
     private Moved                           moved;
+
     public TreeTableController(TableView<? extends DataFile> tableView, TreeView<? extends DataFile> treeView,
                                Button backPath, Label pathName)
     {
@@ -29,9 +30,10 @@ public class TreeTableController {
     }
 
     private void init() {
-        refTableView.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
+        refTableView.getSelectionModel().setSelectionMode(SelectionMode.SINGLE);
+        refTreeView.getSelectionModel().setSelectionMode(SelectionMode.SINGLE);
 
-        TreeItem<DataFile> root = new TreeItem<>(new DataFile("path", DataClient.login,"date","size"));
+        TreeItem<DataFile> root = new TreeItem<>(new DataFile("path", DataClient.login,"date",""));
 
         if (DataClient.tree != null) {
             Pattern pattern = Pattern.compile("\n");
