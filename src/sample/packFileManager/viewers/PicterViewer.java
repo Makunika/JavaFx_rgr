@@ -11,13 +11,14 @@ public class PicterViewer extends Viewer {
     public PicterViewer(StackPane Holder)
     {
         super(Holder);
+        setSize(0,500);
     }
 
     @Override
     protected Node getBody() {
         imageView = new ImageView();
         imageView.setFitWidth(860);
-        imageView.setFitHeight(740);
+        imageView.setFitHeight(500);
         imageView.setPreserveRatio(true);
         return imageView;
     }

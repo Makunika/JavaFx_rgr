@@ -1,11 +1,14 @@
 package sample.packFileManager;
 
+import com.jfoenix.controls.JFXButton;
 import com.jfoenix.controls.JFXTreeTableView;
 import com.jfoenix.controls.JFXTreeView;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.scene.control.*;
+import javafx.scene.shape.SVGPath;
 import sample.client.DataClient;
+import sample.client.SVGIcons;
 
 import java.util.regex.Pattern;
 
@@ -13,18 +16,23 @@ public class TreeTableController {
     private final TableView<DataFile>       refTableView;
     private final TreeView<DataFile>        refTreeView;
     private final ObservableList<DataFile>  files;
-    private final Button                    backPath;
+    private final JFXButton                 backPath;
     private final Label                     pathName;
     private TreeItem<DataFile>              parent;
     private Moved                           moved;
 
     public TreeTableController(TableView<? extends DataFile> tableView, TreeView<? extends DataFile> treeView,
-                               Button backPath, Label pathName)
+                               JFXButton backPath, Label pathName)
     {
         refTableView = (TableView<DataFile>) tableView;
         refTreeView = (TreeView<DataFile>) treeView;
         this.backPath = backPath;
         this.pathName = pathName;
+        backPath.setText("");
+        SVGPath path = new SVGPath();
+        path.setContent(SVGIcons.ARROW_BACK.getPath());
+        path.setStyle("-fx-fill: #4834cd");
+        backPath.setGraphic(path);
         files = FXCollections.observableArrayList();
         init();
     }

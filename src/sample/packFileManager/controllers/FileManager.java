@@ -27,6 +27,7 @@ import javafx.scene.shape.SVGPath;
 import javafx.stage.Stage;
 import javafx.util.Callback;
 import sample.client.DataClient;
+import sample.client.SVGIcons;
 import sample.packFileManager.*;
 import sample.packFileManager.viewers.PicterViewer;
 import sample.packFileManager.viewers.TextViewer;
@@ -59,7 +60,7 @@ public class FileManager implements Initializable {
     private Label pathName;
 
     @FXML
-    private Button backPath;
+    private JFXButton backPath;
 
 
     @FXML
@@ -69,11 +70,7 @@ public class FileManager implements Initializable {
     private AnchorPane pane;
 
     @FXML
-    private Button buttonExit;
-
-    @FXML
-    private Button buttonExitAccount;
-
+    private JFXButton buttonExitAccount;
 
     @FXML
     private JFXSpinner progressUpload;
@@ -94,7 +91,7 @@ public class FileManager implements Initializable {
     private StackPane Holder;
 
     @FXML
-    private TableColumn<DataFile, String> iconColumn;
+    private TableColumn<DataFile, SVGPath> iconColumn;
 
     @FXML
     private TableColumn<DataFile, String> nameColumn;
@@ -130,11 +127,6 @@ public class FileManager implements Initializable {
         }
     }
 
-    @FXML
-    void exitClicked(ActionEvent event) {
-        Platform.exit();
-    }
-
 
 
     @FXML
@@ -157,9 +149,18 @@ public class FileManager implements Initializable {
 
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
+        SVGIconsLoaded.init();
         pathName.setText(DataClient.login+ "\\");
         progressUpload.setVisible(false);
         labelErr.setText("");
+
+        SVGPath exitAccountIcon = new SVGPath();
+        exitAccountIcon.setStyle("-fx-fill: #ffffff");
+        exitAccountIcon.setContent(SVGIcons.EXIT_ACCOUNT.getPath());
+        buttonExitAccount.setGraphic(exitAccountIcon);
+        buttonExitAccount.setText("");
+
+
 
         double ratio = (double)DataClient.storageFill / (double)DataClient.storageAll;
         storageProgressBar.setProgress(ratio);
@@ -179,6 +180,7 @@ public class FileManager implements Initializable {
         nameColumn = new TableColumn<>("Name");
         sizeColumn = new TableColumn<>("Size");
         dateColumn = new TableColumn<>("Date");
+        iconColumn.setStyle("-fx-alignment: CENTER");
 
 
         iconColumn.setCellValueFactory(cellData -> cellData.getValue().iconProperty());
@@ -215,19 +217,6 @@ public class FileManager implements Initializable {
         contextMenusController = new ContextMenusController(contextMenuNotRow,treeTableController,
                 progressUpload,labelDownload,storageLabel,storageProgressBar,labelErr, Holder);
 
-
-        buttonExitAccount.setOnMouseEntered(event -> {
-            buttonExitAccount.setTextFill(Color.AQUA);
-        });
-        buttonExit.setOnMouseEntered(event -> {
-            buttonExit.setTextFill(Color.AQUA);
-        });
-        buttonExitAccount.setOnMouseExited(event -> {
-            buttonExitAccount.setTextFill(Color.WHITE);
-        });
-        buttonExit.setOnMouseExited(event -> {
-            buttonExit.setTextFill(Color.WHITE);
-        });
         loginLabel.setText(DataClient.login);
 
         backPath.setOnAction(event -> {

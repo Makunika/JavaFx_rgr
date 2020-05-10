@@ -12,20 +12,20 @@
     <children>
       <JFXTextField fx:id="emailText" focusColor="#317beb" labelFloat="true" layoutX="340.0" layoutY="190.0" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="40.0" prefWidth="302.0" promptText="Email" unFocusColor="#968f8f" AnchorPane.leftAnchor="340.0" AnchorPane.topAnchor="190.0">
          <font>
-            <Font size="22.0" />
+            <Font size="20.0" />
          </font>
       </JFXTextField>
       <JFXTextField fx:id="loginText" focusColor="#317beb" labelFloat="true" layoutX="340.0" layoutY="344.0" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="40.0" prefWidth="302.0" promptText="Username" unFocusColor="#968f8f" AnchorPane.leftAnchor="340.0" AnchorPane.topAnchor="271.0">
          <font>
-            <Font size="22.0" />
+            <Font size="20.0" />
          </font>
       </JFXTextField>
       <JFXPasswordField fx:id="passwordText" focusColor="#317beb" labelFloat="true" layoutX="340.0" layoutY="372.0" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="40.0" prefWidth="302.0" promptText="Password" unFocusColor="#968f8f" AnchorPane.leftAnchor="340.0" AnchorPane.topAnchor="352.0">
          <font>
-            <Font size="22.0" />
+            <Font size="20.0" />
          </font>
       </JFXPasswordField>
-      <JFXButton fx:id="signUp" layoutX="341.0" layoutY="430.0" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" onAction="#signUpClicked" prefHeight="42.0" prefWidth="119.0" ripplerFill="#3f9724" style="-fx-background-color: #4ad623;" text="Регистрация" textFill="WHITE" AnchorPane.leftAnchor="340.0" AnchorPane.topAnchor="430.0">
+      <JFXButton fx:id="signUp" layoutX="341.0" layoutY="430.0" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" onAction="#signUpClicked" prefHeight="42.0" prefWidth="119.0" ripplerFill="#457534" style="-fx-background-color: #138E3E;" text="Регистрация" textFill="WHITE" AnchorPane.leftAnchor="340.0" AnchorPane.topAnchor="430.0">
          <font>
             <Font size="16.0" />
          </font>

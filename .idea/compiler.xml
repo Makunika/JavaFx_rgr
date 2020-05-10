@@ -15,6 +15,8 @@
       <module name="buildGradle" target="1.8" />
       <module name="buildGradle.main" target="1.8" />
       <module name="buildGradle.test" target="1.8" />
+      <module name="JavaFx_rgr.buildGradle.main" target="1.8" />
+      <module name="JavaFx_rgr.buildGradle.test" target="1.8" />
       <module name="javafxtest.buildGradle.main" target="1.8" />
       <module name="javafxtest.buildGradle.test" target="1.8" />
     </bytecodeTargetLevel>

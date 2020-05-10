@@ -1,12 +1,13 @@
 package sample.packFileManager;
 
 import javafx.beans.property.*;
+import javafx.scene.shape.SVGPath;
 
 import java.util.regex.Pattern;
 
 public class DataFile{
     //private ObjectProperty<ImageView> icon;
-    private StringProperty icon;
+    private ObjectProperty<SVGPath> icon;
     private StringProperty name;
     private StringProperty date;
     private StringProperty size;
@@ -19,7 +20,7 @@ public class DataFile{
 
     public DataFile(String type, String name, String date, String size) {
         //this.icon = new SimpleObjectProperty<>();
-        this.icon = new SimpleStringProperty();
+        this.icon = new SimpleObjectProperty<>();
         //setIcon(new ImageView(new Image(type.equals("file") ? "sample/packFileManager/123.jpg" : "sample/packFileManager/14124.png")));
         this.name = new SimpleStringProperty();
         this.date = new SimpleStringProperty();
@@ -31,7 +32,6 @@ public class DataFile{
 
     public void setData(String type, String name, String date, String size) {
         //setIcon(new ImageView(new Image(type.equals("file") ? "sample/packFileManager/123.jpg" : "sample/packFileManager/14124.png")));
-        setIcon(type);
         isFile = type.equals("file");
         setName(name);
         setDate(date);
@@ -54,13 +54,29 @@ public class DataFile{
             for (String format: formatPicter) {
                 if (format.equals(suffix)) {
                     isPng = true;
+                    setIcon(SVGIconsLoaded.getInstance().getImage());
                     break;
                 }
 
             }
-            if (!isPng && suffix.equals(".txt")) isTxt = true;
-            else if (!isPng && suffix.equals(".mp4")) isMedia = true;
-            else isNone = true;
+            if (!isPng && suffix.equals(".txt"))
+            {
+                setIcon(SVGIconsLoaded.getInstance().getFile());
+                isTxt = true;
+            }
+            else if (!isPng && suffix.equals(".mp4"))
+            {
+                setIcon(SVGIconsLoaded.getInstance().getMedia());
+                isMedia = true;
+            }
+            else if (!isPng)
+            {
+                setIcon(SVGIconsLoaded.getInstance().getFile());
+                isNone = true;
+            }
+        }
+        else {
+            setIcon(SVGIconsLoaded.getInstance().getFolder());
         }
 
     }
@@ -93,7 +109,7 @@ public class DataFile{
         return date;
     }
 
-    public StringProperty iconProperty() {
+    public ObjectProperty<SVGPath> iconProperty() {
         return icon;
     }
 
@@ -105,7 +121,7 @@ public class DataFile{
         return size;
     }
 
-    public String getIcon() {
+    public SVGPath getIcon() {
         return icon.get();
     }
 
@@ -133,7 +149,7 @@ public class DataFile{
         this.size.set(size);
     }
 
-    public void setIcon(String icon) {
+    public void setIcon(SVGPath icon) {
         this.icon.set(icon);
     }
 

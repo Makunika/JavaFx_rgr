@@ -30,6 +30,7 @@ import sample.connection.Request;
 import sample.connection.Response;
 import sample.connection.NetworkServiceMessage;
 import sample.packEnter.NavigatorEnter;
+import sample.packFileManager.Alert;
 
 public class Controller  {
 
@@ -91,7 +92,7 @@ public class Controller  {
 
             networkServiceMessage.setOnFailed(event1 -> {
                 Platform.runLater(() -> {
-                    label.setText("lost connection");
+                    new Alert(rootStackPane, "lost connection").show();
                     Timer timer = new Timer(label,3);
                     progressDownload.setVisible(false);
                 });
@@ -110,11 +111,11 @@ public class Controller  {
                         try {
                             root = FXMLLoader.load(getClass().getClassLoader().getResource("sample/resources/scenepack/FileManager.fxml"), resources);
                             Stage stage = new Stage();
-
                             stage.setTitle("File Manager");
                             stage.setScene(new Scene(root, 1280, 720));
                             ((Node) (event.getSource())).getScene().getWindow().hide();
                             stage.show();
+
 
                         } catch (IOException ex) {
                             ex.printStackTrace();
@@ -153,7 +154,7 @@ public class Controller  {
     void initialize() {
         DataClient.isAutoEnter = false;
         DataClient.isSavedPassword = false;
-
+        NavigatorEnter.setMainController(this);
         RequiredFieldValidator validator = new RequiredFieldValidator();
         validator.setMessage("Поле не может быть пустым");
         loginText.getValidators().add(validator);
@@ -246,7 +247,7 @@ public class Controller  {
 
                         networkServiceMessage.setOnFailed(event2 -> {
                             Platform.runLater(() -> {
-                                label.setText("lost connection");
+                                new Alert(rootStackPane, "lost connection").show();
                                 progressDownload.setVisible(false);
                             });
                         });
@@ -256,12 +257,12 @@ public class Controller  {
 
                             if (response.isValidCode()) {
                                 Platform.runLater(() -> {
-                                    label.setText("Проверьте почту " + email);
+                                    new Alert(rootStackPane, "Проверьте почту " + email).show();
                                     progressDownload.setVisible(false);
                                 });
                             } else {
                                 Platform.runLater(() -> {
-                                    label.setText("Fail");
+                                    new Alert(rootStackPane, "Такой почты не существует").show();
                                     progressDownload.setVisible(false);
                                 });
                             }

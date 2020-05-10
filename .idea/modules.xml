@@ -2,10 +2,10 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/JavaFx_rgr.buildGradle.main.iml" filepath="$PROJECT_DIR$/.idea/modules/JavaFx_rgr.buildGradle.main.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/JavaFx_rgr.buildGradle.test.iml" filepath="$PROJECT_DIR$/.idea/modules/JavaFx_rgr.buildGradle.test.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/buildGradle.iml" filepath="$PROJECT_DIR$/.idea/modules/buildGradle.iml" />
       <module fileurl="file://$PROJECT_DIR$/javafxtest.iml" filepath="$PROJECT_DIR$/javafxtest.iml" />
-      <module fileurl="file://$PROJECT_DIR$/.idea/modules/javafxtest.buildGradle.main.iml" filepath="$PROJECT_DIR$/.idea/modules/javafxtest.buildGradle.main.iml" />
-      <module fileurl="file://$PROJECT_DIR$/.idea/modules/javafxtest.buildGradle.test.iml" filepath="$PROJECT_DIR$/.idea/modules/javafxtest.buildGradle.test.iml" />
     </modules>
   </component>
 </project>

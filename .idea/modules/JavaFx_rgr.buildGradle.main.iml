@@ -3,10 +3,7 @@
   <component name="NewModuleRootManager" LANGUAGE_LEVEL="JDK_1_8">
     <output url="file://$MODULE_DIR$/../../buildGradle/build/classes/java/main" />
     <exclude-output />
-    <content url="file://$MODULE_DIR$/../../buildGradle/src/main">
-      <sourceFolder url="file://$MODULE_DIR$/../../buildGradle/src/main/java" isTestSource="false" />
-      <sourceFolder url="file://$MODULE_DIR$/../../buildGradle/src/main/resources" type="java-resource" />
-    </content>
+    <content url="file://$MODULE_DIR$/../../buildGradle/src/main" />
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
     <orderEntry type="library" name="Gradle: org.springframework:spring-core:2.5.6" level="project" />

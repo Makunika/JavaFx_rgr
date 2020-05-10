@@ -44,6 +44,7 @@ public class ContextMenusController {
     private final PicterViewer          picterViewer;
     private final TextViewer            textViewer;
     private final MediaViewer           mediaViewer;
+    private final StackPane             stackPane;
     private ContextMenu                 contextMenuForTree;
 
     public ContextMenusController(ContextMenu notRowContextMenu, TreeTableController treeTableController,
@@ -59,6 +60,7 @@ public class ContextMenusController {
         this.picterViewer = new PicterViewer(stackPane);
         this.textViewer = new TextViewer(stackPane);
         this.mediaViewer = new MediaViewer(stackPane);
+        this.stackPane = stackPane;
         this.labelIndicator = labelIndicator;
         load();
     }
@@ -81,7 +83,7 @@ public class ContextMenusController {
                 );
                 //Скачать
                 menuItems.get(0).setOnAction(event -> {
-                        downloadFile(row.getItem());
+                    downloadFile(row.getItem());
                 });
 
                 //Удалить
@@ -177,16 +179,14 @@ public class ContextMenusController {
             else
             {
                 Platform.runLater(() -> {
-                    labelErr.setText("Delete error");
-                    Timer timer = new Timer(labelErr,6);
+                    new Alert(stackPane,"Ошибка при удалении: " + response.getCode() + " " + response.getText()).show();
                 });
             }
         });
 
         networkServiceMessage.setOnFailed(event -> {
             Platform.runLater(() -> {
-                labelErr.setText("lost connection");
-                Timer timer = new Timer(labelErr,6);
+                new Alert(stackPane).show();
             });
         });
 
@@ -234,8 +234,7 @@ public class ContextMenusController {
 
         networkServiceFileDownload.setOnFailed(event1 -> {
             Platform.runLater(() -> {
-                labelErr.setText("lost connection");
-                Timer timer = new Timer(labelErr,6);
+                new Alert(stackPane).show();
                 progressIndicator.setVisible(false);
                 labelIndicator.setVisible(false);
             });
@@ -254,8 +253,7 @@ public class ContextMenusController {
                 });
             } else {
                 Platform.runLater(() -> {
-                    labelErr.setText("Fail download");
-                    Timer timer = new Timer(labelErr,6);
+                    new Alert(stackPane, "Ошибка при загрузке: " + response.getCode() + " " + response.getText()).show();
                     progressIndicator.setVisible(false);
                     labelIndicator.setVisible(false);
                 });
@@ -308,8 +306,7 @@ public class ContextMenusController {
                         if (!response.isValidCode()) {
                             Platform.runLater(() -> {
                                 item.setName(oldName);
-                                labelErr.setText("Fail Rename");
-                                Timer timer = new Timer(labelErr,6);
+                                new Alert(stackPane, "Ошибка при переименовании: " + response.getCode() + " " + response.getText()).show();
                                 treeTableController.updateTable();
                                 treeTableController.updateTree();
                             });
@@ -320,8 +317,7 @@ public class ContextMenusController {
                     networkServiceMessage.setOnFailed(event1 -> {
                         Platform.runLater(() -> {
                             item.setName(oldName);
-                            labelErr.setText("lost connection");
-                            Timer timer = new Timer(labelErr,6);
+                            new Alert(stackPane).show();
                             treeTableController.updateTable();
                             treeTableController.updateTree();
                         });
@@ -357,9 +353,7 @@ public class ContextMenusController {
 
             networkServiceFileDownload.setOnFailed(event1 -> {
                 Platform.runLater(() -> {
-                    labelErr.setText("lost connection");
-                    Timer timer = new Timer(labelErr,6);
-                    progressIndicator.setVisible(false);
+                    new Alert(stackPane).show();
                     labelIndicator.setVisible(false);
                 });
             });
@@ -379,8 +373,7 @@ public class ContextMenusController {
                     });
                 } else {
                     Platform.runLater(() -> {
-                        labelErr.setText("Download Failed");
-                        Timer timer = new Timer(labelErr,6);
+                        new Alert(stackPane,"Ошибка при загрузке: " + response.getCode() + " " + response.getText()).show();
                         progressIndicator.setVisible(false);
                         labelIndicator.setVisible(false);
                     });
@@ -464,8 +457,7 @@ public class ContextMenusController {
                         }
                         else {
                             Platform.runLater(() -> {
-                                labelErr.setText("Fail create new path");
-                                Timer timer = new Timer(labelErr,6);
+                                new Alert(stackPane, "Ошибка при создании новой папки: " + response.getCode() + " " + response.getText()).show();
                             });
                         }
                     });
@@ -473,8 +465,7 @@ public class ContextMenusController {
 
                     networkServiceMessage.setOnFailed(event1 -> {
                         Platform.runLater(() -> {
-                            labelErr.setText("lost connection");
-                            Timer timer = new Timer(labelErr,6);
+                            new Alert(stackPane).show();
                         });
                     });
 
@@ -512,8 +503,7 @@ public class ContextMenusController {
             }
             else {
                 Platform.runLater(() -> {
-                    labelErr.setText("Fail relocate");
-                    Timer timer = new Timer(labelErr,6);
+                    new Alert(stackPane, "Ошибка при перемещении: " +response.getCode() + " " + response.getText()).show();
                 });
             }
             Platform.runLater(() -> {
@@ -523,8 +513,7 @@ public class ContextMenusController {
 
         networkServiceMessage.setOnFailed(event1 -> {
             Platform.runLater(() -> {
-                labelErr.setText("lost connection");
-                Timer timer = new Timer(labelErr,6);
+                new Alert(stackPane).show();
                 notRowContextMenu.getItems().get(3).setDisable(true);
             });
         });
@@ -553,8 +542,7 @@ public class ContextMenusController {
 
             networkServiceFileUpload.setOnFailed(event1 -> {
                 Platform.runLater(() -> {
-                    labelErr.setText("lost connection");
-                    Timer timer = new Timer(labelErr,6);
+                    new Alert(stackPane).show();
                     progressIndicator.setVisible(false);
                     labelIndicator.setVisible(false);
                 });
@@ -582,8 +570,7 @@ public class ContextMenusController {
 
                 } else {
                     Platform.runLater(() -> {
-                        labelErr.setText("Слишком большой размер");
-                        Timer timer = new Timer(labelErr,6);
+                        new Alert(stackPane, "Ошибка: " + response.getCode() + " " + response.getText()).show();
                         progressIndicator.setVisible(false);
                         labelIndicator.setVisible(false);
                     });
@@ -623,8 +610,7 @@ public class ContextMenusController {
 
             networkServiceFileUpload.setOnFailed(event1 -> {
                 Platform.runLater(() -> {
-                    labelErr.setText("lost connection");
-                    Timer timer = new Timer(labelErr,6);
+                    new Alert(stackPane).show();
                     progressIndicator.setVisible(false);
                     labelIndicator.setVisible(false);
                 });
@@ -652,8 +638,7 @@ public class ContextMenusController {
 
                 } else {
                     Platform.runLater(() -> {
-                        labelErr.setText("Слишком большой размер");
-                        Timer timer = new Timer(labelErr,6);
+                        new Alert(stackPane, "Ошибка: " + response.getCode() + " " + response.getText()).show();
                         progressIndicator.setVisible(false);
                         labelIndicator.setVisible(false);
                     });
