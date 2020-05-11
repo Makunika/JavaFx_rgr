@@ -1,15 +1,21 @@
 package sample.packFileManager;
 
+import com.jfoenix.controls.JFXButton;
+import com.jfoenix.controls.JFXPopup;
 import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
+import javafx.beans.value.ObservableObjectValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXMLLoader;
+import javafx.geometry.Insets;
+import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.input.MouseButton;
 import javafx.scene.layout.StackPane;
+import javafx.scene.layout.VBox;
 import javafx.scene.media.MediaPlayer;
 import javafx.stage.DirectoryChooser;
 import javafx.stage.FileChooser;
@@ -73,69 +79,79 @@ public class ContextMenusController {
 
     private void loadInRow() {
         treeTableController.getRefTableView().setRowFactory(call -> {
-                final TableRow<DataFile> row = new TableRow<>();
-                final ContextMenu contextMenu = new ContextMenu();
-                ObservableList<MenuItem> menuItems = FXCollections.observableArrayList(
-                        new MenuItem("Скачать"),
-                        new MenuItem("Удалить"),
-                        new MenuItem("Переименовать"),
-                        new MenuItem("Переместить")
-                );
-                //Скачать
-                menuItems.get(0).setOnAction(event -> {
-                    downloadFile(row.getItem());
-                });
+            final TableRow<DataFile> row = new TableRow<>();
+            final JFXPopup contextMenu = new JFXPopup();
+            ObservableList<JFXButton> menuItems = FXCollections.observableArrayList(
+                    new JFXButton("Скачать"),
+                    new JFXButton("Удалить"),
+                    new JFXButton("Переименовать"),
+                    new JFXButton("Переместить")
+            );
+            VBox vBox = new VBox();
+            vBox.getChildren().setAll(menuItems);
+            for (JFXButton button: menuItems) {
+                button.setPadding(new Insets(10));
+                button.setFocusTraversable(false);
+                button.setPrefWidth(120);
+            }
+            contextMenu.setPopupContent(vBox);
+            //Скачать
+            menuItems.get(0).setOnAction(event -> {
+                downloadFile(row.getItem());
+            });
+            //Удалить
+            menuItems.get(1).setOnAction(event -> {
+                delete(row.getItem());
+            });
+            //Переименовать
+            menuItems.get(2).setOnAction(event -> {
+                rename(row.getItem());
+            });
+            //Переместить
+            menuItems.get(3).setOnAction(event -> {
+                treeTableController.setMoved(treeTableController.findByDataFile(row.getItem()),
+                        treeTableController.getPathName().getText().substring(DataClient.login.length()));
+                contextMenu.hide();
+                //переместить сюда... становиться видимым
+                notRowContextMenu.getItems().get(3).setDisable(false);
+            });
+            JFXButton button = new JFXButton("HELLO");
+            JFXPopup popup = new JFXPopup();
+            popup.setPopupContent(button);
 
-                //Удалить
-                menuItems.get(1).setOnAction(event -> {
-                    delete(row.getItem());
-                });
-
-                //Переименовать
-                menuItems.get(2).setOnAction(event -> {
-                    rename(row.getItem());
-                });
-
-                //Переместить
-                menuItems.get(3).setOnAction(event -> {
-                    treeTableController.setMoved(treeTableController.findByDataFile(row.getItem()),
-                            treeTableController.getPathName().getText().substring(DataClient.login.length()));
-                    //переместить сюда... становиться видимым
-                    notRowContextMenu.getItems().get(3).setDisable(false);
-                });
-
-
-                contextMenu.getItems().addAll(menuItems);
-                //двойной клик
-                row.setOnMouseClicked(event -> {
-                    if (event.getClickCount() == 2 && event.getButton().equals(MouseButton.PRIMARY)) {
-                        DataFile item = row.getItem();
-                        if (item != null) {
-                            if (!item.isFile()) {
-                                treeTableController.getRefTreeView().getSelectionModel().select(treeTableController.findByDataFile(item));
-                                treeTableController.getRefTreeView().getSelectionModel().getSelectedItem().setExpanded(true);
-                                treeTableController.treeChildToTable();
-                            } else if (item.isPng()) {
-                                picterViewerLoad(item);
-                            } else if (item.isTxt()) {
-                                txtViewerLoad(item);
-                            } else if (item.isMedia()) {
-                                mediaViewerLoad(item);
-                            }
+            JFXButton button2 = new JFXButton("HELLO2");
+            JFXPopup popup2 = new JFXPopup();
+            popup2.setPopupContent(button2);
+            //двойной клик
+            row.setOnMouseClicked(event -> {
+                if (event.getClickCount() == 2 && event.getButton().equals(MouseButton.PRIMARY)) {
+                    DataFile item = row.getItem();
+                    if (item != null) {
+                        if (!item.isFile()) {
+                            treeTableController.getRefTreeView().getSelectionModel().select(treeTableController.findByDataFile(item));
+                            treeTableController.getRefTreeView().getSelectionModel().getSelectedItem().setExpanded(true);
+                            treeTableController.treeChildToTable();
+                        } else if (item.isPng()) {
+                            picterViewerLoad(item);
+                        } else if (item.isTxt()) {
+                            txtViewerLoad(item);
+                        } else if (item.isMedia()) {
+                            mediaViewerLoad(item);
                         }
                     }
-                });
-
-
-                // Set context menu on row, but use a binding to make it only show for non-empty rows:
-                row.contextMenuProperty().bind(
-                        Bindings.when(row.emptyProperty())
-                                .then((ContextMenu) null)
-                                .otherwise(contextMenu)
-                );
-                return row;
-            }
-        );
+                }
+                if (event.getButton().equals(MouseButton.SECONDARY))
+                {
+                    TableRow<DataFile> row_e = (TableRow<DataFile>) event.getSource();
+                    if (row_e.isEmpty()) {
+                        popup2.show(stackPane, JFXPopup.PopupVPosition.TOP, JFXPopup.PopupHPosition.LEFT, event.getSceneX(), event.getSceneY());
+                    } else {
+                        contextMenu.show(stackPane, JFXPopup.PopupVPosition.TOP, JFXPopup.PopupHPosition.LEFT, event.getSceneX(), event.getSceneY());
+                    }
+                }
+            });
+            return row;
+        });
 
     }
 

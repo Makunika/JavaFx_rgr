@@ -182,7 +182,7 @@ public class FileManager implements Initializable {
         dateColumn = new TableColumn<>("Date");
         iconColumn.setStyle("-fx-alignment: CENTER");
 
-
+        tableView.setContextMenu(null);
         iconColumn.setCellValueFactory(cellData -> cellData.getValue().iconProperty());
         nameColumn.setCellValueFactory(cellData -> cellData.getValue().nameProperty());
         sizeColumn.setCellValueFactory(new Callback<>() {
