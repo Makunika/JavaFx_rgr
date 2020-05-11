@@ -51,16 +51,6 @@
                      <columnResizePolicy>
                         <TableView fx:constant="CONSTRAINED_RESIZE_POLICY" />
                      </columnResizePolicy>
-                     <contextMenu>
-                        <ContextMenu fx:id="contextMenuNotRow">
-                          <items>
-                              <MenuItem fx:id="contextMenuNewPath" mnemonicParsing="false" text="Создать новую папку" />
-                            <MenuItem fx:id="contextMenuLoadPath" mnemonicParsing="false" text="Загрузить папку" />
-                              <MenuItem fx:id="contextMenuLoad" mnemonicParsing="false" text="Загрузить" />
-                             <MenuItem fx:id="contextMenuRelocaeMaybe" mnemonicParsing="false" text="Переместить сюда..." />
-                          </items>
-                        </ContextMenu>
-                     </contextMenu>
                   </TableView>
                   <Label fx:id="pathName" layoutX="346.0" layoutY="20.0" text="Папка" textFill="#4834cd" AnchorPane.leftAnchor="346.0" AnchorPane.topAnchor="20.0">
                      <font>

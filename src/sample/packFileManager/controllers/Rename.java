@@ -1,5 +1,9 @@
 package sample.packFileManager.controllers;
 
+import com.jfoenix.controls.JFXButton;
+import com.jfoenix.controls.JFXDialog;
+import com.jfoenix.controls.JFXTextField;
+import com.jfoenix.validation.RegexValidator;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.Button;
@@ -16,19 +20,17 @@ import java.util.regex.Pattern;
 public class Rename implements Initializable {
 
     @FXML
-    private TextField nameField;
+    private JFXTextField nameField;
 
     @FXML
-    private Button okButton;
+    private JFXButton okButton;
 
     @FXML
-    private Button canselButton;
+    private JFXButton canselButton;
 
-    @FXML
-    private Label labelErr;
+    private JFXDialog dialog;
 
     public DataFile dataFile;
-
 
     public boolean isEdit;
 
@@ -37,31 +39,40 @@ public class Rename implements Initializable {
         nameField.setText(dataFile.getName());
     }
 
+    public void setPromptText(String value)
+    {
+        nameField.setPromptText(value);
+    }
+
     @Override
     public void initialize(URL location, ResourceBundle resources) {
 
         isEdit = false;
+        RegexValidator validator = new RegexValidator();
+        validator.setMessage("Неправильные данные");
+        nameField.getValidators().add(validator);
         okButton.setOnAction(event -> {
-            Pattern pattern = Pattern.compile("\\.");
-            String[] strings = pattern.split(nameField.getText());
-            if ((strings.length != 1 && dataFile.isFile())
-                    || (strings.length == 1 && !dataFile.isFile())) {
+            validator.setRegexPattern(!dataFile.isFile() ? "[^/?*:;{}\\\\]+" : "[^/?*:;{}\\\\]+\\.[^/?*:;{}\\\\]+");
+            if (nameField.validate()) {
                 dataFile.setName(nameField.getText());
                 isEdit = true;
-                Stage stage = (Stage) canselButton.getScene().getWindow();
-                stage.close();
-            }
-            else {
-                labelErr.setText("Неправильные данные");
+                dialog.close();
             }
         });
 
         canselButton.setOnAction(event -> {
             isEdit = false;
-            Stage stage = (Stage) canselButton.getScene().getWindow();
-            stage.close();
+            dialog.close();
         });
 
 
+    }
+
+    public void setDialog(JFXDialog dialog) {
+        this.dialog = dialog;
+    }
+
+    public void setParentDialog(JFXDialog dialog) {
+        this.dialog = dialog;
     }
 }

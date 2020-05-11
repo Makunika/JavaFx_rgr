@@ -1,6 +1,7 @@
 package sample.packFileManager;
 
 import com.jfoenix.controls.JFXButton;
+import com.jfoenix.controls.JFXDialog;
 import com.jfoenix.controls.JFXPopup;
 import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
@@ -9,11 +10,13 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXMLLoader;
 import javafx.geometry.Insets;
+import javafx.geometry.Point3D;
 import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.input.MouseButton;
+import javafx.scene.layout.Region;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.media.MediaPlayer;
@@ -22,6 +25,7 @@ import javafx.stage.FileChooser;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import sample.client.DataClient;
+import sample.client.SVGIcons;
 import sample.client.Timer;
 import sample.connection.*;
 import sample.packFileManager.controllers.Rename;
@@ -40,7 +44,6 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 
 public class ContextMenusController {
-    private final ContextMenu           notRowContextMenu;
     private final TreeTableController   treeTableController;
     private final ProgressIndicator     progressIndicator;
     private final Label                 labelIndicator;
@@ -51,13 +54,13 @@ public class ContextMenusController {
     private final TextViewer            textViewer;
     private final MediaViewer           mediaViewer;
     private final StackPane             stackPane;
-    private ContextMenu                 contextMenuForTree;
+    private MyPopup                     popupInRow;
+    private MyPopup                     popupNotRow;
 
-    public ContextMenusController(ContextMenu notRowContextMenu, TreeTableController treeTableController,
+    public ContextMenusController(TreeTableController treeTableController,
                                   ProgressIndicator progressIndicator, Label labelIndicator , Label storageLabel,
                                   ProgressBar storageProgress, Label labelErr, StackPane stackPane)
     {
-        this.notRowContextMenu = notRowContextMenu;
         this.progressIndicator = progressIndicator;
         this.treeTableController = treeTableController;
         this.labelErr = labelErr;
@@ -72,56 +75,118 @@ public class ContextMenusController {
     }
 
     private void load() {
+        //Загрузка попапов
+        MySVGPath download = new MySVGPath(SVGIcons.GET_APP);
+        ObservableList<MySVGPath> svgs = FXCollections.observableArrayList(
+                new MySVGPath(SVGIcons.GET_APP),
+                new MySVGPath(SVGIcons.DELETE),
+                new MySVGPath(SVGIcons.EDIT),
+                new MySVGPath(SVGIcons.MOVE),
+                new MySVGPath(SVGIcons.CREATE_NEW_FOLDER),
+                new MySVGPath(SVGIcons.GET_APP),
+                new MySVGPath(SVGIcons.GET_APP),
+                new MySVGPath(SVGIcons.MOVE)
+        );
+        svgs.get(5).setRotate(180);
+        svgs.get(6).setRotate(180);
+        for (MySVGPath svg: svgs) {
+            svg.setStyle("-fx-fill: #99999e; -fx-alignment: center-left");
+            svg.setScaleX(0.8);
+            svg.setScaleY(0.8);
+        }
+
+        ObservableList<JFXButton> inRow = FXCollections.observableArrayList(
+                new JFXButton("Скачать", svgs.get(0)),
+                new JFXButton("Удалить", svgs.get(1)),
+                new JFXButton("Переименовать", svgs.get(2)),
+                new JFXButton("Переместить", svgs.get(3))
+        );
+        popupInRow = new MyPopup(inRow, 200);
+        ObservableList<JFXButton> notRow = FXCollections.observableArrayList(
+                new JFXButton("Создать новую папку", svgs.get(4)),
+                new JFXButton("Загрузить папку", svgs.get(5)),
+                new JFXButton("Загрузить файл", svgs.get(6)),
+                new JFXButton("Переместить сюда...", svgs.get(7))
+        );
+        popupNotRow = new MyPopup(notRow,200);
+        //загрузка иx действий
         loadNotRow();
         loadInRow();
     }
 
+    private void loadNotRow() {
+
+        treeTableController.getRefTableView().setOnMouseClicked(event -> {
+            if (event.getButton().equals(MouseButton.SECONDARY) && treeTableController.getRefTableView().getItems().isEmpty())
+            {
+                popupNotRow.show(treeTableController.getRefTableView(),event.getX(),event.getY());
+            }
+        });
+
+        //Новая папка
+        popupNotRow.get(0).setOnAction(event -> {
+            popupNotRow.hide();
+            newPath();
+        });
+
+
+        //Загрузить папку
+        popupNotRow.get(1).setOnAction(event -> {
+            popupNotRow.hide();
+            uploadPath();
+        });
+
+
+        //Загрузить
+        popupNotRow.get(2).setOnAction(event -> {
+            popupNotRow.hide();
+            uploadFile();
+        });
+
+
+        //Переместить сюда...
+        popupNotRow.get(3).setDisable(true);
+        popupNotRow.get(3).setOnAction(event -> {
+            popupNotRow.hide();
+            relocate();
+        });
+    }
 
     private void loadInRow() {
         treeTableController.getRefTableView().setRowFactory(call -> {
             final TableRow<DataFile> row = new TableRow<>();
-            final JFXPopup contextMenu = new JFXPopup();
-            ObservableList<JFXButton> menuItems = FXCollections.observableArrayList(
-                    new JFXButton("Скачать"),
-                    new JFXButton("Удалить"),
-                    new JFXButton("Переименовать"),
-                    new JFXButton("Переместить")
-            );
-            VBox vBox = new VBox();
-            vBox.getChildren().setAll(menuItems);
-            for (JFXButton button: menuItems) {
-                button.setPadding(new Insets(10));
-                button.setFocusTraversable(false);
-                button.setPrefWidth(120);
-            }
-            contextMenu.setPopupContent(vBox);
-            //Скачать
-            menuItems.get(0).setOnAction(event -> {
-                downloadFile(row.getItem());
-            });
-            //Удалить
-            menuItems.get(1).setOnAction(event -> {
-                delete(row.getItem());
-            });
-            //Переименовать
-            menuItems.get(2).setOnAction(event -> {
-                rename(row.getItem());
-            });
-            //Переместить
-            menuItems.get(3).setOnAction(event -> {
-                treeTableController.setMoved(treeTableController.findByDataFile(row.getItem()),
-                        treeTableController.getPathName().getText().substring(DataClient.login.length()));
-                contextMenu.hide();
-                //переместить сюда... становиться видимым
-                notRowContextMenu.getItems().get(3).setDisable(false);
-            });
-            JFXButton button = new JFXButton("HELLO");
-            JFXPopup popup = new JFXPopup();
-            popup.setPopupContent(button);
 
-            JFXButton button2 = new JFXButton("HELLO2");
-            JFXPopup popup2 = new JFXPopup();
-            popup2.setPopupContent(button2);
+            //Скачать
+            popupInRow.get(0).setOnAction(event -> {
+                popupInRow.hide();
+                downloadFile(treeTableController.getRefTableView().getSelectionModel().getSelectedItem());
+            });
+
+
+            //Удалить
+            popupInRow.get(1).setOnAction(event -> {
+                popupInRow.hide();
+                delete(treeTableController.getRefTableView().getSelectionModel().getSelectedItem());
+            });
+
+
+            //Переименовать
+            popupInRow.get(2).setOnAction(event -> {
+                popupInRow.hide();
+                rename(treeTableController.getRefTableView().getSelectionModel().getSelectedItem());
+            });
+
+
+            //Переместить
+            popupInRow.get(3).setOnAction(event -> {
+                treeTableController.setMoved(treeTableController.findByDataFile(treeTableController.getRefTableView().getSelectionModel().getSelectedItem()),
+                        treeTableController.getPathName().getText().substring(DataClient.login.length()));
+                popupInRow.hide();
+                //переместить сюда... становится видимым
+                popupNotRow.get(3).setDisable(false);
+            });
+
+
             //двойной клик
             row.setOnMouseClicked(event -> {
                 if (event.getClickCount() == 2 && event.getButton().equals(MouseButton.PRIMARY)) {
@@ -144,9 +209,9 @@ public class ContextMenusController {
                 {
                     TableRow<DataFile> row_e = (TableRow<DataFile>) event.getSource();
                     if (row_e.isEmpty()) {
-                        popup2.show(stackPane, JFXPopup.PopupVPosition.TOP, JFXPopup.PopupHPosition.LEFT, event.getSceneX(), event.getSceneY());
+                        popupNotRow.show(stackPane, event.getSceneX(), event.getSceneY());
                     } else {
-                        contextMenu.show(stackPane, JFXPopup.PopupVPosition.TOP, JFXPopup.PopupHPosition.LEFT, event.getSceneX(), event.getSceneY());
+                        popupInRow.show(stackPane, event.getSceneX(), event.getSceneY());
                     }
                 }
             });
@@ -293,55 +358,54 @@ public class ContextMenusController {
 
                 rename.dataFile = item;
                 rename.setName();
-                Stage stage = new Stage();
-                stage.setTitle("Восстановление пароля");
-                stage.setIconified(false);
-                stage.setScene(new Scene(root));
-                stage.initModality(Modality.WINDOW_MODAL);
-                stage.initOwner(labelErr.getScene().getWindow());
-                stage.showAndWait();
+                rename.setPromptText("Новое название");
+                JFXDialog dialog = new JFXDialog();
+                rename.setParentDialog(dialog);
+                dialog.setContent((Region) root);
+                dialog.show(stackPane);
+
+                dialog.setOnDialogClosed(event -> {
+                    if (rename.isEdit) {
+
+                        treeTableController.updateTable();
+                        treeTableController.updateTree();
+
+                        Request request = new Request(
+                                "RENAME",
+                                treeTableController.getPathName().getText().substring(DataClient.login.length()) + oldName +
+                                        "//" + item.getName(),
+                                202);
+
+                        NetworkServiceMessage networkServiceMessage = new NetworkServiceMessage(request);
 
 
-                if (rename.isEdit) {
+                        networkServiceMessage.setOnSucceeded(event1 -> {
+                            Response response = networkServiceMessage.getValue();
 
-                    treeTableController.updateTable();
-                    treeTableController.updateTree();
+                            if (!response.isValidCode()) {
+                                Platform.runLater(() -> {
+                                    item.setName(oldName);
+                                    new Alert(stackPane, "Ошибка при переименовании: " + response.getCode() + " " + response.getText()).show();
+                                    treeTableController.updateTable();
+                                    treeTableController.updateTree();
+                                });
+                            }
+                        });
 
-                    Request request = new Request(
-                            "RENAME",
-                            treeTableController.getPathName().getText().substring(DataClient.login.length()) + oldName +
-                                    "//" + item.getName(),
-                            202);
 
-                    NetworkServiceMessage networkServiceMessage = new NetworkServiceMessage(request);
-
-
-                    networkServiceMessage.setOnSucceeded(event1 -> {
-                        Response response = networkServiceMessage.getValue();
-
-                        if (!response.isValidCode()) {
+                        networkServiceMessage.setOnFailed(event1 -> {
                             Platform.runLater(() -> {
                                 item.setName(oldName);
-                                new Alert(stackPane, "Ошибка при переименовании: " + response.getCode() + " " + response.getText()).show();
+                                new Alert(stackPane).show();
                                 treeTableController.updateTable();
                                 treeTableController.updateTree();
                             });
-                        }
-                    });
-
-
-                    networkServiceMessage.setOnFailed(event1 -> {
-                        Platform.runLater(() -> {
-                            item.setName(oldName);
-                            new Alert(stackPane).show();
-                            treeTableController.updateTable();
-                            treeTableController.updateTree();
                         });
-                    });
 
-                    networkServiceMessage.start();
+                        networkServiceMessage.start();
 
-                }
+                    }
+                });
             } catch (IOException ex) {
                 ex.printStackTrace();
             }
@@ -404,33 +468,6 @@ public class ContextMenusController {
         }
     }
 
-    private void loadNotRow() {
-
-        //Новая папка
-        notRowContextMenu.getItems().get(0).setOnAction(event -> {
-            newPath();
-        });
-
-
-        //Загрузить папку
-        notRowContextMenu.getItems().get(1).setOnAction(event -> {
-            uploadPath();
-        });
-
-
-        //Загрузить
-        notRowContextMenu.getItems().get(2).setOnAction(event -> {
-            uploadFile();
-        });
-
-
-        //Переместить сюда...
-        notRowContextMenu.getItems().get(3).setDisable(true);
-        notRowContextMenu.getItems().get(3).setOnAction(event -> {
-            relocate();
-        });
-    }
-
     private void newPath() {
         Platform.runLater(() -> {
             try {
@@ -443,51 +480,50 @@ public class ContextMenusController {
 
                 rename.dataFile = newPath;
                 rename.setName();
-                Stage stage = new Stage();
-                stage.setTitle("Новая папка");
-                stage.setIconified(false);
-                stage.setScene(new Scene(root));
-                stage.initModality(Modality.WINDOW_MODAL);
-                stage.initOwner(labelErr.getScene().getWindow());
-                stage.showAndWait();
+                rename.setPromptText("Название новой папки");
+                JFXDialog dialog = new JFXDialog();
+                rename.setParentDialog(dialog);
+                dialog.setContent((Region) root);
+                dialog.show(stackPane);
+
+                dialog.setOnDialogClosed(event -> {
+                    if (rename.isEdit) {
+
+                        Request request = new Request(
+                                "NEWPATH",
+                                treeTableController.getPathName().getText().substring(DataClient.login.length()) +
+                                        "//" + newPath.getName(),
+                                204);
+
+                        NetworkServiceMessage networkServiceMessage = new NetworkServiceMessage(request);
 
 
-                if (rename.isEdit) {
+                        networkServiceMessage.setOnSucceeded(event1 -> {
+                            Response response = networkServiceMessage.getValue();
 
-                    Request request = new Request(
-                            "NEWPATH",
-                            treeTableController.getPathName().getText().substring(DataClient.login.length()) +
-                                    "//" + newPath.getName(),
-                            204);
-
-                    NetworkServiceMessage networkServiceMessage = new NetworkServiceMessage(request);
-
-
-                    networkServiceMessage.setOnSucceeded(event1 -> {
-                        Response response = networkServiceMessage.getValue();
-
-                        if (response.isValidCode()) {
-                            Platform.runLater(() -> {
-                                treeTableController.addItem(newPath);
-                            });
-                        }
-                        else {
-                            Platform.runLater(() -> {
-                                new Alert(stackPane, "Ошибка при создании новой папки: " + response.getCode() + " " + response.getText()).show();
-                            });
-                        }
-                    });
-
-
-                    networkServiceMessage.setOnFailed(event1 -> {
-                        Platform.runLater(() -> {
-                            new Alert(stackPane).show();
+                            if (response.isValidCode()) {
+                                Platform.runLater(() -> {
+                                    treeTableController.addItem(newPath);
+                                });
+                            }
+                            else {
+                                Platform.runLater(() -> {
+                                    new Alert(stackPane, "Ошибка при создании новой папки: " + response.getCode() + " " + response.getText()).show();
+                                });
+                            }
                         });
-                    });
 
-                    networkServiceMessage.start();
 
-                }
+                        networkServiceMessage.setOnFailed(event1 -> {
+                            Platform.runLater(() -> {
+                                new Alert(stackPane).show();
+                            });
+                        });
+
+                        networkServiceMessage.start();
+
+                    }
+                });
             } catch (IOException ex) {
                 ex.printStackTrace();
             }
@@ -523,14 +559,14 @@ public class ContextMenusController {
                 });
             }
             Platform.runLater(() -> {
-                notRowContextMenu.getItems().get(3).setDisable(true);
+                popupNotRow.get(3).setDisable(true);
             });
         });
 
         networkServiceMessage.setOnFailed(event1 -> {
             Platform.runLater(() -> {
                 new Alert(stackPane).show();
-                notRowContextMenu.getItems().get(3).setDisable(true);
+                popupNotRow.get(3).setDisable(true);
             });
         });
 

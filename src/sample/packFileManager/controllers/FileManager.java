@@ -34,24 +34,9 @@ import sample.packFileManager.viewers.TextViewer;
 
 public class FileManager implements Initializable {
 
-    @FXML
-    public MenuItem contextMenuLoadPath;
-
-    @FXML
-    public MenuItem contextMenuLoad;
-
-    @FXML
-    public MenuItem contextMenuRelocaeMaybe;
-
-    @FXML
-    public ContextMenu contextMenuNotRow;
-
     private TreeTableController treeTableController;
 
     private ContextMenusController contextMenusController;
-
-    @FXML
-    private MenuItem contextMenuNewPath;
 
     @FXML
     private Label labelDownload;
@@ -61,7 +46,6 @@ public class FileManager implements Initializable {
 
     @FXML
     private JFXButton backPath;
-
 
     @FXML
     private ResourceBundle resources;
@@ -214,7 +198,7 @@ public class FileManager implements Initializable {
 
 
         //загрузка всех контекстных менюшек
-        contextMenusController = new ContextMenusController(contextMenuNotRow,treeTableController,
+        contextMenusController = new ContextMenusController(treeTableController,
                 progressUpload,labelDownload,storageLabel,storageProgressBar,labelErr, Holder);
 
         loginLabel.setText(DataClient.login);
