@@ -280,7 +280,7 @@ public class ContextMenusController {
     private void recursiveGetSize(TreeItem<DataFile> item, Int size) {
         for (TreeItem<DataFile> it:
              item.getChildren()) {
-            if (it.getValue().isFile())
+            if (!it.getValue().isFile())
             {
                 recursiveGetSize(it,size);
             }
