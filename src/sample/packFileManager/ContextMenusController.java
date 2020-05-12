@@ -89,8 +89,9 @@ public class ContextMenusController {
         );
         svgs.get(5).setRotate(180);
         svgs.get(6).setRotate(180);
+        String str = "#99999e";
         for (MySVGPath svg: svgs) {
-            svg.setStyle("-fx-fill: #99999e; -fx-alignment: center-left");
+            svg.setStyle("-fx-fill: #79a6f2; -fx-alignment: center-left");
             svg.setScaleX(0.8);
             svg.setScaleY(0.8);
         }
@@ -155,7 +156,7 @@ public class ContextMenusController {
     private void loadInRow() {
         treeTableController.getRefTableView().setRowFactory(call -> {
             final TableRow<DataFile> row = new TableRow<>();
-
+            row.setPrefHeight(35);
             //Скачать
             popupInRow.get(0).setOnAction(event -> {
                 popupInRow.hide();
@@ -187,8 +188,10 @@ public class ContextMenusController {
             });
 
 
+
             //двойной клик
             row.setOnMouseClicked(event -> {
+
                 if (event.getClickCount() == 2 && event.getButton().equals(MouseButton.PRIMARY)) {
                     DataFile item = row.getItem();
                     if (item != null) {

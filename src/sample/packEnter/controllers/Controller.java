@@ -14,6 +14,7 @@ import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
+import javafx.scene.image.Image;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.Border;
 import javafx.scene.layout.Region;
@@ -111,7 +112,8 @@ public class Controller  {
                         try {
                             root = FXMLLoader.load(getClass().getClassLoader().getResource("sample/resources/scenepack/FileManager.fxml"), resources);
                             Stage stage = new Stage();
-                            stage.setTitle("File Manager");
+                            stage.setTitle("Bolt Drive");
+                            stage.getIcons().add(new Image("sample\\resources\\icon\\baseline_cloud_black_18dp.png"));
                             stage.setScene(new Scene(root, 1280, 720));
                             ((Node) (event.getSource())).getScene().getWindow().hide();
                             stage.show();
@@ -124,8 +126,7 @@ public class Controller  {
                 }
                 else {
                     Platform.runLater(() -> {
-                        label.setText("Неправильный логин или пароль");
-                        Timer timer = new Timer(label,10);
+                        new Alert(rootStackPane, "Неправильный логин или пароль").show();
                         passwordText.clear();
                         progressDownload.setVisible(false);
                     });

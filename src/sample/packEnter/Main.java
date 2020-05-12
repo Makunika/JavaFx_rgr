@@ -3,6 +3,7 @@ package sample.packEnter;
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
+import javafx.scene.image.Image;
 import javafx.scene.layout.Pane;
 import javafx.stage.Stage;
 import sample.packEnter.NavigatorEnter;
@@ -22,8 +23,8 @@ public class Main extends Application {
 
     @Override
     public void start(Stage stage) throws Exception{
-        stage.setTitle("File Manager");
-
+        stage.setTitle("Bolt Drive");
+        stage.getIcons().add(new Image("sample\\resources\\icon\\baseline_cloud_black_18dp.png"));
         stage.setScene(createScene(loadMainPane()));
 
         stage.show();

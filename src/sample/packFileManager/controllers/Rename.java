@@ -52,7 +52,7 @@ public class Rename implements Initializable {
         validator.setMessage("Неправильные данные");
         nameField.getValidators().add(validator);
         okButton.setOnAction(event -> {
-            validator.setRegexPattern(!dataFile.isFile() ? "[^/?*:;{}\\\\]+" : "[^/?*:;{}\\\\]+\\.[^/?*:;{}\\\\]+");
+            validator.setRegexPattern(!dataFile.isFile() ? "[^/?*:;\\.{}\\\\]+" : "[^/?*:;{}\\\\]+\\.[^/?*:;{}\\\\]+");
             if (nameField.validate()) {
                 dataFile.setName(nameField.getText());
                 isEdit = true;

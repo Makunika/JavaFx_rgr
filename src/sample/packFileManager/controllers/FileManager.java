@@ -6,6 +6,7 @@ import java.net.URL;
 import java.util.ResourceBundle;
 
 import com.jfoenix.controls.*;
+import com.jfoenix.skins.JFXTreeTableViewSkin;
 import com.jfoenix.svg.SVGGlyph;
 import javafx.application.Platform;
 import javafx.beans.property.SimpleStringProperty;
@@ -160,11 +161,14 @@ public class FileManager implements Initializable {
         //nameColumn.setSortType(TableColumn.SortType.ASCENDING);
 
 
-        iconColumn = new TableColumn<>("Icon");
-        nameColumn = new TableColumn<>("Name");
-        sizeColumn = new TableColumn<>("Size");
-        dateColumn = new TableColumn<>("Date");
+        iconColumn = new TableColumn<>("");
+        nameColumn = new TableColumn<>("Имя");
+        sizeColumn = new TableColumn<>("Размер");
+        dateColumn = new TableColumn<>("Последнее изменение");
         iconColumn.setStyle("-fx-alignment: CENTER");
+        dateColumn.setStyle("-fx-alignment: CENTER-LEFT");
+        sizeColumn.setStyle("-fx-alignment: CENTER-LEFT");
+        dateColumn.setStyle("-fx-alignment: CENTER-LEFT");
 
         tableView.setContextMenu(null);
         iconColumn.setCellValueFactory(cellData -> cellData.getValue().iconProperty());

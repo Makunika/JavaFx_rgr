@@ -27,16 +27,16 @@ public class SVGIconsLoaded {
         {
             folder[i] = new SVGPath();
             folder[i].setContent(SVGIcons.FOLDER.getPath());
-            folder[i].setStyle("-fx-fill: #7d6f70");
+            folder[i].setStyle("-fx-fill:  #79a6f2");
             media[i] = new SVGPath();
             media[i].setContent(SVGIcons.VIDEO_CAM.getPath());
-            media[i].setStyle("-fx-fill: #7d6f70");
+            media[i].setStyle("-fx-fill:  #79a6f2");
             image[i] = new SVGPath();
             image[i].setContent(SVGIcons.IMAGE.getPath());
-            image[i].setStyle("-fx-fill: #7d6f70");
+            image[i].setStyle("-fx-fill:  #79a6f2");
             file[i] = new SVGPath();
             file[i].setContent(SVGIcons.DESCRIPTOR.getPath());
-            file[i].setStyle("-fx-fill: #7d6f70");
+            file[i].setStyle("-fx-fill:  #79a6f2");
         }
         //TODO: MUSIC
     }
