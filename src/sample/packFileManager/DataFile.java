@@ -3,14 +3,16 @@ package sample.packFileManager;
 import javafx.beans.property.*;
 import javafx.scene.shape.SVGPath;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.regex.Pattern;
 
-public class DataFile{
-    //private ObjectProperty<ImageView> icon;
-    private ObjectProperty<SVGPath> icon;
-    private StringProperty name;
-    private StringProperty date;
-    private StringProperty size;
+public class DataFile implements Comparable<DataFile> {
+    private final ObjectProperty<SVGPath> icon;
+    private final StringProperty name;
+    private final StringProperty date;
+    private final StringProperty size;
     private boolean isFile;
     private boolean isPng;
     private boolean isTxt;
@@ -40,8 +42,7 @@ public class DataFile{
         isNone = false;
         isTxt = false;
         isMedia = false;
-        suffix = ".file";
-
+        suffix = ".path";
         if (isFile) {
             Pattern pattern = Pattern.compile("\\.");
             String[] strings = pattern.split(name);
@@ -77,6 +78,16 @@ public class DataFile{
         }
         else {
             setIcon(SVGIconsLoaded.getInstance().getFolder());
+        }
+
+        //date
+
+        try {
+            Date date1=new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").parse(date);
+            SimpleDateFormat dateFormat = new SimpleDateFormat("dd.MM.yyyy HH:mm");
+            setDate(dateFormat.format(date1));
+        } catch (ParseException e) {
+            e.printStackTrace();
         }
 
     }
@@ -154,8 +165,14 @@ public class DataFile{
     }
 
 
+
     @Override
     public String toString() {
         return name.getValue();
+    }
+
+    @Override
+    public int compareTo(DataFile o) {
+        return getName().compareTo(o.getName());
     }
 }

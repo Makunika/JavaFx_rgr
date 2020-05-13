@@ -9,6 +9,15 @@
     -fx-table-cell-border-color: transparent;
 }
 
+.table-view .table-column {
+    -fx-alignment: CENTER-LEFT;
+}
+
+.table-view .column-header .arrow {
+    -fx-background-color: #79a6f2;
+    -fx-shape: "M7.41 8.59L12 13.17l4.59-4.58L18 10l-6 6-6-6 1.41-1.41z";
+}
+
 .table-view:focused {
     -fx-background-color: transparent;
     -fx-border-color:  transparent;
@@ -106,4 +115,14 @@
 .table-view > .virtual-flow > .scroll-bar > .increment-button,
 .table-view > .virtual-flow > .scroll-bar > .decrement-button {
     -fx-opacity: 0;
+}
+
+.table-view > .virtual-flow > .scroll-bar {
+    -fx-font-size: 5px;
+}
+
+.table-view > .virtual-flow > .scroll-bar:horizontal > .thumb,
+.table-view > .virtual-flow > .scroll-bar:vertical > .thumb {
+    -fx-background-color: #c6c8d2;
+
 }

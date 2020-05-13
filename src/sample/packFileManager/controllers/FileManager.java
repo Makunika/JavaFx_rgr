@@ -3,6 +3,10 @@ package sample.packFileManager.controllers;
 
 import java.io.IOException;
 import java.net.URL;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Comparator;
+import java.util.Date;
 import java.util.ResourceBundle;
 
 import com.jfoenix.controls.*;
@@ -113,17 +117,6 @@ public class FileManager implements Initializable {
     }
 
 
-
-    @FXML
-    void SelectedTable(MouseEvent event) {
-
-    }
-
-    @FXML
-    void SortTable(ActionEvent event) {
-
-    }
-
     @FXML
     void SelectedNode(MouseEvent event) {
         treeTableController.treeChildToTable();
@@ -144,7 +137,6 @@ public class FileManager implements Initializable {
         exitAccountIcon.setContent(SVGIcons.EXIT_ACCOUNT.getPath());
         buttonExitAccount.setGraphic(exitAccountIcon);
         buttonExitAccount.setText("");
-
 
 
         double ratio = (double)DataClient.storageFill / (double)DataClient.storageAll;
@@ -169,8 +161,12 @@ public class FileManager implements Initializable {
         dateColumn.setStyle("-fx-alignment: CENTER-LEFT");
         sizeColumn.setStyle("-fx-alignment: CENTER-LEFT");
         dateColumn.setStyle("-fx-alignment: CENTER-LEFT");
-
-        tableView.setContextMenu(null);
+        sizeColumn.setPrefWidth(80);
+        sizeColumn.setMinWidth(80);
+        sizeColumn.setMaxWidth(80);
+        dateColumn.setPrefWidth(180);
+        dateColumn.setMinWidth(180);
+        dateColumn.setMaxWidth(180);
         iconColumn.setCellValueFactory(cellData -> cellData.getValue().iconProperty());
         nameColumn.setCellValueFactory(cellData -> cellData.getValue().nameProperty());
         sizeColumn.setCellValueFactory(new Callback<>() {
@@ -189,17 +185,26 @@ public class FileManager implements Initializable {
         iconColumn.setPrefWidth(50);
         iconColumn.setMaxWidth(50);
         iconColumn.setMinWidth(50);
-        iconColumn.setSortable(false);
-        nameColumn.setSortable(false);
         sizeColumn.setSortable(false);
-        dateColumn.setSortable(false);
+        dateColumn.comparatorProperty().set(new Comparator<String>() {
+            @Override
+            public int compare(String o1, String o2) {
+                int result = 0;
+                try {
+                    Date date1 = new SimpleDateFormat("dd.MM.yyyy HH:mm").parse(o1);
+                    Date date2 = new SimpleDateFormat("dd.MM.yyyy HH:mm").parse(o2);
+                    result = date1.compareTo(date2);
+                } catch (ParseException e) {
+                    e.printStackTrace();
+                }
 
-
-
+                return result;
+            }
+        });
 
         treeTableController = new TreeTableController(tableView,treeView,backPath,pathName);
         tableView.getColumns().addAll(iconColumn,nameColumn,dateColumn,sizeColumn);
-
+        tableView.getSortOrder().addAll(nameColumn,sizeColumn);
 
         //загрузка всех контекстных менюшек
         contextMenusController = new ContextMenusController(treeTableController,

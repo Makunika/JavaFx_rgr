@@ -1,9 +1,9 @@
 package sample.packFileManager;
 
-import javafx.scene.control.TreeItem;
+import sample.packFileManager.newtreeitem.FilterableTreeItem;
 
 public class Moved {
-    public TreeItem<DataFile> movedDataFile;
+    public FilterableTreeItem<DataFile> movedDataFile;
     public String oldPathNameMoved;
-    public TreeItem<DataFile> newParent;
+    public FilterableTreeItem<DataFile> newParent;
 }

@@ -1,0 +1,72 @@
+
+
+.tree-view {
+    -fx-font-size: 13px;
+    -fx-background-color: transparent;
+    -fx-border-color: transparent;
+    -fx-border-width: 0;
+}
+
+@font-face {
+    font-family: Roboto;
+    src: url("../font/roboto/Roboto-Regular.ttf");
+}
+
+.tree-view:selected {
+    -fx-background-color: transparent;
+    -fx-border-width: 0;
+}
+
+.tree-cell:focused {
+    -fx-background-color: #e2e2e2;
+    -fx-text-fill: black;
+}
+
+.tree-cell {
+    -fx-background-color: transparent;
+    -fx-pref-height: 35;
+}
+
+.tree-cell > .tree-disclosure-node {
+    -fx-alignment: center;
+}
+
+.tree-disclosure-node {
+    -fx-padding: 10 10 0 5;
+}
+
+.tree-cell > .tree-disclosure-node > .arrow {
+    -fx-shape: "M8.59 16.59L13.17 12 8.59 7.41 10 6l6 6-6 6-1.41-1.41z";
+    -fx-alignment: center;
+}
+
+.tree-cell:selected > .tree-disclosure-node > .arrow {
+    -fx-background-color: black;
+
+}
+
+.tree-view > .virtual-flow > .scroll-bar:horizontal > .thumb,
+.tree-view > .virtual-flow > .scroll-bar:vertical > .thumb {
+    -fx-background-color: #c6c8d2;
+
+}
+
+
+.tree-view > .virtual-flow > .scroll-bar:vertical,
+.tree-view > .virtual-flow > .scroll-bar:vertical > .track,
+.tree-view > .virtual-flow > .scroll-bar:vertical > .track-background,
+.tree-view > .virtual-flow > .scroll-bar:horizontal,
+.tree-view > .virtual-flow > .scroll-bar:horizontal > .track,
+.tree-view > .virtual-flow > .scroll-bar:horizontal > .track-background {
+    -fx-background-color: transparent;
+}
+
+
+.tree-view > .virtual-flow > .scroll-bar > .increment-button,
+.tree-view > .virtual-flow > .scroll-bar > .decrement-button {
+    -fx-opacity: 0;
+}
+
+.tree-view > .virtual-flow > .scroll-bar {
+    -fx-font-size: 5px;
+}

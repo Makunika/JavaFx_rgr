@@ -1,15 +1,17 @@
 package sample.packFileManager;
 
 import com.jfoenix.controls.JFXButton;
-import com.jfoenix.controls.JFXTreeTableView;
-import com.jfoenix.controls.JFXTreeView;
+import javafx.beans.binding.Bindings;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.scene.control.*;
 import javafx.scene.shape.SVGPath;
 import sample.client.DataClient;
 import sample.client.SVGIcons;
+import sample.packFileManager.newtreeitem.FilterableTreeItem;
+import sample.packFileManager.newtreeitem.TreeItemPredicate;
 
+import java.util.Date;
 import java.util.regex.Pattern;
 
 public class TreeTableController {
@@ -18,7 +20,7 @@ public class TreeTableController {
     private final ObservableList<DataFile>  files;
     private final JFXButton                 backPath;
     private final Label                     pathName;
-    private TreeItem<DataFile>              parent;
+    private FilterableTreeItem<DataFile>    parent;
     private Moved                           moved;
 
     public TreeTableController(TableView<? extends DataFile> tableView, TreeView<? extends DataFile> treeView,
@@ -31,7 +33,7 @@ public class TreeTableController {
         backPath.setText("");
         SVGPath path = new SVGPath();
         path.setContent(SVGIcons.ARROW_BACK.getPath());
-        path.setStyle("-fx-fill: #4834cd");
+        path.setStyle("-fx-fill: #79a6f2");
         backPath.setGraphic(path);
         files = FXCollections.observableArrayList();
         init();
@@ -41,17 +43,26 @@ public class TreeTableController {
         refTableView.getSelectionModel().setSelectionMode(SelectionMode.SINGLE);
         refTreeView.getSelectionModel().setSelectionMode(SelectionMode.SINGLE);
 
-        TreeItem<DataFile> root = new TreeItem<>(new DataFile("path", DataClient.login,"date",""));
+        FilterableTreeItem<DataFile> root = new FilterableTreeItem<>(new DataFile("path", DataClient.login,"2020-05-04 20:20:20",""));
 
         if (DataClient.tree != null) {
             Pattern pattern = Pattern.compile("\n");
             parseTree(root, pattern.split(DataClient.tree), new Index(0), 0);
         }
         refTreeView.setRoot(root);
+
+        TextField textField = new TextField();
+        textField.setText(".path");
+        root.predicateProperty().bind(Bindings.createObjectBinding(()
+                        -> TreeItemPredicate.<DataFile> create(dataFile
+                        -> dataFile.getSuffix().equals(textField.getText()))
+                , textField.textProperty()));
+
+
         refTreeView.setShowRoot(true);
         root.setExpanded(true);
         parent = root;
-        for (TreeItem<DataFile> it : root.getChildren()) {
+        for (TreeItem<DataFile> it : root.getInternalChildren()) {
             files.add(it.getValue());
         }
         refTableView.setItems(files);
@@ -65,10 +76,11 @@ public class TreeTableController {
     public void updateTable() {
         files.clear();
 
-        for (TreeItem<DataFile> it : parent.getChildren()) {
+        for (TreeItem<DataFile> it : parent.getInternalChildren()) {
             files.add(it.getValue());
         }
         refTableView.setItems(files);
+        refTableView.sort();
     }
 
     private class Index
@@ -82,10 +94,10 @@ public class TreeTableController {
     }
 
 
-    private void parseTree(TreeItem<DataFile> root, String[] strings, Index index, int rank) {
+    private void parseTree(FilterableTreeItem<DataFile> root, String[] strings, Index index, int rank) {
         Pattern pattern;
 
-        TreeItem<DataFile> newRoot = root;
+        FilterableTreeItem<DataFile> newRoot = root;
         while (index.index != strings.length)
         {
             pattern = Pattern.compile("\t");
@@ -105,13 +117,12 @@ public class TreeTableController {
                 String[] regex = pattern.split(stringsItem[2]);
                 String type = regex[0].equals("-1") ? "path" : "file";
                 String size = regex[0].equals("-1") ? "" : regex[0];
-                TreeItem<DataFile> newItem = null;
+                FilterableTreeItem<DataFile> newItem = null;
                 regex[1] = regex[1].replace("T", " ");
                 regex[1] = regex[1].substring(0,regex[1].length() - 8);
-                newItem = new TreeItem<>(new DataFile(type, stringsItem[1],regex[1], size));
-                root.getChildren().add(newItem);
+                newItem = new FilterableTreeItem<>(new DataFile(type, stringsItem[1],regex[1], size));
+                root.getInternalChildren().add(newItem);
                 newRoot = newItem;
-
             }
 
 
@@ -126,7 +137,7 @@ public class TreeTableController {
         TreeItem<DataFile> item = refTreeView.getSelectionModel().getSelectedItem();
         if (item != null && !item.getValue().isFile()) {
             backPath.setVisible(item.getParent() != null);
-            parent = item;
+            parent = (FilterableTreeItem<DataFile>) item;
             updateTable();
 
             StringBuffer sb = new StringBuffer("");
@@ -139,11 +150,11 @@ public class TreeTableController {
     }
 
 
-    public TreeItem<DataFile> getParent() {
+    public FilterableTreeItem<DataFile> getParent() {
         return parent;
     }
 
-    public void setParent(TreeItem<DataFile> parent) {
+    public void setParent(FilterableTreeItem<DataFile> parent) {
         this.parent = parent;
     }
 
@@ -151,15 +162,15 @@ public class TreeTableController {
         return files;
     }
 
-    public void addItem(TreeItem<DataFile> newElement)
+    public void addItem(FilterableTreeItem<DataFile> newElement)
     {
-        parent.getChildren().add(newElement);
+        parent.getInternalChildren().add(newElement);
         treeChildToTable();
         updateTree();
         updateTable();
     }
 
-    public void setMoved(TreeItem<DataFile> moved, String path) {
+    public void setMoved(FilterableTreeItem<DataFile> moved, String path) {
         this.moved = new Moved();
         this.moved.movedDataFile = moved;
         this.moved.oldPathNameMoved = path;
@@ -171,32 +182,33 @@ public class TreeTableController {
     }
 
     public Moved initMoved() {
-        moved.movedDataFile.getParent().getChildren().remove(moved.movedDataFile);
-        moved.newParent.getChildren().add(moved.movedDataFile);
+        moved.movedDataFile.getParentMy().getInternalChildren().remove(moved.movedDataFile);
+        moved.newParent.getInternalChildren().add(moved.movedDataFile);
         updateTree();
         updateTable();
 
         return moved;
     }
 
-    public TreeItem<DataFile> findByDataFile(DataFile item)
+    public FilterableTreeItem<DataFile> findByDataFile(DataFile item)
     {
-        TreeItem<DataFile> find = getParent().getChildren().get(0);
+        TreeItem<DataFile> find = getParent().getInternalChildren().get(0);
         for (TreeItem<DataFile> it:
-                getParent().getChildren()) {
+                getParent().getInternalChildren()) {
             if (it.getValue() == item)
             {
                 find = it;
+                ((FilterableTreeItem<DataFile>)find).setParentMy(parent);
                 break;
             }
         }
-        return find;
+        return (FilterableTreeItem<DataFile>)find;
     }
 
     public void deleteItem(DataFile item)
     {
-        TreeItem<DataFile> it = findByDataFile(item);
-        it.getParent().getChildren().remove(it);
+        FilterableTreeItem<DataFile> it = findByDataFile(item);
+        ((FilterableTreeItem<DataFile>)it.getParent()).getInternalChildren().remove(it);
         treeChildToTable();
         updateTable();
         updateTree();
@@ -211,7 +223,7 @@ public class TreeTableController {
 
     public void addItem(DataFile item)
     {
-        addItem(new TreeItem<>(item));
+        addItem(new FilterableTreeItem<>(item));
     }
 
     public Button getBackPath() {

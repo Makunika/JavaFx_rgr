@@ -2,33 +2,22 @@ package sample.packFileManager;
 
 import com.jfoenix.controls.JFXButton;
 import com.jfoenix.controls.JFXDialog;
-import com.jfoenix.controls.JFXPopup;
 import javafx.application.Platform;
-import javafx.beans.binding.Bindings;
-import javafx.beans.value.ObservableObjectValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXMLLoader;
-import javafx.geometry.Insets;
-import javafx.geometry.Point3D;
-import javafx.scene.Node;
 import javafx.scene.Parent;
-import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.input.MouseButton;
 import javafx.scene.layout.Region;
 import javafx.scene.layout.StackPane;
-import javafx.scene.layout.VBox;
-import javafx.scene.media.MediaPlayer;
 import javafx.stage.DirectoryChooser;
 import javafx.stage.FileChooser;
-import javafx.stage.Modality;
-import javafx.stage.Stage;
 import sample.client.DataClient;
 import sample.client.SVGIcons;
-import sample.client.Timer;
 import sample.connection.*;
 import sample.packFileManager.controllers.Rename;
+import sample.packFileManager.newtreeitem.FilterableTreeItem;
 import sample.packFileManager.viewers.MediaViewer;
 import sample.packFileManager.viewers.PicterViewer;
 import sample.packFileManager.viewers.TextViewer;
@@ -609,7 +598,7 @@ public class ContextMenusController {
                 if (response.isValidCode()) {
                     Platform.runLater(() -> {
                         DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-                        TreeItem<DataFile> newFile = new TreeItem<>(new DataFile("file",
+                        FilterableTreeItem<DataFile> newFile = new FilterableTreeItem<>(new DataFile("file",
                                 selectedFile.getName(),
                                 dateFormat.format(new Date()),
                                 Long.toString(selectedFile.length())));
@@ -677,7 +666,7 @@ public class ContextMenusController {
                 if (response.isValidCode()) {
                     Platform.runLater(() -> {
                         DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-                        TreeItem<DataFile> newFile = new TreeItem<>(new DataFile("path",
+                        FilterableTreeItem<DataFile> newFile = new FilterableTreeItem<>(new DataFile("path",
                                 selectedPath.getName(),
                                 dateFormat.format(new Date()),
                                 ""));
@@ -710,27 +699,27 @@ public class ContextMenusController {
         }
     }
 
-    private void recTree(File fileSource, TreeItem<DataFile> parent) {
+    private void recTree(File fileSource, FilterableTreeItem<DataFile> parent) {
         for (File file : fileSource.listFiles()) {
             try {
                 BasicFileAttributes atr = Files.readAttributes(file.toPath(), BasicFileAttributes.class);
                 if (atr.isDirectory()) {
                     String data = atr.creationTime().toString();
-                    TreeItem<DataFile> newPath = new TreeItem<>(new DataFile(
+                    FilterableTreeItem<DataFile> newPath = new FilterableTreeItem<>(new DataFile(
                             "path",
                             file.getName(),
                             data.replace("T", " ").substring(0,data.length() - 8),
                             ""));
-                    parent.getChildren().add(newPath);
+                    parent.getInternalChildren().add(newPath);
                     recTree(file,newPath);
                 } else {
                     String data = atr.creationTime().toString();
-                    TreeItem<DataFile> newFile = new TreeItem<>(new DataFile(
+                    FilterableTreeItem<DataFile> newFile = new FilterableTreeItem<>(new DataFile(
                             "file",
                             file.getName(),
                             data.replace("T", " ").substring(0,data.length() - 8),
                             Long.toString(file.length())));
-                    parent.getChildren().add(newFile);
+                    parent.getInternalChildren().add(newFile);
                     DataClient.storageFill += file.length();
                 }
             } catch (IOException e) {
