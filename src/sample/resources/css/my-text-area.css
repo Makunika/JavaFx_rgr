@@ -1,0 +1,57 @@
+/**
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
+
+.text-area,
+.text-area .scroll-pane,
+.text-area:focused,
+.text-area:focused .scroll-pane{
+    -fx-background-color: white;
+}
+
+.text-area .content,
+.text-area:focused .content{
+    -fx-background-color: white;
+    -fx-padding: 0 0 0 0;
+}
+
+.text-area .scroll-bar:horizontal > .thumb,
+.text-area .scroll-bar:vertical > .thumb {
+    -fx-background-color: #99999e;
+}
+
+
+.text-area .scroll-bar:vertical,
+.text-area .scroll-bar:vertical > .track,
+.text-area .scroll-bar:vertical > .track-background,
+.text-area .scroll-bar:horizontal,
+.text-area .scroll-bar:horizontal > .track,
+.text-area .scroll-bar:horizontal > .track-background {
+    -fx-background-color: transparent;
+}
+
+
+.text-area .scroll-bar > .increment-button,
+.text-area .scroll-bar > .decrement-button {
+    -fx-opacity: 0;
+}
+
+.text-area .scroll-bar {
+    -fx-font-size: 7px;
+}

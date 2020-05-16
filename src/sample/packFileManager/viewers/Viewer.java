@@ -48,7 +48,7 @@ public abstract class Viewer {
             file.delete();
         });
         content.getHeading().get(0).setStyle("-fx-font-weight: normal; -fx-text-fill: dimgray; -fx-opacity: 0.5");
-        content.setActions(jfxButton);
+        content.getActions().add(jfxButton);
     }
 
     protected abstract Node getBody();
@@ -89,4 +89,22 @@ public abstract class Viewer {
         content.setPrefSize(width, height);
     }
 
+    protected void setWidth(double width)
+    {
+        content.setPrefWidth(width);
+    }
+
+    protected void setHeight(double height)
+    {
+        content.setPrefHeight(height);
+    }
+
+    protected void setMaxHeight(double height)
+    {
+        content.setMaxHeight(height);
+    }
+
+    public JFXDialogLayout getContent() {
+        return content;
+    }
 }

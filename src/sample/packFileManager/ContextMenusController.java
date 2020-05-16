@@ -72,12 +72,14 @@ public class ContextMenusController {
                 new MySVGPath(SVGIcons.EDIT),
                 new MySVGPath(SVGIcons.MOVE),
                 new MySVGPath(SVGIcons.CREATE_NEW_FOLDER),
-                new MySVGPath(SVGIcons.GET_APP),
-                new MySVGPath(SVGIcons.GET_APP),
+                new MySVGPath(SVGIcons.ADD),
+                new MySVGPath(SVGIcons.ADD),
+                new MySVGPath(SVGIcons.MOVE),
+                new MySVGPath(SVGIcons.CREATE_NEW_FOLDER),
+                new MySVGPath(SVGIcons.ADD),
+                new MySVGPath(SVGIcons.ADD),
                 new MySVGPath(SVGIcons.MOVE)
         );
-        svgs.get(5).setRotate(180);
-        svgs.get(6).setRotate(180);
         String str = "#99999e";
         for (MySVGPath svg: svgs) {
             svg.setStyle("-fx-fill: #79a6f2; -fx-alignment: center-left");
@@ -89,16 +91,20 @@ public class ContextMenusController {
                 new JFXButton("Скачать", svgs.get(0)),
                 new JFXButton("Удалить", svgs.get(1)),
                 new JFXButton("Переименовать", svgs.get(2)),
-                new JFXButton("Переместить", svgs.get(3))
+                new JFXButton("Переместить", svgs.get(3)),
+                new JFXButton("Создать новую папку", svgs.get(8)),
+                new JFXButton("Загрузить файл", svgs.get(9)),
+                new JFXButton("Загрузить папку", svgs.get(10)),
+                new JFXButton("Переместить сюда...", svgs.get(11))
         );
-        popupInRow = new MyPopup(inRow, 200);
         ObservableList<JFXButton> notRow = FXCollections.observableArrayList(
                 new JFXButton("Создать новую папку", svgs.get(4)),
-                new JFXButton("Загрузить папку", svgs.get(5)),
                 new JFXButton("Загрузить файл", svgs.get(6)),
+                new JFXButton("Загрузить папку", svgs.get(5)),
                 new JFXButton("Переместить сюда...", svgs.get(7))
         );
         popupNotRow = new MyPopup(notRow,200);
+        popupInRow = new MyPopup(inRow, 200);
         //загрузка иx действий
         loadNotRow();
         loadInRow();
@@ -121,14 +127,14 @@ public class ContextMenusController {
 
 
         //Загрузить папку
-        popupNotRow.get(1).setOnAction(event -> {
+        popupNotRow.get(2).setOnAction(event -> {
             popupNotRow.hide();
             uploadPath();
         });
 
 
-        //Загрузить
-        popupNotRow.get(2).setOnAction(event -> {
+        //Загрузить файл
+        popupNotRow.get(1).setOnAction(event -> {
             popupNotRow.hide();
             uploadFile();
         });
@@ -174,6 +180,36 @@ public class ContextMenusController {
                 popupInRow.hide();
                 //переместить сюда... становится видимым
                 popupNotRow.get(3).setDisable(false);
+                popupInRow.get(7).setDisable(false);
+            });
+
+
+            //Новая папка
+            popupInRow.get(5).setOnAction(event -> {
+                popupInRow.hide();
+                newPath();
+            });
+
+
+            //Загрузить папку
+            popupInRow.get(4).setOnAction(event -> {
+                popupInRow.hide();
+                uploadPath();
+            });
+
+
+            //Загрузить файл
+            popupInRow.get(6).setOnAction(event -> {
+                popupInRow.hide();
+                uploadFile();
+            });
+
+
+            //Переместить сюда...
+            popupInRow.get(7).setDisable(true);
+            popupInRow.get(7).setOnAction(event -> {
+                popupInRow.hide();
+                relocate();
             });
 
 
@@ -552,6 +588,7 @@ public class ContextMenusController {
             }
             Platform.runLater(() -> {
                 popupNotRow.get(3).setDisable(true);
+                popupInRow.get(7).setDisable(true);
             });
         });
 
@@ -559,6 +596,7 @@ public class ContextMenusController {
             Platform.runLater(() -> {
                 new Alert(stackPane).show();
                 popupNotRow.get(3).setDisable(true);
+                popupInRow.get(7).setDisable(true);
             });
         });
 

@@ -62,12 +62,13 @@ public class DataFile implements Comparable<DataFile> {
             }
             if (!isPng && suffix.equals(".txt"))
             {
-                setIcon(SVGIconsLoaded.getInstance().getFile());
+                setIcon(SVGIconsLoaded.getInstance().getTxt());
                 isTxt = true;
             }
-            else if (!isPng && suffix.equals(".mp4"))
+            else if (!isPng && (suffix.equals(".mp4") || suffix.equals(".mp3") || suffix.equals(".wav")))
             {
-                setIcon(SVGIconsLoaded.getInstance().getMedia());
+                if (suffix.equals(".mp3") || suffix.equals(".wav")) setIcon(SVGIconsLoaded.getInstance().getMusic());
+                else setIcon(SVGIconsLoaded.getInstance().getMedia());
                 isMedia = true;
             }
             else if (!isPng)

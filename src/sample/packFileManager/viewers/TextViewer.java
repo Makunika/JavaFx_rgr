@@ -1,17 +1,16 @@
 package sample.packFileManager.viewers;
 
-import com.jfoenix.controls.JFXTextArea;
-import com.jfoenix.skins.JFXTextAreaSkin;
 import javafx.scene.Node;
+import javafx.scene.control.TextArea;
 import javafx.scene.layout.StackPane;
 
-import java.io.*;
+import java.io.IOException;
+import java.net.URL;
 import java.nio.file.Files;
-import java.util.Scanner;
 
 public class TextViewer extends Viewer {
 
-    private JFXTextArea textArea;
+    private TextArea textArea;
 
     public TextViewer(StackPane Holder) {
         super(Holder);
@@ -20,8 +19,14 @@ public class TextViewer extends Viewer {
 
     @Override
     protected Node getBody() {
-        textArea = new JFXTextArea();
+        textArea = new TextArea();
         textArea.setEditable(false);
+
+        URL url = this.getClass().getResource("/sample/resources/css/my-text-area.css");
+        String css = url.toExternalForm();
+        textArea.getStylesheets().add(css);
+
+
         return textArea;
     }
 

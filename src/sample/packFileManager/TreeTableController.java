@@ -208,7 +208,7 @@ public class TreeTableController {
     public void deleteItem(DataFile item)
     {
         FilterableTreeItem<DataFile> it = findByDataFile(item);
-        ((FilterableTreeItem<DataFile>)it.getParent()).getInternalChildren().remove(it);
+        it.getParentMy().getInternalChildren().remove(it);
         treeChildToTable();
         updateTable();
         updateTree();

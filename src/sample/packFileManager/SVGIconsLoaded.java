@@ -9,11 +9,13 @@ public class SVGIconsLoaded {
     private SVGPath[] music;
     private SVGPath[] image;
     private SVGPath[] file;
+    private SVGPath[] txt;
     private int iF = 0;
     private int iM = 0;
     private int iI = 0;
     private int iFile = 0;
     private int iMusic = 0;
+    private int iTxt = 0;
 
 
     private SVGIconsLoaded()
@@ -23,6 +25,7 @@ public class SVGIconsLoaded {
         music = new SVGPath[100];
         file = new SVGPath[100];
         image = new SVGPath[100];
+        txt = new SVGPath[100];
         for (int i = 0; i < folder.length; i++)
         {
             folder[i] = new SVGPath();
@@ -35,10 +38,15 @@ public class SVGIconsLoaded {
             image[i].setContent(SVGIcons.IMAGE.getPath());
             image[i].setStyle("-fx-fill:  #79a6f2");
             file[i] = new SVGPath();
-            file[i].setContent(SVGIcons.DESCRIPTOR.getPath());
+            file[i].setContent(SVGIcons.INSERT_DRIVE_FILE.getPath());
             file[i].setStyle("-fx-fill:  #79a6f2");
+            music[i] = new SVGPath();
+            music[i].setContent(SVGIcons.MUSIC.getPath());
+            music[i].setStyle("-fx-fill:  #79a6f2");
+            txt[i] = new SVGPath();
+            txt[i].setContent(SVGIcons.DESCRIPTOR.getPath());
+            txt[i].setStyle("-fx-fill:  #79a6f2");
         }
-        //TODO: MUSIC
     }
 
     private static SVGIconsLoaded svgIconsLoaded;
@@ -81,5 +89,11 @@ public class SVGIconsLoaded {
         iMusic++;
         if (iMusic >= music.length) iMusic = 0;
         return music[iMusic];
+    }
+
+    public SVGPath getTxt() {
+        iTxt++;
+        if (iTxt >= txt.length) iTxt = 0;
+        return txt[iTxt];
     }
 }

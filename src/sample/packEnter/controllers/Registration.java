@@ -125,7 +125,7 @@ public class Registration  {
                 "{3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?|" +
                 "[a-z0-9-]*[a-z0-9]:(?:" +
                 "[\\x01-\\x08\\x0b\\x0c\\x0e-\\x1f\\x21-\\x5a\\x53-\\x7f]|\\\\[\\x01-\\x09\\x0b\\x0c\\x0e-\\x7f])+)\\])";
-        String regex2 = "\\w{3,}";
+        String regex2 = "\\w{3,25}";
 
         RegexValidator emailValidator = new RegexValidator();
         RegexValidator textValidator = new RegexValidator();
@@ -134,7 +134,7 @@ public class Registration  {
         textValidator.setRegexPattern(regex2);
 
         emailValidator.setMessage("Неправильные данные");
-        textValidator.setMessage("Неправильные данные, необходимо больше трех символов");
+        textValidator.setMessage("Слишком мало или слишком много символов");
         loginText.getValidators().add(textValidator);
         emailText.getValidators().add(emailValidator);
         passwordText.getValidators().add(textValidator);
