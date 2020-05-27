@@ -1,6 +1,7 @@
 package sample.packFileManager.controllers;
 
 
+import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.text.ParseException;
@@ -13,7 +14,10 @@ import com.jfoenix.controls.*;
 import com.jfoenix.skins.JFXTreeTableViewSkin;
 import com.jfoenix.svg.SVGGlyph;
 import javafx.application.Platform;
+import javafx.beans.InvalidationListener;
+import javafx.beans.Observable;
 import javafx.beans.property.SimpleStringProperty;
+import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -24,17 +28,25 @@ import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.control.Button;
+import javafx.scene.effect.GaussianBlur;
 import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
+import javafx.scene.image.PixelReader;
+import javafx.scene.image.WritableImage;
 import javafx.scene.input.MouseEvent;
-import javafx.scene.layout.AnchorPane;
-import javafx.scene.layout.StackPane;
+import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.SVGPath;
 import javafx.stage.Stage;
 import javafx.util.Callback;
 import sample.client.DataClient;
 import sample.client.SVGIcons;
+import sample.connection.NetworkServiceMessage;
+import sample.connection.Request;
+import sample.connection.Response;
+import sample.packEnter.controllers.RememberPasswordController;
 import sample.packFileManager.*;
+import sample.packFileManager.Alert;
 import sample.packFileManager.viewers.PicterViewer;
 import sample.packFileManager.viewers.TextViewer;
 
@@ -43,6 +55,12 @@ public class FileManager implements Initializable {
     private TreeTableController treeTableController;
 
     private ContextMenusController contextMenusController;
+
+    private DragAndDrop dragAndDrop;
+
+    @FXML
+    private ImageView imageFon;
+
 
     @FXML
     private Label labelDownload;
@@ -72,6 +90,9 @@ public class FileManager implements Initializable {
     private Label storageLabel;
 
     @FXML
+    private JFXButton buttonSetting;
+
+    @FXML
     private Label labelErr;
 
     @FXML
@@ -98,6 +119,13 @@ public class FileManager implements Initializable {
     @FXML
     private TreeView<DataFile> treeView;
 
+    @FXML
+    private AnchorPane paneFon;
+
+    @FXML
+    private ImageView storageImageView;
+
+    private Image imageFonImage;
 
     @FXML
     void exitAccountClicked(ActionEvent event) {
@@ -108,7 +136,7 @@ public class FileManager implements Initializable {
             root = FXMLLoader.load(getClass().getClassLoader().getResource("sample/resources/scenepack/sample.fxml"), resources);
             Stage stage = new Stage();
             stage.setTitle("Bolt Drive");
-            stage.getIcons().add(new Image("sample\\resources\\icon\\baseline_cloud_black_18dp.png"));
+            stage.getIcons().add(new Image("/sample/resources/icon/baseline_cloud_black_18dp.png"));
             stage.setScene(new Scene(root));
             ((Node) (event.getSource())).getScene().getWindow().hide();
             stage.show();
@@ -133,6 +161,14 @@ public class FileManager implements Initializable {
         pathName.setText(DataClient.login+ "\\");
         progressUpload.setVisible(false);
         labelErr.setText("");
+        if (DataClient.isCustomPicter) {
+            try {
+                imageFonImage = new Image(new File(new File(new File(".").getCanonicalPath()), "custom.png").toURI().toString());
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+
 
         SVGPath exitAccountIcon = new SVGPath();
         exitAccountIcon.setStyle("-fx-fill: #ffffff");
@@ -140,11 +176,14 @@ public class FileManager implements Initializable {
         buttonExitAccount.setGraphic(exitAccountIcon);
         buttonExitAccount.setText("");
 
+        SVGPath settingIcon = new SVGPath();
+        settingIcon.setStyle("-fx-fill: #ffffff");
+        settingIcon.setContent(SVGIcons.SETTING.getPath());
+        buttonSetting.setGraphic(settingIcon);
+        buttonSetting.setText("");
 
-        double ratio = (double)DataClient.storageFill / (double)DataClient.storageAll;
-        storageProgressBar.setProgress(ratio);
-
-        storageLabel.setText(FuncStatic.getStringStorage(DataClient.storageFill) + " / " + FuncStatic.getStringStorage(DataClient.storageAll));
+        FuncStatic.initStorage(storageLabel, storageProgressBar);
+        FuncStatic.updateStorage();
         progressUpload.setProgress(ProgressIndicator.INDETERMINATE_PROGRESS);
 
         //загрузка в tree view
@@ -154,6 +193,19 @@ public class FileManager implements Initializable {
         //настройка таблицы
         //nameColumn.setSortType(TableColumn.SortType.ASCENDING);
 
+        paneFon.heightProperty().addListener(new ChangeListener<Number>() {
+            @Override
+            public void changed(ObservableValue<? extends Number> observable, Number oldValue, Number newValue) {
+                imageFon.setFitHeight(paneFon.getHeight());
+                imageFonResize();
+            }
+        });
+
+        imageFonResize();
+        if (DataClient.isCustomPicter) {
+            GaussianBlur blur = new GaussianBlur(15);
+            storageImageView.setEffect(blur);
+        }
 
         iconColumn = new TableColumn<>("");
         nameColumn = new TableColumn<>("Имя");
@@ -210,7 +262,10 @@ public class FileManager implements Initializable {
 
         //загрузка всех контекстных менюшек
         contextMenusController = new ContextMenusController(treeTableController,
-                progressUpload,labelDownload,storageLabel,storageProgressBar,labelErr, Holder);
+                progressUpload, labelDownload, labelErr, Holder);
+
+        //загрузка дроп
+        dragAndDrop = new DragAndDrop(Holder, progressUpload, labelDownload, treeTableController);
 
         loginLabel.setText(DataClient.login);
 
@@ -219,9 +274,71 @@ public class FileManager implements Initializable {
             treeView.getSelectionModel().select(treeView.getSelectionModel().getSelectedItem().getParent());
             treeTableController.treeChildToTable();
         });
+
+        buttonSetting.setOnAction(event -> {
+            try {
+                FXMLLoader loader = new FXMLLoader(getClass().getResource("/sample/resources/scenepack/settings.fxml"));
+                Parent root = (Parent) loader.load();
+                Settings settings = (Settings) loader.getController();
+                settings.setFileManager(this);
+                JFXDialog dialog = new JFXDialog();
+                dialog.setContent((Region) root);
+                dialog.show(Holder);
+
+
+                dialog.setOnDialogClosed(event1 -> {
+                    if (settings.isYes())
+                    {
+                        try {
+                            DataClient.isCustomPicter = true;
+                            imageFonImage = new Image(new File(new File(new File(".").getCanonicalPath()), "custom.png").toURI().toString());
+                            imageFonResize();
+                            GaussianBlur blur = new GaussianBlur(15);
+                            storageImageView.setEffect(blur);
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                    else if (settings.isNo())
+                    {
+                        imageFonImage = null;
+                        DataClient.isCustomPicter = false;
+                        storageImageView.setImage(null);
+                        imageFon.setImage(null);
+                    }
+                    DataClient.SavedPreferences();
+                });
+
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        });
     }
 
+    private void imageFonResize() {
+        if (DataClient.isCustomPicter) {
+            PixelReader reader = imageFonImage.getPixelReader();
+            double ratio = imageFon.getFitHeight() / imageFon.getFitWidth();
+            double height = imageFonImage.getHeight();
+            double width = height / ratio;
+            double x = imageFonImage.getWidth() / 2 - width / 2;
+            double y = 0;
+            WritableImage newImage = new WritableImage(reader, (int) x, (int) y, (int) width, (int) height);
+            imageFon.setPreserveRatio(true);
+            imageFon.setImage(newImage);
 
+            PixelReader reader2 = newImage.getPixelReader();
+            double ratioY = imageFon.getFitWidth() / newImage.getWidth();
+            double ratioX = imageFon.getFitHeight() / newImage.getHeight();
+            double heightBlur = storageImageView.getFitHeight() / ratioY;
+            double widthBlur = storageImageView.getFitWidth() / ratioX;
+            double xBlur = 0;
+            double yBlur = 313 / ratioY;
+            WritableImage newBlurImage = new WritableImage(reader2, (int) xBlur, (int) yBlur, (int) widthBlur, (int) heightBlur);
+            storageImageView.setPreserveRatio(true);
+            storageImageView.setImage(newBlurImage);
+        }
+    }
 
 
 }

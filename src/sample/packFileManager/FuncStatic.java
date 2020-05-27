@@ -1,6 +1,26 @@
 package sample.packFileManager;
 
+import com.jfoenix.controls.JFXProgressBar;
+import javafx.scene.control.Label;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
+import sample.client.DataClient;
+
 public class FuncStatic {
+
+    private static Label labelStorage;
+    private static JFXProgressBar progressBar;
+
+    public static void initStorage(Label labelStorage, JFXProgressBar progressBar) {
+        FuncStatic.labelStorage = labelStorage;
+        FuncStatic.progressBar = progressBar;
+    }
+
+    public static void updateStorage() {
+        double ratiox = (double) DataClient.storageFill / (double)DataClient.storageAll;
+        FuncStatic.progressBar.setProgress(ratiox);
+        FuncStatic.labelStorage.setText(FuncStatic.getStringStorage(DataClient.storageFill) + " / " + FuncStatic.getStringStorage(DataClient.storageAll));
+    }
 
     public static String getStringStorage(long storage)
     {
@@ -37,5 +57,15 @@ public class FuncStatic {
             default: break;
         }
         return str;
+    }
+
+
+    public static void loadCustomPicter(ImageView imageView)
+    {
+        //imageView.setPreserveRatio(true);
+
+
+        //imageView.setSmooth(true);
+        imageView.setImage(new Image("custom.u"));
     }
 }

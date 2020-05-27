@@ -53,21 +53,25 @@ public class DataFile implements Comparable<DataFile> {
             };
             suffix = "." + strings[strings.length-1];
             for (String format: formatPicter) {
-                if (format.equals(suffix)) {
+                if (format.equalsIgnoreCase(suffix)) {
                     isPng = true;
                     setIcon(SVGIconsLoaded.getInstance().getImage());
                     break;
                 }
 
             }
-            if (!isPng && suffix.equals(".txt"))
+            if (!isPng && suffix.equalsIgnoreCase(".txt"))
             {
                 setIcon(SVGIconsLoaded.getInstance().getTxt());
                 isTxt = true;
             }
-            else if (!isPng && (suffix.equals(".mp4") || suffix.equals(".mp3") || suffix.equals(".wav")))
+            else if (!isPng && (suffix.equalsIgnoreCase(".mp4") ||
+                    suffix.equalsIgnoreCase(".mp3") ||
+                    suffix.equalsIgnoreCase(".wav")))
             {
-                if (suffix.equals(".mp3") || suffix.equals(".wav")) setIcon(SVGIconsLoaded.getInstance().getMusic());
+                if (suffix.equalsIgnoreCase(".mp3") ||
+                        suffix.equalsIgnoreCase(".wav"))
+                    setIcon(SVGIconsLoaded.getInstance().getMusic());
                 else setIcon(SVGIconsLoaded.getInstance().getMedia());
                 isMedia = true;
             }

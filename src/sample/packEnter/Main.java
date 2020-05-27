@@ -24,7 +24,7 @@ public class Main extends Application {
     @Override
     public void start(Stage stage) throws Exception{
         stage.setTitle("Bolt Drive");
-        stage.getIcons().add(new Image("sample\\resources\\icon\\baseline_cloud_black_18dp.png"));
+        stage.getIcons().add(new Image("/sample/resources/icon/baseline_cloud_black_18dp.png"));
         stage.setScene(createScene(loadMainPane()));
 
         stage.show();

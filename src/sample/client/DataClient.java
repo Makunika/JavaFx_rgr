@@ -15,8 +15,9 @@ public class DataClient {
     public static String tree;
     public static long storageAll;
     public static long storageFill;
+    public static boolean isCustomPicter = false;
 
-    public static final String SERVER = "localhost";
+    public static final String SERVER = "185.209.29.73";
     public static final int PORT = 24571;
 
 
@@ -34,7 +35,8 @@ public class DataClient {
             if (filePreferences.exists()) {
                 if (filePreferences.canWrite()) {
                     try (BufferedWriter br = new BufferedWriter(new FileWriter(filePreferences))) {
-                        br.write(DataClient.isSavedPassword + "\n"
+                        br.write(DataClient.isCustomPicter + "\n"
+                                + DataClient.isSavedPassword + "\n"
                                 + DataClient.isAutoEnter + "\n"
                                 + DataClient.login + "\n"
                                 + (DataClient.isSavedPassword ? DataClient.password : ""));

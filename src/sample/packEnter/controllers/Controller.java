@@ -113,7 +113,7 @@ public class Controller  {
                             root = FXMLLoader.load(getClass().getClassLoader().getResource("sample/resources/scenepack/FileManager.fxml"), resources);
                             Stage stage = new Stage();
                             stage.setTitle("Bolt Drive");
-                            stage.getIcons().add(new Image("sample\\resources\\icon\\baseline_cloud_black_18dp.png"));
+                            stage.getIcons().add(new Image("/sample/resources/icon/baseline_cloud_black_18dp.png"));
                             stage.setScene(new Scene(root, 1280, 720));
                             ((Node) (event.getSource())).getScene().getWindow().hide();
                             stage.show();
@@ -167,7 +167,14 @@ public class Controller  {
                 if (filePreferences.canRead())
                 {
                     try(BufferedReader br = new BufferedReader(new FileReader(filePreferences))) {
-                        String line = br.readLine();
+                        String line = "";
+
+                        line = br.readLine();
+                        if (line != null) {
+                            DataClient.isCustomPicter = line.equalsIgnoreCase("true");
+                        }
+
+                        line = br.readLine();
                         checkPassword.setSelected(DataClient.isSavedPassword = line != null && line.equalsIgnoreCase("true"));
 
                         line = br.readLine();
@@ -194,7 +201,10 @@ public class Controller  {
         } catch (IOException e) {
             e.printStackTrace();
         }
+        if (DataClient.isCustomPicter)
+        {
 
+        }
         if (DataClient.isAutoEnter)
         {
             signIn.fire();
