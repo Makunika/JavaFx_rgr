@@ -2,6 +2,8 @@ package sample.packFileManager.controllers;
 
 import com.jfoenix.controls.JFXButton;
 import com.jfoenix.controls.JFXCheckBox;
+import com.jfoenix.controls.JFXDialog;
+import com.jfoenix.controls.JFXSpinner;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.layout.AnchorPane;
@@ -29,14 +31,24 @@ public class Settings implements Initializable {
 
     private FileManager fileManager;
 
+    private JFXDialog dialog;
+
+    @FXML
+    private JFXSpinner spinner;
+
     public void setFileManager(FileManager fileManager) {
         this.fileManager = fileManager;
+    }
+
+    public void setDialog(JFXDialog dialog) {
+        this.dialog = dialog;
     }
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
         yes = false;
         no = false;
+        spinner.setVisible(false);
         if (DataClient.isCustomPicter)
         {
             checkBoxPicter.setSelected(true);
@@ -64,12 +76,16 @@ public class Settings implements Initializable {
             if (image != null)
             {
                 try {
+                    spinner.setVisible(true);
+                    dialog.setOverlayClose(false);
                     File fileSource = new File("custom.png");
                     if (fileSource.exists()) {
                         fileSource.delete();
                     }
                     Files.copy(image.toPath(),fileSource.toPath());
                     yes = true;
+                    dialog.setOverlayClose(true);
+                    spinner.setVisible(false);
                 } catch (FileNotFoundException e) {
                     e.printStackTrace();
                 } catch (IOException e) {

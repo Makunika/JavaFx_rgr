@@ -122,9 +122,6 @@ public class FileManager implements Initializable {
     @FXML
     private AnchorPane paneFon;
 
-    @FXML
-    private ImageView storageImageView;
-
     private Image imageFonImage;
 
     @FXML
@@ -202,10 +199,6 @@ public class FileManager implements Initializable {
         });
 
         imageFonResize();
-        if (DataClient.isCustomPicter) {
-            GaussianBlur blur = new GaussianBlur(15);
-            storageImageView.setEffect(blur);
-        }
 
         iconColumn = new TableColumn<>("");
         nameColumn = new TableColumn<>("Имя");
@@ -282,6 +275,7 @@ public class FileManager implements Initializable {
                 Settings settings = (Settings) loader.getController();
                 settings.setFileManager(this);
                 JFXDialog dialog = new JFXDialog();
+                settings.setDialog(dialog);
                 dialog.setContent((Region) root);
                 dialog.show(Holder);
 
@@ -293,8 +287,6 @@ public class FileManager implements Initializable {
                             DataClient.isCustomPicter = true;
                             imageFonImage = new Image(new File(new File(new File(".").getCanonicalPath()), "custom.png").toURI().toString());
                             imageFonResize();
-                            GaussianBlur blur = new GaussianBlur(15);
-                            storageImageView.setEffect(blur);
                         } catch (IOException e) {
                             e.printStackTrace();
                         }
@@ -303,7 +295,6 @@ public class FileManager implements Initializable {
                     {
                         imageFonImage = null;
                         DataClient.isCustomPicter = false;
-                        storageImageView.setImage(null);
                         imageFon.setImage(null);
                     }
                     DataClient.SavedPreferences();
@@ -323,20 +314,11 @@ public class FileManager implements Initializable {
             double width = height / ratio;
             double x = imageFonImage.getWidth() / 2 - width / 2;
             double y = 0;
-            WritableImage newImage = new WritableImage(reader, (int) x, (int) y, (int) width, (int) height);
-            imageFon.setPreserveRatio(true);
-            imageFon.setImage(newImage);
-
-            PixelReader reader2 = newImage.getPixelReader();
-            double ratioY = imageFon.getFitWidth() / newImage.getWidth();
-            double ratioX = imageFon.getFitHeight() / newImage.getHeight();
-            double heightBlur = storageImageView.getFitHeight() / ratioY;
-            double widthBlur = storageImageView.getFitWidth() / ratioX;
-            double xBlur = 0;
-            double yBlur = 313 / ratioY;
-            WritableImage newBlurImage = new WritableImage(reader2, (int) xBlur, (int) yBlur, (int) widthBlur, (int) heightBlur);
-            storageImageView.setPreserveRatio(true);
-            storageImageView.setImage(newBlurImage);
+            if (x >= 0) {
+                WritableImage newImage = new WritableImage(reader, (int) x, (int) y, (int) width, (int) height);
+                imageFon.setPreserveRatio(true);
+                 imageFon.setImage(newImage);
+            }
         }
     }
 

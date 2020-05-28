@@ -13,27 +13,26 @@
 <?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.text.Font?>
 
-<StackPane fx:id="Holder" prefHeight="720.0" prefWidth="1280.0" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="sample.packFileManager.controllers.FileManager">
+<StackPane fx:id="Holder" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="sample.packFileManager.controllers.FileManager">
    <children>
       <AnchorPane fx:id="pane" prefHeight="720.0" prefWidth="1280.0" style="-fx-background-color: #ffffff">
          <children>
             <AnchorPane fx:id="paneFon" minHeight="25.0" prefHeight="720.0" prefWidth="300.0" style="-fx-background-color: #79a6f2;" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.topAnchor="0.0">
                <children>
                   <ImageView fx:id="imageFon" fitHeight="720.0" fitWidth="300.0" pickOnBounds="true" smooth="false" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
-                  <AnchorPane layoutX="-4.0" layoutY="9.0" prefHeight="95.0" prefWidth="290.0" style="-fx-background-color: #fffffff;" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                  <AnchorPane layoutX="-4.0" layoutY="9.0" prefHeight="95.0" prefWidth="290.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
                      <children>
                         <Label fx:id="loginLabel" layoutY="5.0" prefHeight="30.0" prefWidth="215.0" text="Login" textFill="WHITE" wrapText="true" AnchorPane.leftAnchor="15.0" AnchorPane.topAnchor="14.0">
                            <font>
                               <Font size="20.0" />
                            </font>
                         </Label>
-                        <JFXButton fx:id="buttonExitAccount" focusTraversable="false" layoutX="231.0" onAction="#exitAccountClicked" prefHeight="40.0" prefWidth="40.0" AnchorPane.rightAnchor="14.0" AnchorPane.topAnchor="9.0" />
-                        <JFXButton fx:id="buttonSetting" focusTraversable="false" layoutX="231.0" layoutY="46.0" onAction="#exitAccountClicked" prefHeight="40.0" prefWidth="40.0" AnchorPane.rightAnchor="14.0" AnchorPane.topAnchor="55.0" />
+                        <JFXButton fx:id="buttonExitAccount" focusTraversable="false" layoutX="231.0" onAction="#exitAccountClicked" prefHeight="40.0" prefWidth="40.0" ripplerFill="#a7aafb" AnchorPane.rightAnchor="14.0" AnchorPane.topAnchor="9.0" />
+                        <JFXButton fx:id="buttonSetting" focusTraversable="false" layoutX="231.0" layoutY="46.0" onAction="#exitAccountClicked" prefHeight="40.0" prefWidth="40.0" ripplerFill="#a7aafb" AnchorPane.rightAnchor="14.0" AnchorPane.topAnchor="55.0" />
                      </children>
                   </AnchorPane>
                   <Pane layoutY="313.0" prefHeight="123.0" prefWidth="229.0" AnchorPane.leftAnchor="0.0" AnchorPane.topAnchor="313.0">
                      <children>
-                        <ImageView fx:id="storageImageView" fitHeight="40.0" fitWidth="215.0" layoutY="6.0" pickOnBounds="true" preserveRatio="true" />
                         <JFXProgressBar fx:id="storageProgressBar" layoutX="15.0" layoutY="52.0" progress="0.24" stylesheets="@../css/my-progress-bar.css" />
                         <Label fx:id="storageLabel" layoutX="15.0" layoutY="11.0" text="12/15" textFill="WHITE">
                            <font>

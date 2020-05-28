@@ -7,6 +7,8 @@ import java.util.ResourceBundle;
 import com.jfoenix.controls.*;
 import com.jfoenix.validation.RequiredFieldValidator;
 import javafx.application.Platform;
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -15,6 +17,9 @@ import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
+import javafx.scene.image.PixelReader;
+import javafx.scene.image.WritableImage;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.Border;
 import javafx.scene.layout.Region;
@@ -78,6 +83,13 @@ public class Controller  {
     @FXML
     private Label label;
 
+    @FXML
+    private ImageView imageFon;
+
+    @FXML
+    private AnchorPane paneFon;
+
+    private Image imageFonImage;
 
     @FXML
     void signInClicked(ActionEvent event) {
@@ -155,6 +167,7 @@ public class Controller  {
     void initialize() {
         DataClient.isAutoEnter = false;
         DataClient.isSavedPassword = false;
+        DataClient.isCustomPicter = false;
         NavigatorEnter.setMainController(this);
         RequiredFieldValidator validator = new RequiredFieldValidator();
         validator.setMessage("Поле не может быть пустым");
@@ -203,8 +216,21 @@ public class Controller  {
         }
         if (DataClient.isCustomPicter)
         {
-
+            try {
+                imageFonImage = new Image(new File(new File(new File(".").getCanonicalPath()), "custom.png").toURI().toString());
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         }
+        imageFonResize();
+        imageFonResize();
+        paneFon.heightProperty().addListener(new ChangeListener<Number>() {
+            @Override
+            public void changed(ObservableValue<? extends Number> observable, Number oldValue, Number newValue) {
+                imageFon.setFitHeight(paneFon.getHeight());
+                imageFonResize();
+            }
+        });
         if (DataClient.isAutoEnter)
         {
             signIn.fire();
@@ -302,6 +328,19 @@ public class Controller  {
         Holder.getChildren().setAll(node);
     }
 
+    private void imageFonResize() {
+        if (DataClient.isCustomPicter) {
+            PixelReader reader = imageFonImage.getPixelReader();
+            double ratio = imageFon.getFitHeight() / imageFon.getFitWidth();
+            double height = imageFonImage.getHeight();
+            double width = height / ratio;
+            double x = imageFonImage.getWidth() / 2 - width / 2;
+            double y = 0;
+            WritableImage newImage = new WritableImage(reader, (int) x, (int) y, (int) width, (int) height);
+            imageFon.setPreserveRatio(true);
+            imageFon.setImage(newImage);
+        }
+    }
 
 }
 
