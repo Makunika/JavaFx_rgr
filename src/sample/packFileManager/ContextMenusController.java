@@ -127,10 +127,10 @@ public class ContextMenusController extends Loadable {
             FileChooser fileChooser = new FileChooser();
             fileChooser.setTitle("Выберете файл");
             fileChooser.getExtensionFilters().addAll(
-                    new FileChooser.ExtensionFilter("All Files", "*.*"),
-                    new FileChooser.ExtensionFilter("Text Files", "*.txt"),
-                    new FileChooser.ExtensionFilter("Image Files", "*.png", "*.jpg", "*.gif"),
-                    new FileChooser.ExtensionFilter("Audio Files", "*.wav", "*.mp3", "*.aac"));
+                    new FileChooser.ExtensionFilter("Все файлы", "*.*"),
+                    new FileChooser.ExtensionFilter("Текстовые файлы", "*.txt"),
+                    new FileChooser.ExtensionFilter("Изображения", "*.png", "*.jpg", "*.gif"),
+                    new FileChooser.ExtensionFilter("Аудио", "*.wav", "*.mp3", "*.aac"));
             File selectedFile = fileChooser.showOpenDialog(stackPane.getScene().getWindow());
             uploadFile(selectedFile);
         });
@@ -181,34 +181,32 @@ public class ContextMenusController extends Loadable {
 
 
             //Новая папка
-            popupInRow.get(5).setOnAction(event -> {
+            popupInRow.get(4).setOnAction(event -> {
                 popupInRow.hide();
                 newPath();
             });
 
+            //Загрузить файл
+            popupInRow.get(5).setOnAction(event -> {
+                popupInRow.hide();
+                FileChooser fileChooser = new FileChooser();
+                fileChooser.setTitle("Выберете файл");
+                fileChooser.getExtensionFilters().addAll(
+                        new FileChooser.ExtensionFilter("Все файлы", "*.*"),
+                        new FileChooser.ExtensionFilter("Текстовые файлы", "*.txt"),
+                        new FileChooser.ExtensionFilter("Изображения", "*.png", "*.jpg", "*.gif"),
+                        new FileChooser.ExtensionFilter("Аудио", "*.wav", "*.mp3", "*.aac"));
+                File selectedFile = fileChooser.showOpenDialog(stackPane.getScene().getWindow());
+                uploadFile(selectedFile);
+            });
 
             //Загрузить папку
-            popupInRow.get(4).setOnAction(event -> {
+            popupInRow.get(6).setOnAction(event -> {
                 popupInRow.hide();
                 DirectoryChooser dc = new DirectoryChooser();
                 dc.setTitle("Выберете папку");
                 File selectedPath = dc.showDialog(stackPane.getScene().getWindow());
                 uploadPath(selectedPath);
-            });
-
-
-            //Загрузить файл
-            popupInRow.get(6).setOnAction(event -> {
-                popupInRow.hide();
-                FileChooser fileChooser = new FileChooser();
-                fileChooser.setTitle("Выберете файл");
-                fileChooser.getExtensionFilters().addAll(
-                        new FileChooser.ExtensionFilter("All Files", "*.*"),
-                        new FileChooser.ExtensionFilter("Text Files", "*.txt"),
-                        new FileChooser.ExtensionFilter("Image Files", "*.png", "*.jpg", "*.gif"),
-                        new FileChooser.ExtensionFilter("Audio Files", "*.wav", "*.mp3", "*.aac"));
-                File selectedFile = fileChooser.showOpenDialog(stackPane.getScene().getWindow());
-                uploadFile(selectedFile);
             });
 
 
@@ -286,6 +284,7 @@ public class ContextMenusController extends Loadable {
             Platform.runLater(() -> {
                 new Alert(stackPane).show();
                 progressIndicator.setVisible(false);
+                progressIndicator.progressProperty().unbind();
                 labelIndicator.setVisible(false);
             });
         });
@@ -296,6 +295,8 @@ public class ContextMenusController extends Loadable {
             if (response.isValidCode()) {
                 Platform.runLater(() -> {
                     progressIndicator.setVisible(false);
+                    progressIndicator.progressProperty().unbind();
+                    progressIndicator.setProgress(ProgressIndicator.INDETERMINATE_PROGRESS);
                     labelIndicator.setVisible(false);
                     viewer.loadBody();
                     viewer.addHeader(item.getName());
@@ -305,6 +306,7 @@ public class ContextMenusController extends Loadable {
                 Platform.runLater(() -> {
                     new Alert(stackPane, "Ошибка при загрузке: " + response.getCode() + " " + response.getText()).show();
                     progressIndicator.setVisible(false);
+                    progressIndicator.progressProperty().unbind();
                     labelIndicator.setVisible(false);
                 });
             }

@@ -17,7 +17,7 @@ public class DataClient {
     public static long storageFill;
     public static boolean isCustomPicter = false;
 
-    public static final String SERVER = "185.209.29.73";
+    public static final String SERVER = "localhost";
     public static final int PORT = 24571;
 
 

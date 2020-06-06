@@ -31,7 +31,7 @@ public class NetworkServiceMessage extends GetData {
                 Response response = new Response(request.getCode());
                 try (Socket socket = new Socket(DataClient.SERVER, DataClient.PORT);
                      DataOutputStream oos = new DataOutputStream(socket.getOutputStream());
-                     DataInputStream ois = new DataInputStream(socket.getInputStream());)
+                     DataInputStream ois = new DataInputStream(socket.getInputStream()))
                 {
                     if (!socket.isOutputShutdown()) {
                         outMessage(oos,request);

@@ -38,7 +38,6 @@ public class NetworkServiceFileDownload extends GetData {
         Task<Response> task = new Task<Response>() {
             @Override
             protected Response call() throws Exception {
-                updateProgress(0,10);
                 Response response = new Response(request.getCode());
                 try (Socket socket = new Socket(DataClient.SERVER, DataClient.PORT);
                      DataOutputStream oos = new DataOutputStream(socket.getOutputStream());
@@ -49,6 +48,7 @@ public class NetworkServiceFileDownload extends GetData {
                         response = inMessage(ois, request.getCode());
                         if (response.isValidCode()) {
                             if (!isFile) updateMessage("Архивация");
+                            else updateMessage("Загрузка");
                             try {
                                 Thread.sleep(500);
                             } catch (InterruptedException e) {
